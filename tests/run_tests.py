@@ -11,6 +11,7 @@ from sutra.ingestion.loader import EmailDatasetLoader
 from sutra.ingestion.normalizers import parse_indian_currency
 from sutra.processing.threading import ThreadManager
 from sutra.evaluation.harness import SutraEvaluator
+from tests.test_retrieval import TestEmbeddingAndVectorRetrieval
 
 DATASET_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dataset"))
 
