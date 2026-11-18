@@ -1,0 +1,416 @@
+"""Unit tests for the Mail Archive X loader."""
+
+import email
+import os
+import tempfile
+import unittest
+from email import policy
+from unittest.mock import patch
+
+from src.data.loaders.mail_archive_x import MailArchiveXLoader
+from src.data.models import NormalizedEmail
+
+
+class TestMailArchiveXLoader(unittest.TestCase):
+    def test_load_limits_samples_and_normalizes(self):
+        eml_files = ["/tmp/a.eml", "/tmp/b.eml", "/tmp/c.eml"]
+        parsed = {
+            "sender": "alice@example.com",
+            "subject": "Hello",
+            "date": None,
+            "body": "Body one",
+            "recipients": "bob@example.com",
+            "error": None,
+        }
+
+        with patch("os.path.isdir", return_value=True):
+            loader = MailArchiveXLoader("/tmp")
+
+        with patch.object(loader, "_discover_eml_files", return_value=eml_files):
+            with patch.object(loader, "_parse_eml_file", return_value=parsed):
+                emails = loader.load(num_samples=2)
+
+        self.assertEqual(len(emails), 2)
+        self.assertTrue(all(isinstance(e, NormalizedEmail) for e in emails))
+        self.assertEqual(emails[0].source, "mail_archive_x")
+        self.assertEqual(emails[0].source_id, eml_files[0])
+        self.assertIn("Body", emails[0].body)
+
+
+class TestBulkHeaderDetection(unittest.TestCase):
+    """The loader flags bulk mail (List-Unsubscribe / Precedence:bulk) so the
+    conservative Pass-1 noise filter can act on it downstream."""
+
+    def _load_one(self, raw: str) -> NormalizedEmail:
+        with tempfile.NamedTemporaryFile("w", suffix=".eml", delete=False, encoding="utf-8") as f:
+            f.write(raw)
+            path = f.name
+        try:
+            return MailArchiveXLoader(eml_files=[path]).load()[0]
+        finally:
+            os.unlink(path)
+
+    def test_list_unsubscribe_header_sets_is_bulk(self):
+        raw = (
+            "From: News <news@example.com>\r\n"
+            "Subject: Weekly digest\r\n"
+            "List-Unsubscribe: <https://example.com/unsub>\r\n"
+            "\r\n"
+            "This week's stories.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_precedence_bulk_sets_is_bulk(self):
+        raw = (
+            "From: News <news@example.com>\r\n"
+            "Subject: Notice\r\n"
+            "Precedence: bulk\r\n"
+            "\r\n"
+            "Automated notice.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    # --- a group alias is a relay, not a newsletter (#216) -----------------
+    #
+    # A Google Group used as a shared address (support@, contact@) stamps every
+    # message it relays with Precedence: list, a List-Id on the organisation's
+    # own domain and its own unsubscribe link. On a business mailbox that was 89%
+    # of the mail, all of it ordinary correspondence.
+
+    ALIAS = (
+        "Delivered-To: alice@example.com\r\n"
+        "From: A Customer <customer@x.com>\r\n"
+        "To: support@example.com\r\n"
+        "Subject: Where is my order?\r\n"
+        "Precedence: list\r\n"
+        "Mailing-list: list support@example.com; contact support+owners@example.com\r\n"
+        "List-ID: <support.example.com>\r\n"
+        "X-Google-Group-Id: 123456789\r\n"
+    )
+    GROUP_UNSUB = (
+        "List-Unsubscribe: <mailto:googlegroups-manage+123+unsubscribe@googlegroups.com>,\r\n"
+        " <https://groups.google.com/a/example.com/group/support/subscribe>\r\n"
+    )
+
+    def test_mail_relayed_by_an_own_domain_alias_is_not_bulk(self):
+        self.assertFalse(self._load_one(self.ALIAS + "\r\nIt has not arrived.\r\n").is_bulk)
+
+    def test_the_aliases_own_unsubscribe_link_does_not_make_it_bulk(self):
+        raw = self.ALIAS + self.GROUP_UNSUB + "\r\nIt has not arrived.\r\n"
+        self.assertFalse(self._load_one(raw).is_bulk)
+
+    def test_a_newsletter_relayed_through_the_alias_is_still_bulk(self):
+        """Marketing mail sent TO the alias keeps its sender's unsubscribe link."""
+        raw = (
+            self.ALIAS
+            + "List-Unsubscribe: <https://mailer.x.com/unsub?id=1>\r\n"
+            + "\r\nSpring offers.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_precedence_bulk_wins_even_through_an_alias(self):
+        raw = self.ALIAS.replace("Precedence: list", "Precedence: bulk") + "\r\nNotice.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_third_party_list_is_still_bulk(self):
+        """A discussion list elsewhere has its List-Id on someone else's domain."""
+        raw = (
+            "Delivered-To: alice@example.com\r\n"
+            "From: Someone <someone@x.com>\r\n"
+            "Subject: [dev] release plan\r\n"
+            "Precedence: list\r\n"
+            "List-ID: <dev.lists.x.com>\r\n"
+            "\r\nThoughts?\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_without_delivered_to_there_is_no_own_domain_to_trust(self):
+        """Nothing anchors "own domain", so the header keeps its old meaning."""
+        raw = self.ALIAS.replace("Delivered-To: alice@example.com\r\n", "") + "\r\nHi.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_list_id_that_only_resembles_the_domain_is_not_an_alias(self):
+        """The sender writes List-Id. A suffix match must stop at a label
+        boundary, or 'notexample.com' would pass for 'example.com'."""
+        raw = (
+            self.ALIAS.replace("<support.example.com>", "<support.notexample.com>") + "\r\nHi.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_list_id_that_is_not_a_host_is_not_an_alias(self):
+        raw = self.ALIAS.replace("<support.example.com>", "=?utf-8?q?=ff=fe?=") + "\r\nHi.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_if_the_headers_cannot_be_read_the_old_rule_answers(self):
+        """The guard around sender-typed headers. When the new logic fails, a
+        message with list markers is bulk, as it always was."""
+        from unittest import mock
+
+        raw = self.ALIAS + "\r\nHi.\r\n"
+        with mock.patch(
+            "src.data.loaders.mail_archive_x._bulk_by_headers", side_effect=RuntimeError("boom")
+        ):
+            self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_only_the_receiving_servers_delivered_to_counts(self):
+        """A list host leaves its own Delivered-To lower down in the message
+        (Postfix with Mailman does). Trusting every one let a third-party list,
+        or a newsletter that adds the header itself, pass for an own-domain
+        alias. Only the topmost was written by the server that took final
+        delivery."""
+        raw = (
+            "Delivered-To: alice@example.com\r\n"
+            "Delivered-To: dev@x.com\r\n"
+            "From: Someone <someone@x.com>\r\n"
+            "Subject: [dev] release plan\r\n"
+            "Precedence: list\r\n"
+            "List-Id: Dev <dev.x.com>\r\n"
+            "List-Unsubscribe: <https://mail.x.com/mailman/options/dev>\r\n"
+            "\r\nThoughts?\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_an_unsubscribe_link_on_the_own_domain_is_the_relays(self):
+        """Mailman on the organisation's own host, relaying an internal alias."""
+        raw = (
+            self.ALIAS
+            + "List-Unsubscribe: <mailto:support-leave@lists.example.com>\r\n"
+            + "\r\nIt has not arrived.\r\n"
+        )
+        self.assertFalse(self._load_one(raw).is_bulk)
+
+    def test_a_foreign_link_in_a_second_unsubscribe_header_is_bulk(self):
+        raw = (
+            self.ALIAS
+            + self.GROUP_UNSUB
+            + "List-Unsubscribe: <mailto:leave@mailer.x.com>\r\n"
+            + "\r\nSpring offers.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_any_precedence_bulk_header_wins(self):
+        """A relay can add its own Precedence: list above the sender's."""
+        raw = self.ALIAS + "Precedence: bulk\r\n" + "\r\nNotice.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_delivered_to_below_a_received_header_is_not_the_mailboxs(self):
+        """Some servers write no Delivered-To at final delivery. The topmost one
+        is then whatever the list host left on its way out, and its domain is
+        the list's. Only a Delivered-To above every Received header was written
+        by the last hop."""
+        raw = (
+            "Received: from lists.x.com by mx.example.com; Mon, 1 Jan 2026 10:00:00 +0000\r\n"
+            "Delivered-To: dev@lists.x.com\r\n"
+            "From: Someone <someone@x.com>\r\n"
+            "Subject: [dev] release plan\r\n"
+            "Precedence: list\r\n"
+            "List-Id: <dev.lists.x.com>\r\n"
+            "List-Unsubscribe: <https://lists.x.com/mailman/options/dev>\r\n"
+            "\r\nThoughts?\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_an_alias_message_with_received_headers_below_is_still_a_relay(self):
+        raw = self.ALIAS.replace(
+            "From: A Customer",
+            "Received: by mx.example.com; Mon, 1 Jan 2026 10:00:00 +0000\r\nFrom: A Customer",
+        )
+        self.assertFalse(self._load_one(raw + "\r\nIt has not arrived.\r\n").is_bulk)
+
+    def test_an_unsubscribe_value_with_no_readable_host_is_bulk(self):
+        """Nothing to attribute to the relay, so it cannot be excused as its own."""
+        for value in ("<mailto:unsubscribe>", "=?utf-8?q?https=3A=2F=2Fmailer=2Ex=2Ecom?="):
+            with self.subTest(value=value):
+                raw = self.ALIAS + f"List-Unsubscribe: {value}\r\n\r\nOffers.\r\n"
+                self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_foreign_host_after_the_relays_in_one_header_is_bulk(self):
+        raw = (
+            self.ALIAS
+            + "List-Unsubscribe: <mailto:x+unsubscribe@googlegroups.com>, <https://mailer.x.com/u>\r\n"
+            + "\r\nOffers.\r\n"
+        )
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_a_list_id_without_angle_brackets_is_read(self):
+        raw = self.ALIAS.replace("List-ID: <support.example.com>", "List-ID: support.example.com")
+        self.assertFalse(self._load_one(raw + "\r\nIt has not arrived.\r\n").is_bulk)
+
+    def test_the_first_list_id_decides(self):
+        """A third-party list's message relayed on through the alias carries two
+        List-Id headers. The first one read is the one that counts, so a
+        foreign list above the group's stays bulk."""
+        raw = self.ALIAS.replace(
+            "List-ID: <support.example.com>",
+            "List-ID: Dev <dev.lists.x.com>\r\nList-ID: <support.example.com>",
+        )
+        self.assertTrue(self._load_one(raw + "\r\nThoughts?\r\n").is_bulk)
+
+    def test_the_first_angle_group_of_a_list_id_decides(self):
+        raw = self.ALIAS.replace(
+            "List-ID: <support.example.com>", "List-ID: <dev.lists.x.com> <support.example.com>"
+        )
+        self.assertTrue(self._load_one(raw + "\r\nThoughts?\r\n").is_bulk)
+
+    def test_precedence_list_alone_is_bulk(self):
+        """No List-Id and no Delivered-To: nothing says relay."""
+        raw = "From: L <l@x.com>\r\nSubject: digest\r\nPrecedence: list\r\n\r\nItems.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_precedence_is_read_whatever_its_case_or_spacing(self):
+        raw = "From: N <n@x.com>\r\nSubject: notice\r\nPrecedence:   BULK  \r\n\r\nNotice.\r\n"
+        self.assertTrue(self._load_one(raw).is_bulk)
+
+    def test_only_a_later_bulk_adds_a_flag_the_old_rule_did_not(self):
+        """The new rule may clear flags. The one flag it adds is for a
+        Precedence: bulk that is not the first Precedence header. A later
+        'list' changes nothing, as before."""
+        raw = (
+            "From: N <n@x.com>\r\nSubject: s\r\nPrecedence: junk\r\nPrecedence: list\r\n\r\nHi.\r\n"
+        )
+        self.assertFalse(self._load_one(raw).is_bulk)
+
+    def test_the_guards_fallback_is_the_old_rule_exactly(self):
+        from unittest import mock
+
+        cases = (
+            ("List-Unsubscribe: <https://x.com/u>\r\n", True),
+            ("Precedence: bulk\r\n", True),
+            ("Precedence: list\r\n", True),
+            ("", False),
+        )
+        for header, expected in cases:
+            with self.subTest(header=header.strip()):
+                raw = "From: N <n@x.com>\r\nSubject: s\r\n" + header + "\r\nHi.\r\n"
+                with mock.patch(
+                    "src.data.loaders.mail_archive_x._bulk_by_headers",
+                    side_effect=RuntimeError("boom"),
+                ):
+                    self.assertIs(self._load_one(raw).is_bulk, expected)
+
+    def test_plain_human_email_is_not_bulk(self):
+        raw = (
+            "From: Alice <alice@example.com>\r\n"
+            "Subject: Lunch?\r\n"
+            "\r\n"
+            "Wanna grab lunch tomorrow?\r\n"
+        )
+        self.assertFalse(self._load_one(raw).is_bulk)
+
+
+class TestLoaderVerbosity(unittest.TestCase):
+    """The loader is chatty by default (progress for batch loads) but can be
+    silenced for the per-email hot path, so the threaded Pass-2/calibrate loaders
+    don't need to hijack the process-global ``sys.stdout`` (which is not
+    thread-safe and corrupts later prints under ``--workers > 1``)."""
+
+    def _eml(self) -> str:
+        f = tempfile.NamedTemporaryFile("w", suffix=".eml", delete=False, encoding="utf-8")
+        f.write("From: a@example.com\r\nSubject: Hi\r\n\r\nHello body.\r\n")
+        f.close()
+        return f.name
+
+    def test_quiet_loader_prints_nothing(self):
+        import io
+        from contextlib import redirect_stdout
+
+        path = self._eml()
+        try:
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                emails = MailArchiveXLoader(eml_files=[path], verbose=False).load()
+            self.assertEqual(len(emails), 1)
+            self.assertEqual(buf.getvalue(), "")
+        finally:
+            os.unlink(path)
+
+    def test_verbose_default_still_prints(self):
+        import io
+        from contextlib import redirect_stdout
+
+        path = self._eml()
+        try:
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                MailArchiveXLoader(eml_files=[path]).load()
+            self.assertIn("Loaded 1 emails", buf.getvalue())
+        finally:
+            os.unlink(path)
+
+
+class TestPartPayloadDecoding(unittest.TestCase):
+    """``_decode_part_payload`` narrows on what ``decode=True`` actually returns.
+
+    ``get_payload(decode=True)`` yields bytes for a leaf part but ``None`` for a
+    multipart container. Testing ``isinstance(raw, bytes)`` rather than mere
+    truthiness is what makes the None case explicit instead of incidental.
+    """
+
+    @staticmethod
+    def _part(raw: str) -> email.message.Message:
+        return email.message_from_string(raw, policy=policy.compat32)
+
+    def test_multipart_container_yields_empty_string(self):
+        part = self._part(
+            'Content-Type: multipart/mixed; boundary="b"\n\n'
+            "--b\nContent-Type: text/plain\n\nhi\n--b--\n"
+        )
+        self.assertIsNone(part.get_payload(decode=True))
+        self.assertEqual(MailArchiveXLoader._decode_part_payload(part), "")
+
+    def test_empty_leaf_payload_yields_empty_string(self):
+        part = self._part("Content-Type: text/plain\n\n")
+        self.assertEqual(MailArchiveXLoader._decode_part_payload(part), "")
+
+    def test_leaf_bytes_are_decoded_with_the_part_charset(self):
+        part = self._part(
+            "Content-Type: text/plain; charset=iso-8859-1\n"
+            "Content-Transfer-Encoding: 8bit\n\ncaf\xe9\n"
+        )
+        self.assertEqual(MailArchiveXLoader._decode_part_payload(part).strip(), "café")
+
+    def test_unknown_charset_falls_back_to_utf8(self):
+        part = self._part(
+            "Content-Type: text/plain; charset=definitely-not-a-charset\n"
+            "Content-Transfer-Encoding: 8bit\n\nhello\n"
+        )
+        self.assertEqual(MailArchiveXLoader._decode_part_payload(part).strip(), "hello")
+
+
+class TestLoaderConstructionGuards(unittest.TestCase):
+    """The two ways of pointing the loader at input are mutually exclusive.
+
+    ``__init__`` validates ``backup_dir`` only in the mode that actually walks it.
+    These pin that split: without them, folding the directory check back out to
+    the top level would reject a perfectly valid explicit-file-list loader whose
+    ``backup_dir`` happens to be unset or stale, and nothing would catch it.
+    """
+
+    def test_neither_source_is_rejected(self):
+        with self.assertRaises(ValueError) as ctx:
+            MailArchiveXLoader()
+        self.assertIn("Provide either backup_dir or eml_files", str(ctx.exception))
+
+    def test_missing_backup_dir_is_rejected_when_walking(self):
+        missing = os.path.join(tempfile.gettempdir(), "mailrag-no-such-dir-xyz")
+        self.assertFalse(os.path.isdir(missing))
+        with self.assertRaises(ValueError) as ctx:
+            MailArchiveXLoader(backup_dir=missing)
+        self.assertIn("Backup directory not found", str(ctx.exception))
+        self.assertIn(missing, str(ctx.exception))
+
+    def test_explicit_file_list_does_not_validate_backup_dir(self):
+        """An explicit list means backup_dir is never walked, so it is not checked."""
+        missing = os.path.join(tempfile.gettempdir(), "mailrag-no-such-dir-xyz")
+        loader = MailArchiveXLoader(eml_files=["/tmp/a.eml"], backup_dir=missing)
+        self.assertEqual(loader.eml_files, ["/tmp/a.eml"])
+
+    def test_existing_backup_dir_is_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            loader = MailArchiveXLoader(backup_dir=tmp)
+            self.assertEqual(loader.backup_dir, tmp)
+            self.assertIsNone(loader.eml_files)
+
+
+if __name__ == "__main__":
+    unittest.main()

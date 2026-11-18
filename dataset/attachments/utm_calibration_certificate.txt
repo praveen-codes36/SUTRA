@@ -1,0 +1,5 @@
+SYNTHETIC CALIBRATION CERTIFICATE
+Equipment: Universal Testing Machine, Materials Testing Lab
+Work: Load-cell connector replaced; calibration and verification completed.
+Result: Passed verification test.
+Date: 28 September 2026. Status: Returned to service.

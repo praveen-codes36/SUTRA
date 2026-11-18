@@ -1,0 +1,25 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for more information:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# https://containers.dev/guide/dependabot
+
+version: 2
+updates:
+ - package-ecosystem: "devcontainers"
+   directory: "/"
+   schedule:
+     interval: weekly
+ # Poetry projects use the `pip` ecosystem: Dependabot reads pyproject.toml + poetry.lock
+ # through it. This entry used to say "poetry", which is not an ecosystem name, and no
+ # version-update job had ever run for any ecosystem (security updates still did).
+ - package-ecosystem: "pip"
+   directory: "/"
+   schedule:
+     interval: weekly
+ # Keep the SHA-pinned GitHub Actions fresh (they're pinned to commit SHAs for
+ # supply-chain safety; Dependabot proposes version bumps as PRs).
+ - package-ecosystem: "github-actions"
+   directory: "/"
+   schedule:
+     interval: weekly

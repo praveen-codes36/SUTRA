@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>mailrag — private, self-hosted email RAG</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%230e7490'/%3E%3Ctext%20x='32'%20y='46'%20font-family='monospace'%20font-size='40'%20fill='%23fff'%20text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E">
+<meta name="description" content="Turn your own mail archive into a queryable knowledge base on your hardware. Hybrid dense+sparse retrieval, thread-aware answers, structure-aware attachment chunking, and a seven-tool MCP server for agents. Open-source, measured, self-hosted.">
+<style>
+  :root{
+    /* light (default) — warm cream paper, matching the family sites */
+    --bg:#fbfaf7; --panel:#ffffff; --ink:#1a1f29; --muted:#5b6573;
+    --line:#e8e3d7; --accent:#0e7490; --accent2:#0891b2; --ok:#0a8f57;
+    --code-bg:#f3efe6; --code-ink:#1a1f29; --glow:transparent;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      /* dark — the original deep navy */
+      --bg:#0a0e14; --panel:#11161f; --ink:#e6edf3; --muted:#8b97a7;
+      --line:#1f2733; --accent:#4cc9f0; --accent2:#80ffea; --ok:#3ddc97;
+      --code-bg:#0d1320; --code-ink:#e6edf3; --glow:rgba(76,201,240,.10);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
+       background-image:radial-gradient(1200px 600px at 70% -10%,var(--glow),transparent 60%);}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  header{padding:84px 0 26px}
+  .name{font-family:var(--mono);font-size:14px;letter-spacing:.12em;color:var(--accent2);text-transform:lowercase}
+  h1{font-size:clamp(30px,5vw,50px);line-height:1.12;margin:14px 0 10px;font-weight:780;letter-spacing:-.02em}
+  h1 .hl{color:var(--accent)}
+  .tag{font-size:clamp(16px,2.4vw,20px);color:var(--muted);max-width:680px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 26px}
+  .badge{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--panel);
+         border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  .badge.ok{color:var(--ok);border-color:rgba(61,220,151,.35)}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+  .btn{font-weight:650;border-radius:10px;padding:11px 18px;border:1px solid var(--line);
+       background:var(--panel);color:var(--ink)}
+  .btn.primary{background:linear-gradient(180deg,#1b6fa8,#155a87);border-color:#1c84c6;color:#fff}
+  .btn:hover{text-decoration:none;border-color:var(--accent)}
+  /* terminal stays dark in both themes — fixed colours, independent of the palette */
+  .term{margin:30px 0 6px;border:1px solid #1f2733;border-radius:14px;background:#0d1320;
+        font-family:var(--mono);font-size:13.5px;line-height:1.7;overflow:hidden}
+  .term .bar{background:#161c2b;border-bottom:1px solid #1f2733;padding:8px 14px;
+             color:#8b97a7;font-size:12px;letter-spacing:.04em}
+  .term pre{margin:0;padding:16px 18px;overflow-x:auto;color:#e6edf3}
+  .term .p{color:#80ffea}
+  .term .c{color:#8b97a7}
+  .term .o{color:#3ddc97}
+  section{padding:34px 0;border-top:1px solid var(--line)}
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent2);margin:0 0 16px}
+  .lead{font-size:18px;color:var(--ink)}
+  .muted{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card h3{margin:0 0 6px;font-size:15px}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  ul.hard{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+  ul.hard li{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 18px}
+  ul.hard b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  td,th{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em}
+  td.n{font-family:var(--mono)}
+  td .up{color:var(--ok)}
+  code{font-family:var(--mono);background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px}
+  footer{padding:40px 0 70px;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+  footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="name">mailrag</div>
+    <h1>Your email, answerable <span class="hl">on your own hardware</span>.</h1>
+    <p class="tag">Turns a mail archive into a queryable knowledge base — hybrid dense+sparse
+       retrieval, thread-aware answers assembled from whole conversations, optional local-LLM
+       cleanup, and an MCP server so your agents can use all of it. Runs on your hardware, on
+       open models, with nothing required to leave your network.</p>
+    <div class="badges">
+      <span class="badge">Python 3.11+</span>
+      <span class="badge">LlamaIndex</span>
+      <span class="badge">bge-m3 hybrid</span>
+      <span class="badge ok">self-hosted</span>
+      <span class="badge">recall@5 45.6→93.3%</span>
+      <span class="badge">~1,970 tests</span>
+      <span class="badge">Apache-2.0</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/fmasi/mailrag">View on GitHub →</a>
+      <a class="btn" href="https://www.linkedin.com/in/fmasi/">Frédéric Masi · LinkedIn</a>
+    </div>
+
+    <div class="term">
+      <div class="bar">thread-aware contextual RAG over the public Enron demo</div>
+<pre><span class="p">$</span> git clone https://github.com/fmasi/mailrag &amp;&amp; cd mailrag
+<span class="p">$</span> just demo                <span class="c"># two indexes, same questions — what context buys</span>
+  <span class="c">→ plain          R@5  60.6%</span>
+  <span class="c">  with context   R@5  73.7%   (McNemar p=0.0044, public Enron)</span>
+  <span class="c">→ spanning questions: right conversation found 97.3% @5;</span>
+  <span class="c">  top-5 messages give you 52.6% of it, thread expansion 100%</span>
+<span class="p">$</span> ./mailrag ask <span class="o">"who approved the Q3 budget, and when?"</span>
+  <span class="c">→ retrieves the matching message, expands to its full thread,</span>
+  <span class="c">  and answers from the whole conversation.</span>
+
+<span class="p">$</span> just bench               <span class="c"># check the retrieval claim yourself — no LLM, no key</span>
+  <span class="c">→ dense         R@5  94.4 [91.6, 96.4]</span>
+  <span class="c">  dense+sparse  R@5  97.5 [95.3, 98.7]</span>
+  <span class="c">  paired @5: fixes 12, breaks 1 — McNemar p=0.0034</span></pre>
+    </div>
+  </header>
+
+  <section>
+    <h2>Why it exists</h2>
+    <p class="lead">Making your mailbox searchable by an AI usually means handing your entire
+       email history to someone else's servers. For your real correspondence, that's a non-starter.</p>
+    <p class="muted">So I built the opposite: an email RAG you run yourself, on your hardware, on
+       open models, with nothing required to leave your network. What comes out goes past search.
+       These emails are <b>private context</b> my own AI agents can draw on for total recall,
+       without renting my memory to anyone. mailrag covers email.
+       <a href="https://github.com/fmasi/parley">parley</a> covers calls and meetings. Independent
+       tools, and my agents know about both and reach for whatever fits.</p>
+  </section>
+
+  <section>
+    <h2>What it does</h2>
+    <div class="grid">
+      <div class="card"><h3>Thread-aware answers</h3><p>The flagship: match a single message, then answer from its <em>entire</em> conversation. Lifts recall@5 from <b>64.2% (message-level) → 93.3% (thread-level)</b>. Biggest single lever in the system, and it needs no LLM.</p></div>
+      <div class="card"><h3>Hybrid retrieval</h3><p>bge-m3 dense + learned sparse vectors, fused with RRF. Gets both the concept <em>and</em> the rare exact token: acronyms, IDs, reference numbers.</p></div>
+      <div class="card"><h3>Email-aware preprocessing</h3><p>Reply-chain stripping, calendar-invite collapsing, noise/newsletter filtering, and exact-text chunk dedup.</p></div>
+      <div class="card"><h3>Attachments, searchable</h3><p>Text pulled from PDFs, Office files, HTML and images, with OCR for scans (local Tesseract or a local vision model). Each attachment is chunked by its own structure: spreadsheet rows with a repeated header, PDF pages, deck slides. A number buried in a 500-row sheet stays findable, and every chunk traces back to its email and thread.</p></div>
+      <div class="card"><h3>Local-LLM summaries</h3><p>Optional <code>summarize</code> step: a local LLM writes a per-email summary + noise judgement, content-addressed and cached so re-runs are free. Local by default, and it points at <em>any</em> OpenAI-compatible server (LM Studio, Ollama, vLLM, NVIDIA NIM, OpenAI) with one env var.</p></div>
+      <div class="card"><h3>Stays current</h3><p>A collection built from a backup is a snapshot that quietly rots. <code>./mailrag sync</code> pulls new mail from a live account and indexes only the delta, so the index stays as fresh as the schedule you set instead of frozen at its export date. Deterministic point ids mean re-indexing <em>replaces</em> rather than duplicates, and the content-addressed cache means only new mail costs an LLM call.</p></div>
+      <div class="card"><h3>Pluggable loaders &amp; sources</h3><p>The public Enron corpus and local <code>.eml</code> archives sit behind one <code>EmailLoader</code>. IMAP and Maildir sit behind a <code>MessageSource</code> seam with opaque cursors, so the Gmail API, JMAP or Graph slot in without a schema change.</p></div>
+      <div class="card"><h3>Measured methodology</h3><p>A 360-query eval that prices every technique, controls for confounds and reports significance. In several cases it overturned the intuitive choice.</p></div>
+      <div class="card"><h3>Agents connect over MCP</h3><p>A multi-collection, read-only <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server (<code>./mailrag mcp</code>, MCP SDK v2): any agent can discover your indexed corpora, search and fetch whole threads, regex-grep the raw <code>.eml</code> corpus where embeddings are blind, ask grounded questions, and read attachment text. Seven tools, no internals exposed.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works — the hard parts</h2>
+    <ul class="hard">
+      <li><b>Thread-aware reconstruction is the biggest single win, and it needs no LLM.</b> Matching a single
+         message and returning its whole conversation lifts <b>recall@5 from 64.2% (message-level) → 93.3%
+         (thread-level)</b>, a gain of 29.1 points. That is bigger than the embedder and reranker choices
+         combined. The target shifts from one message to its thread by design: for a conversation, the
+         thread is the right unit of truth. Most of the headline gain comes from here rather than from
+         the model.</li>
+      <li><b>Cheap regex for the obvious bulk, the LLM only where it earns its keep.</b> Corpus-derived
+         sender/subject rules catch ~65% of the noise at high precision. The other ~35% is interleaved
+         mixed-domain noise you cannot write a rule for. That is the local LLM's unique contribution,
+         along with the per-email summaries that power contextual retrieval.</li>
+      <li><b>The noise rubric does not port across corpora.</b> The <i>corporate</i> rubric flagged
+         <b>87.6%</b> of a personal archive as noise, against <b>61.5%</b> from a rubric calibrated for
+         that corpus. It would have deleted real receipts and bank statements. A ~200-email calibration
+         caught the gap before a multi-hour run, all on a local model with no cloud spend.</li>
+      <li><b>Reranking earns far less than its reputation — and one claim about it had to be withdrawn.</b>
+         A cross-encoder reranker adds <b>+2.5 recall@5</b> overall, a fraction of what thread reconstruction
+         buys, in exchange for a per-query call to a paid endpoint. These pages used to say it demoted the
+         answer on thread-spanning questions. Re-running that arm over 360 queries in August 2026 did not
+         reproduce it: on recall the reranker is neutral or positive in every category, and thread-spanning
+         is unchanged at rank 5 and better at rank 1. The harm is real but it belongs to a different
+         measurement — answer quality under an LLM judge — and that is why the reranker stays off by
+         default. (Query-side HyDE never beat the raw query on this entity-rich corpus either.) Both stay
+         in-tree. Every published figure, including this correction, is tracked in the
+         <a href="https://github.com/fmasi/mailrag/blob/main/docs/CLAIMS.md">claims register</a>.</li>
+      <li><b>Retrieval is the ceiling, well before the model is.</b> With the answer in context, the
+         answer model was right about 88% of the time, and a 4 B model essentially tied one six times
+         its size. The lost points are queries where retrieval never surfaced the thread at all. Model
+         size came out second-order.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Architecture</h2>
+    <p class="muted" style="margin:0 0 14px">From a raw mailbox to an answered question — every stage runs on your own hardware.</p>
+    <picture>
+      <!-- dark mode keeps the crisp dark diagram; light mode (and no-preference) gets the light one -->
+      <source srcset="architecture.png" media="(prefers-color-scheme: dark)">
+      <img src="architecture-light.png" alt="mailrag pipeline: loaders (.eml / Enron / IMAP sync) to clean, chunk, embed (bge-m3), Qdrant hybrid store, thread-aware retrieval, and a local-LLM answer — with llm-none / llm-verify / llm-all recipes, all on your own machine" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block">
+    </picture>
+  </section>
+
+  <section>
+    <h2>The guided wizard</h2>
+    <p class="muted" style="margin:0 0 14px"><code>./mailrag wizard</code> is a full-screen terminal app
+       (<a href="https://textual.textualize.io/">Textual</a>): pick a recipe, from Quick (no AI) to
+       Thorough (AI reads everything), scope your folders on a tree, review the exact plan, then watch
+       every step run live. Every recipe ends by storing the attachments so your agents can open them.
+       Two human checkpoints — the calibrate gate and confirm-before-spend — keep you in control before
+       any LLM cost.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
+      <img src="images/tui/persona.svg" alt="The recipe picker: a list of cost-ordered recipes on the left and a live preview of the highlighted recipe — every verb with a colour-coded cost badge — on the right" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block">
+      <img src="images/tui/run.svg" alt="The live run screen: the recipe as a step ladder with tick marks on the left and a streaming log on the right, an overall progress bar beneath" style="width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block">
+    </div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">Screenshots are auto-generated from the real
+       app against a synthetic mailbox — see
+       <a href="https://github.com/fmasi/mailrag/blob/main/docs/GUIDE.md#what-to-expect-from-the-wizard">the full walkthrough</a>.</p>
+  </section>
+
+  <section>
+    <h2>The compound effect</h2>
+    <p class="muted" style="margin:0 0 14px">Stacking the ladder — each technique added one at a time and
+       individually measured on 360 real-email questions. <b>recall@5</b> = how often the right email lands
+       in the top 5 results:</p>
+    <table>
+      <tr><th>Technique</th><th>recall@5</th><th>gain</th></tr>
+      <tr><td>plain dense (baseline)</td><td class="n">45.6%</td><td class="n">—</td></tr>
+      <tr><td>+ learned sparse</td><td class="n">48.9%</td><td class="n"><span class="up">+3.3</span></td></tr>
+      <tr><td>+ contextual summary</td><td class="n">61.7%</td><td class="n"><span class="up">+12.8</span></td></tr>
+      <tr><td>+ reranking</td><td class="n">64.2%</td><td class="n"><span class="up">+2.5</span></td></tr>
+      <tr><td>+ thread reconstruction ★</td><td class="n"><span class="up">93.3%</span></td><td class="n"><span class="up">+29.1</span></td></tr>
+    </table>
+    <p class="muted" style="margin:10px 0 0;font-size:13px">★ The final step switches the goal from
+       "find the exact email" to "find its thread", a legitimately easier and more useful target. Both
+       of the big levers (thread reconstruction +29.1, contextual summary +12.8) come from understanding
+       the conversation rather than from a fancier embedding model.
+       <a href="https://fmasi.eu/blog/email-rag-retrieval/">Read the full benchmark →</a></p>
+
+    <p class="muted" style="margin-top:14px"><b>Where the ladder comes from.</b> A real work mailbox,
+       360 questions, each with a known correct answer, so the scoring uses hard labels and no subjective
+       judging. Cross-checked on 360 public Enron-QA questions, which put the arms in the same order and
+       rule out a quirk of one inbox. All references anonymized. These figures come from a private corpus,
+       so treat them as author-reported.</p>
+
+    <p class="muted" style="margin-top:14px"><b>The winner flips with the task.</b> Run the identical
+       comparison on legal e-discovery (three TREC Legal topics, real human judgments) and the order
+       reverses: a general-purpose dense+rerank stack, NVIDIA's retrieval NIMs, wins there. The obvious
+       objection is the right one. Their stack is built and tuned for general retrieval, not for email,
+       and it is very good at that. The finding is that specialising for a task beats general-purpose
+       on that task, and email is a task worth specialising for. Three topics is low statistical power,
+       so read it as a direction rather than a score.</p>
+
+    <p class="muted" style="margin-top:14px"><b>What a stranger can reproduce.</b>
+       <code>just demo</code> now covers both of the big levers on 1,200 public Enron emails. Contextual
+       embedding takes R@5 from 60.6% to 73.7% (McNemar p=0.0044), and on 73 questions whose answers
+       span several messages it finds the right conversation 97.3% of the time at top-5, where the top-5
+       <i>messages</i> give you only 52.6% of that conversation and thread expansion gives you all of it.
+       <code>just bench</code> then scores the retrieval layer: 360 committed queries against 2 000
+       public Enron-QA documents in a couple of minutes, no key and no private data, printing
+       <b>R@5 94.4% dense vs 97.5% dense+learned-sparse</b> (95% Wilson [91.6, 96.4] vs [95.3, 98.7]).
+       Those intervals overlap, so it reports the <i>paired</i> test too, since both arms answer the same
+       queries: learned-sparse fixes 12 and breaks 1, <b>McNemar exact p=0.0034</b>. Zero LLM calls,
+       1.6 min on an M5 Pro GPU and 14.7 min CPU-only. Widen the distractor pool 5× with
+       <code>just bench large</code> and the advantage grows instead of shrinking (+4.4pp,
+       p=0.0001), which is the directional claim that matters.</p>
+
+    <p class="muted" style="margin-top:14px"><b>Scope, stated plainly.</b> <code>just bench</code>
+       checks the hybrid <i>retrieval layer</i> alone, with reranking switched off because it needs a
+       paid endpoint. Between them the two commands reproduce the mechanisms but not the magnitude: the
+       45.6→93.3 ladder was measured on a 32,000-email archive and stays author-reported. Every figure
+       on this page is tracked in the
+       <a href="https://github.com/fmasi/mailrag/blob/main/docs/CLAIMS.md">claims register</a> with the
+       script that produced it and the date it last ran. The <a href="methods.html">methods page</a>
+       walks through how the evidence was gathered. Full write-up in the
+       <a href="https://fmasi.eu/blog/email-rag-retrieval/">benchmark post</a> and the
+       <a href="https://github.com/fmasi/mailrag/blob/main/docs/CASE_STUDY.md">case study</a>.</p>
+  </section>
+
+  <section>
+    <h2>How it's kept honest</h2>
+    <div class="grid">
+      <div class="card"><h3>~1,970 tests</h3><p>A <code>unittest</code>-style suite covering the pipeline, the retrieval seams, the MCP tools and the sync machinery. A green <code>pytest</code> is a required check before anything reaches <code>main</code>.</p></div>
+      <div class="card"><h3>Independent CI gates</h3><p>Lint (<code>ruff</code>, <code>mypy</code>, secret and workflow scans), <code>pytest</code>, <code>pip-audit</code>, dependency review and CodeQL each run as a separately named required check, and one Claude review gates the merge. The <code>pip-audit</code> ignore list is deliberately empty. Advisories get fixed or pinned around, never waved through.</p></div>
+      <div class="card"><h3>Supply chain, pinned on purpose</h3><p>The Qdrant server image is pinned by digest; the client is capped below a release that silently removed a symbol. Every pin carries an in-tree comment saying why it exists and when to lift it. Zero open Dependabot alerts.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recently shipped</h2>
+    <p class="muted" style="margin:0 0 16px">mailrag is built to be one node in a private context
+       stack — the pieces that make it reachable by agents and keep its memory current are now in.
+       The first tagged release, <b>v0.9.0</b>, marks it feature-complete and in daily use; 1.0.0
+       follows once the gaps named in the
+       <a href="https://github.com/fmasi/mailrag/blob/main/docs/ROADMAP.md">roadmap</a> close.</p>
+    <div class="grid">
+      <div class="card"><h3>MCP server — shipped ✓</h3><p>A multi-collection stdio server exposes seven tools: <code>list_collections</code>, <code>search_email</code>, <code>get_thread</code> (an exact key lookup rather than a second retrieval pass), <code>grep_email</code>, <code>answer_question</code>, and attachment list/fetch. Any agent, yours or a teammate's, can query your mail without touching the internals.</p></div>
+      <div class="card"><h3>Live ingestion — shipped ✓</h3><p><code>./mailrag sync</code> moves mailrag from one-time imports to incremental ingest: a <em>living</em> context source, not a static snapshot. New mail is spooled as <code>.eml</code> and run through the <em>same</em> pipeline, so the cleaning rubric never drifts. Each stage degrades independently. Mail is still fetched when the LLM is down and still judged when the vector store is down, and the run picks up where it left off next time. A launchd agent on macOS, or a systemd timer on Linux, keeps it running unattended.</p></div>
+      <div class="card"><h3>Guided TUI — shipped ✓</h3><p><code>./mailrag wizard</code> is now a full-screen terminal app (Textual): pick a recipe, scope folders on a tree, review the plan, and watch the run live, with the calibrate and confirm-before-spend gates as dialogs.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    Built by <a href="https://www.linkedin.com/in/fmasi/">Frédéric Masi</a> — private, self-hosted AI tools. By humans, for agents.<br>
+    Open source under <a href="https://github.com/fmasi/mailrag/blob/main/LICENSE">Apache-2.0</a>.
+    Sister project: <a href="https://github.com/fmasi/parley">parley</a> — private, on-device transcription for calls &amp; meetings.
+    © 2026 Frédéric Masi.
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+# Persona registry — the single source of truth for the mailrag pipeline recipes.
+#
+# A persona is a named, ordered recipe of verbs (with optional per-step settings).
+# The TUI runs it, `mailrag run --persona <name>` executes it headlessly, and the
+# docs render from it. Add an entry here (or in a gitignored personas.local.yaml)
+# to define a custom persona.
+#
+# See docs/VERBS.md for the cost model. Only `index` deletes anything.
+
+# `does` is shown to first-time users on the wizard's review and run screens:
+# plain words, no internal terms, short enough for one line.
+verbs:
+  scope:     {does: "pick the folders to include",                         cost: free}
+  measure:   {does: "check message lengths to set how text is split",     cost: free}
+  tag:       {does: "flag obvious newsletters from their headers",        cost: free}
+  scan:      {does: "group similar mail and suggest a recipe (no AI)",    cost: cheap}
+  judge:     {does: "AI double-checks only the mail that looks like junk", cost: small-llm}
+  calibrate: {does: "AI tries the junk rules on a sample, you check it",  cost: small-llm}
+  summarize: {does: "AI reads each email: a summary, and keep or junk",   cost: big-llm}
+  prune:     {does: "put the junk on a skip list",                        cost: free}
+  index:     {does: "make the kept mail searchable",                      cost: gpu}
+  attach:    {does: "keep the attachments so agents can open them",       cost: cpu}
+
+personas:
+  llm-none:
+    label: "Quick, no AI"
+    advisor_hint: "Fastest, and no AI model needed. Newsletters are dropped by their headers; everything else is searchable as written."
+    steps:
+      - scope
+      - measure
+      - {scan: {optional: true}}
+      - tag
+      - {prune: {from: tag}}
+      - {index: {embed: body}}
+      - attach
+
+  llm-verify:
+    label: "Balanced"
+    advisor_hint: "An AI model double-checks only the mail that looks like junk, then summarizes what is kept. Needs a local AI model."
+    steps:
+      - scope
+      - measure
+      - scan
+      - calibrate
+      - {judge: {min_score: 0.6}}
+      - {prune: {from: judge}}
+      - {summarize: {target: keepers}}
+      - {index: {embed: summary}}
+      - attach
+
+  llm-all:
+    label: "Thorough, AI reads everything"
+    advisor_hint: "An AI model reads every email, writes a summary and decides keep or junk. Best search results, slowest: one AI call per email."
+    steps:
+      - scope
+      - measure
+      - calibrate
+      - {summarize: {target: all}}
+      - {prune: {from: summarize}}
+      - {index: {embed: summary}}
+      - attach

@@ -1,0 +1,11 @@
+SUTRA — AI-Powered Institutional Email Intelligence Platform
+Copyright 2026 SUTRA Team
+
+This product includes software developed by Frederic Masi (mailrag, https://github.com/fmasi/mailrag),
+licensed under the Apache License, Version 2.0.
+
+Portions of SUTRA's retrieval concepts (hybrid search, RRF fusion, contextual retrieval)
+and email preprocessing strategies are informed by and adapted from mailrag.
+
+Per Section 4(d) of the Apache 2.0 License, attribution to the original author is hereby preserved.
+

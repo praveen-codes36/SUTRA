@@ -1,0 +1,101 @@
+# Email noise filter rules — TEMPLATE
+#
+# ── Setup ────────────────────────────────────────────────────────────────────
+# Copy this file to noise_rules.yaml (which is gitignored):
+#   cp config/noise_rules.template.yaml config/noise_rules.yaml
+#
+# Then run the interactive discovery tool to grow your rules automatically:
+#   python scripts/noise.py discover
+#
+# ── How rules work ───────────────────────────────────────────────────────────
+# Used in two places:
+#   1. Pre-index  — batch_index_to_vector_store.py skips matching emails
+#                   before embedding (zero LLM cost)
+#   2. Post-index — scripts/noise.py purge removes matching emails from
+#                   Qdrant and optionally Azure Blob Storage
+#
+# Rule evaluation (any match across any rule = noise):
+#   sender_domains   : substring match on the domain part of the sender address
+#                      (case-insensitive)
+#                      "linkedin.com" matches user@linkedin.com and
+#                      user@sub.linkedin.com, but NOT user@notlinkedin.com
+#   sender_patterns  : regex match against the full sender string
+#                      (case-insensitive)
+#   subject_patterns : regex match against the subject string (case-insensitive)
+#
+# Key naming convention:
+#   - Manually curated entries use a descriptive name
+#     (e.g. linkedin_notifications)
+#   - Auto-discovered entries use the domain with dots/hyphens replaced by
+#     underscores (e.g. hootsuite_com) — guarantees uniqueness
+#
+# To add a rule manually: copy any block below, adjust values, and save.
+# No code change required.
+# ─────────────────────────────────────────────────────────────────────────────
+
+categories:
+
+  # ── Example: dedicated noise domain ─────────────────────────────────────────
+
+  linkedin_notifications:
+    description: >-
+      LinkedIn automated notifications, job alerts and marketing. Narrowed to
+      *-noreply@ senders and the e.linkedin.com marketing subdomain so genuine
+      InMail (inmail-hit-reply@linkedin.com) — real human outreach — is kept.
+      Never block the whole linkedin.com domain: InMail rides on it.
+    sender_patterns:
+      - '-noreply@linkedin\.com'
+      - '@e\.linkedin\.com'
+
+  # ── Example: general-purpose domain with narrow patterns ────────────────────
+  # (never block the whole domain — real people use gmail/outlook/yahoo too)
+  #
+  # gmail_marketing:
+  #   description: Automated marketing and newsletter emails from Gmail accounts
+  #   sender_patterns:
+  #     - 'noreply@gmail\.com'
+  #   subject_patterns:
+  #     - '\bunsubscribe\b'
+  #     - '^Newsletter'
+
+  # ── Add your own rules below ─────────────────────────────────────────────────
+  # Run `python scripts/noise.py discover` to auto-generate rules from your index.
+
+
+# ── Bulk-mail filter (header-driven, conservative) ───────────────────────────
+# Optional section. An email whose raw headers carry a bulk marker (RFC 2369
+# List-Unsubscribe or RFC 2076 Precedence: bulk/list) is treated as noise —
+# UNLESS a keep-guard spares it. This catches newsletters/marketing you've never
+# seen without enumerating domains, while biasing toward keeping data: human
+# mailing-list traffic (Google Groups injects List-Unsubscribe) and receipts
+# survive. Matched emails are reported under the category "bulk_unsubscribe".
+#   keep_freemail_domains : sender is a personal/freemail domain → keep
+#                           (a human sent it, even via a list)
+#   keep_domains          : explicit allowlist → keep (e.g. course providers)
+#   keep_subject_patterns : transactional subjects → keep (receipts, shipping,
+#                           bookings) — narrow, so marketing nudges still drop
+bulk_filter:
+  keep_freemail_domains:
+    - gmail.com
+    - googlemail.com
+    - yahoo.com
+    - hotmail.com
+    - outlook.com
+    - live.com
+    - icloud.com
+    - me.com
+    - aol.com
+    - proton.me
+  keep_domains:
+    - edx.org
+    - oreilly.com
+  keep_sender_patterns:
+    # LinkedIn InMail is real human outreach relayed over linkedin.com (carries
+    # List-Unsubscribe) — exempt it from the bulk drop.
+    - 'inmail-hit-reply@linkedin\.com'
+  keep_subject_patterns:
+    - '\b(order|booking|reservation|payment|delivery|shipment|parcel|package)\b.{0,40}\b(confirm\w*|cancel\w*|ship\w*|dispatch\w*|deliver\w*|receiv\w*|refund\w*)\b'
+    - '\b(confirm\w*|cancel\w*|ship\w*|dispatch\w*|deliver\w*)\b.{0,40}\b(order|booking|reservation|payment|delivery|shipment|parcel|package)\b'
+    - '\b(receipt|invoice|e-?ticket|boarding pass|itinerary)\b'
+    # Non-English receipts/invoices (PT/ES/FR/DE)
+    - '\b(fatura|factura|facture|rechnung|recibo|re[çc]u|nota fiscal|quittance)\b'

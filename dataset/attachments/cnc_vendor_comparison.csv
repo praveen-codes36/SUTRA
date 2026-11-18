@@ -1,0 +1,4 @@
+vendor,quoted_price_inr,technical_status,delivery_weeks
+Vendor A,1840000,Does not meet spindle speed range,6
+Vendor B,1790000,Meets all mandatory specifications,8
+Vendor C,1910000,Compliant,12

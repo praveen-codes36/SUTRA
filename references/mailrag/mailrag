@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Thin shim so `mailrag onboard ...` works without packaging (poetry package-mode=false).
+#
+# Self-locating on purpose: this is also the launch command in .mcp.json, and an
+# MCP client starts the server with no shell, no activated conda env, and no
+# guarantee about the working directory. So resolve the repo and the interpreter
+# from the script's own path rather than inheriting them.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Interpreter: an explicit override wins, then the project's own environments,
+# then whatever `python` is on PATH. Bare `python` is the last resort because it
+# is usually a base conda/system interpreter without this project's deps — the
+# failure mode being "the MCP server silently never starts".
+resolve_python() {
+  if [[ -n "${MAILRAG_PYTHON:-}" ]]; then
+    echo "$MAILRAG_PYTHON"
+    return
+  fi
+  local roots=(
+    "${CONDA_EXE:+$(dirname "$(dirname "$CONDA_EXE")")}"
+    "$HOME/miniconda3" "/opt/miniconda3"
+    "$HOME/miniforge3" "/opt/miniforge3"
+    "$HOME/mambaforge" "/opt/homebrew/Caskroom/miniforge/base"
+    "$HOME/anaconda3" "/opt/anaconda3"
+  )
+  [[ -x "$REPO/.venv/bin/python" ]] && { echo "$REPO/.venv/bin/python"; return; }
+  local root
+  for root in "${roots[@]}"; do
+    [[ -n "$root" && -x "$root/envs/mailrag/bin/python" ]] && {
+      echo "$root/envs/mailrag/bin/python"; return
+    }
+  done
+  # Last resort. If even this is missing, say so: an MCP client starting this
+  # shim gets no shell and no diagnostics, and a bare non-zero exit reproduces
+  # exactly the "server silently never starts" failure this shim exists to fix.
+  command -v python || {
+    echo "mailrag: no Python found. Set MAILRAG_PYTHON=/path/to/python, create" >&2
+    echo "  a .venv in $REPO, or create the 'mailrag' conda env (see docs/SETUP.md)." >&2
+    return 1
+  }
+}
+
+PY="$(resolve_python)"
+export PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}"
+exec "$PY" -m src.cli "$@"

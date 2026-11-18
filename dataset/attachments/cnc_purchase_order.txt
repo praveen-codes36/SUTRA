@@ -1,0 +1,7 @@
+SYNTHETIC PURCHASE ORDER
+Vendor: Vendor B
+Item: One CNC turning centre
+Order value: INR 1,790,000
+Approved by: Dean (Administration), 8 September 2026
+Issued: 11 September 2026
+Expected delivery: Within eight weeks of order confirmation.

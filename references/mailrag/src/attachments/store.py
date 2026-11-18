@@ -1,0 +1,521 @@
+"""Source-agnostic, content-addressed attachment store.
+
+Bytes live at ``<root>/blobs/{first-2}/{sha256}`` (write-once, dedup); metadata in
+a sqlite index; extracted text cached by sha. Any ingester (.eml now; IMAP/AppleScript
+later) feeds the same store.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, List, Optional
+
+from src.attachments.extract import (
+    ExtractResult,
+    Status,
+    build_default_extractor,
+    default_extractor_name,
+)
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS attachments (
+    sha256 TEXT, message_id TEXT, thread_id TEXT, filename TEXT, mime TEXT,
+    size INTEGER, source_type TEXT, source_ref TEXT, inline INTEGER, created_at TEXT,
+    UNIQUE(message_id, sha256)
+);
+CREATE INDEX IF NOT EXISTS idx_att_msg ON attachments(message_id);
+CREATE INDEX IF NOT EXISTS idx_att_thread ON attachments(thread_id);
+CREATE INDEX IF NOT EXISTS idx_att_sha ON attachments(sha256);
+CREATE TABLE IF NOT EXISTS blob_signals (
+    sha256 TEXT PRIMARY KEY, chars INTEGER, words INTEGER, unique_words INTEGER,
+    digits INTEGER, width INTEGER, height INTEGER, status TEXT, extractor TEXT,
+    measured_at TEXT
+);
+CREATE TABLE IF NOT EXISTS store_meta (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS text_cache (
+    sha256 TEXT, extractor TEXT, text TEXT, status TEXT,
+    extractor_used TEXT, created_at TEXT,
+    PRIMARY KEY (sha256, extractor)
+);
+"""
+
+
+# Boilerplate thresholds, calibrated on a real 45k-row corpus and verified by
+# LOOKING at the images at every boundary (2026-08-19). 70% of attachment rows
+# are recurring inline decoration — signature strips, newsletter headers,
+# marketing templates, spacer pixels — which drown the actual documents.
+#
+# Three things that look like they should work, and do not:
+#
+# * Filename/mime. `image002.png` is a 259-byte spacer in one message and a
+#   12 MB pasted screenshot in another. Both inline, both image/png.
+# * Aspect ratio. "Banner-shaped means signature" is wrong: a 2475x383 strip in
+#   this corpus is a product-lifecycle table with EOL dates.
+# * Counting messages. A real image quoted down an 18-message reply chain
+#   appears in 18 messages of ONE thread. A message-based rule read 237 blobs
+#   (36% of everything it removed) as decoration that way — including a customer
+#   feature-request table. Count distinct THREADS: decoration is reused by
+#   unrelated conversations, quoted content is not.
+#
+# What remains is that recurrence alone still catches genuinely reused content —
+# a benchmark table shared into 5 threads because it is useful. Size separates
+# them: decoration at that recurrence is uniformly tiny, while the reused-content
+# false positives were 60-93 KB. So the bar scales with size — a big image must
+# be far more widely reused before it counts as decoration.
+#
+# Verified at the boundary: what this removes at the top end is a newsletter
+# header in 52 threads and a marketing template in 25; what it now keeps is that
+# benchmark table (88.8 KB, 5 threads). Costs 1 point of noise removal (64% ->
+# 63%) over the size-blind rule. The rule errs toward keeping: leaving some
+# decoration in beats hiding one real document.
+BOILERPLATE_SMALL_MAX_SIZE = 20_000  # below this, 5 threads is enough evidence
+BOILERPLATE_SMALL_MIN_THREADS = 5
+BOILERPLATE_MAX_SIZE = 100_000  # nothing bigger is ever treated as decoration
+BOILERPLATE_LARGE_MIN_THREADS = 15  # 20-100KB must be this widely reused
+
+_NOT_BOILERPLATE = """
+    NOT (a.inline = 1 AND a.mime LIKE 'image/%' AND a.size < ?
+         AND (SELECT COUNT(DISTINCT b.thread_id) FROM attachments b
+              WHERE b.sha256 = a.sha256)
+             >= (CASE WHEN a.size < ? THEN ? ELSE ? END))
+"""
+
+
+@dataclass
+class AttachmentMeta:
+    sha256: str
+    message_id: str
+    thread_id: str
+    filename: str
+    mime: str
+    size: int
+    source_type: str
+    source_ref: str
+    inline: bool
+
+
+class AttachmentStore:
+    def __init__(self, root: str):
+        self.root = os.path.abspath(os.path.expanduser(root))
+        self._blobs = os.path.join(self.root, "blobs")
+        os.makedirs(self._blobs, exist_ok=True)
+        self._conn = sqlite3.connect(os.path.join(self.root, "index.db"))
+        self._conn.row_factory = sqlite3.Row
+        self._conn.executescript(_SCHEMA)
+        # Migrate a legacy text_cache (pre composite-key) — it is a disposable cache.
+        cols = {r["name"] for r in self._conn.execute("PRAGMA table_info(text_cache)")}
+        if "extractor" not in cols or "extractor_used" not in cols:
+            self._conn.execute("DROP TABLE IF EXISTS text_cache")
+            self._conn.executescript(_SCHEMA)
+        self._conn.commit()
+
+    def close(self) -> None:
+        self._conn.close()
+
+    def count(self) -> int:
+        """Total attachment rows in the store (0 = never ingested).
+
+        Exists so callers can tell "this thread has no attachments" apart from
+        "no attachments have ever been ingested". Two things write here:
+        ``mailrag attachments build`` over a whole profile, and continuous sync
+        for each message it indexes. A bulk ``index`` / ``onboard`` does not: it
+        extracts attachment *text* for retrieval down a separate path
+        (``src.indexing.attachment_docs``). So a corpus can be fully indexed,
+        with attachment content searchable, while this store is still empty —
+        and every lookup then returns an empty list that looks exactly like a
+        thread with no attachments.
+        """
+        return int(self._conn.execute("SELECT COUNT(*) FROM attachments").fetchone()[0])
+
+    def put_signals(self, sha256: str, signals) -> None:
+        """Record measured signals for one blob (keyed by content hash).
+
+        Keyed by sha256 because that is content identity: measuring the one
+        6.5KB logo once covers all 2,273 messages that carry it. 45,454 rows in
+        this corpus are only 6,761 distinct blobs.
+        """
+        self._conn.execute(
+            """INSERT OR REPLACE INTO blob_signals
+               (sha256, chars, words, unique_words, digits, width, height, status,
+                extractor, measured_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?)""",
+            (
+                sha256,
+                signals.chars,
+                signals.words,
+                signals.unique_words,
+                signals.digits,
+                signals.width,
+                signals.height,
+                signals.status,
+                signals.extractor,
+                datetime.now(timezone.utc).isoformat(),
+            ),
+        )
+        self._conn.commit()
+
+    def get_signals(self, sha256: str):
+        """Measured signals for one blob, or ``None`` if never measured."""
+        from src.attachments.signals import BlobSignals
+
+        r = self._conn.execute(
+            """SELECT chars, words, unique_words, digits, width, height, status, extractor
+               FROM blob_signals WHERE sha256=?""",
+            (sha256,),
+        ).fetchone()
+        if r is None:
+            return None
+        return BlobSignals(*r)
+
+    def unmeasured_blobs(self, *, max_size: Optional[int] = None, images_only: bool = True):
+        """Distinct blobs with no recorded signals yet — the classify work list.
+
+        Returns ``(sha256, mime, filename, size)`` rows. ``max_size`` bounds the
+        pass to the cheap tier: OCR on a 6KB logo is ~0.05s, while a 200-page
+        PDF is minutes, so bulk measurement is worth it only for the small
+        inline images that actually pollute listings.
+        """
+        sql = """SELECT a.sha256, a.mime, a.filename, MIN(a.size)
+                 FROM attachments a
+                 LEFT JOIN blob_signals s ON s.sha256 = a.sha256
+                 WHERE s.sha256 IS NULL"""
+        params: List[Any] = []
+        if images_only:
+            sql += " AND a.mime LIKE 'image/%'"
+        if max_size is not None:
+            sql += " AND a.size < ?"
+            params.append(max_size)
+        sql += " GROUP BY a.sha256"
+        return self._conn.execute(sql, params).fetchall()
+
+    def thread_counts(self, sha256s: Optional[List[str]] = None) -> dict:
+        """sha256 -> number of distinct threads carrying it (the recurrence signal).
+
+        Pass ``sha256s`` to resolve just those blobs in a single query; omit it
+        for the whole store.
+        """
+        sql = "SELECT sha256, COUNT(DISTINCT thread_id) FROM attachments"
+        params: List[Any] = []
+        if sha256s is not None:
+            unique = sorted(set(sha256s))
+            if not unique:
+                return {}
+            # One bound parameter per blob. SQLite caps them, but not within
+            # reach here: the cap has defaulted to 32,766 since SQLite 3.32
+            # (2020) and is 250,000 on the build this runs, while pyproject
+            # requires Python >=3.11 (2022) — no supported interpreter links a
+            # SQLite old enough for the historical 999 limit to apply.
+            sql += " WHERE sha256 IN (%s)" % ",".join("?" * len(unique))
+            params = list(unique)
+        sql += " GROUP BY sha256"
+        return {r[0]: r[1] for r in self._conn.execute(sql, params)}
+
+    # --- completeness -----------------------------------------------------
+    # Two writers fill this store: `attachments build`, over a whole profile,
+    # and sync, one delta at a time. Only the first makes an empty lookup mean
+    # "this thread has no attachments". A store sync started from empty holds
+    # recent mail only, and for anything older "nothing stored" means nobody
+    # ever looked. The markers below keep those two states apart.
+
+    def _meta(self, key: str) -> Optional[str]:
+        row = self._conn.execute("SELECT value FROM store_meta WHERE key = ?", (key,)).fetchone()
+        return row["value"] if row else None
+
+    def _set_meta(self, key: str) -> None:
+        self._conn.execute(
+            "INSERT OR IGNORE INTO store_meta (key, value) VALUES (?, ?)",
+            (key, datetime.now(timezone.utc).isoformat()),
+        )
+        self._conn.commit()
+
+    def built_at(self) -> Optional[str]:
+        """When a full ``attachments build`` last completed here, or ``None``."""
+        return self._meta("built_at")
+
+    def mark_built(self) -> None:
+        """Record that a build over the whole profile completed."""
+        self._conn.execute("DELETE FROM store_meta WHERE key = 'built_at'")
+        self._set_meta("built_at")
+
+    def mark_partial(self) -> None:
+        """Called by every writer before its first row. Marks a store that is
+        being filled from EMPTY as partial: sync only ever covers recent mail,
+        and a build may be limited or interrupted. A store that already holds
+        rows was filled by a build (every store that predates these markers
+        was), so it is left alone, and so is one a build has completed on."""
+        if self.built_at() is None and self.count() == 0:
+            self._set_meta("partial_since")
+
+    def build_gap(self) -> Optional[str]:
+        """Why an empty lookup here cannot be read as "no attachments".
+
+        ``"empty"``: nothing was ever ingested. ``"partial"``: sync filled it
+        from empty and no build has covered the older mail. ``None``: a build
+        covered the corpus, so an empty lookup is a real answer.
+        """
+        if self.count() == 0:
+            return "empty"
+        if self._meta("partial_since") and self.built_at() is None:
+            return "partial"
+        return None
+
+    def path_for(self, sha256: str) -> str:
+        return os.path.join(self._blobs, sha256[:2], sha256)
+
+    def put(
+        self,
+        data: bytes,
+        *,
+        message_id: str,
+        thread_id: str,
+        filename: str,
+        mime: str,
+        size: int,
+        source_type: str,
+        source_ref: str,
+        inline: bool = False,
+    ) -> str:
+        sha = hashlib.sha256(data).hexdigest()
+        blob = self.path_for(sha)
+        # All or nothing, and never trust a blob by its name alone. A write cut
+        # short (disk full, a scheduled run killed) used to leave a truncated
+        # file under the full content hash; every later put saw it "exists",
+        # skipped the write and filed a row for it, so the short bytes were
+        # served for good. Temp file + rename means a blob is either whole or
+        # absent, and the size check heals one left by an older version.
+        if not (os.path.exists(blob) and os.path.getsize(blob) == len(data)):
+            os.makedirs(os.path.dirname(blob), exist_ok=True)
+            tmp = f"{blob}.{os.getpid()}.tmp"
+            try:
+                with open(tmp, "wb") as fh:
+                    fh.write(data)
+                os.replace(tmp, blob)
+            finally:
+                if os.path.exists(tmp):
+                    os.remove(tmp)
+        self._conn.execute(
+            """INSERT OR IGNORE INTO attachments
+               (sha256, message_id, thread_id, filename, mime, size, source_type,
+                source_ref, inline, created_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?)""",
+            (
+                sha,
+                message_id or "",
+                thread_id or "",
+                filename or "",
+                mime or "",
+                int(size),
+                source_type,
+                source_ref,
+                int(bool(inline)),
+                datetime.now(timezone.utc).isoformat(),
+            ),
+        )
+        self._conn.commit()
+        return sha
+
+    def _row_to_meta(self, r: sqlite3.Row) -> AttachmentMeta:
+        return AttachmentMeta(
+            sha256=r["sha256"],
+            message_id=r["message_id"],
+            thread_id=r["thread_id"],
+            filename=r["filename"],
+            mime=r["mime"],
+            size=r["size"],
+            source_type=r["source_type"],
+            source_ref=r["source_ref"],
+            inline=bool(r["inline"]),
+        )
+
+    def list_for(
+        self,
+        *,
+        message_id: Optional[str] = None,
+        thread_id: Optional[str] = None,
+        include_boilerplate: bool = True,
+    ) -> List[AttachmentMeta]:
+        """Attachments for a message or thread (or the whole store).
+
+        ``include_boilerplate=False`` drops recurring small inline images —
+        signature logos, spacer pixels, footer badges — using the recurrence
+        rule described at :data:`BOILERPLATE_SMALL_MIN_THREADS`. One-off inline
+        images (pasted screenshots) are kept, as are images reused only *within* one
+        thread — quoting down a reply chain is not evidence of decoration.
+        """
+        where = "1=1"
+        params: List[Any] = []
+        if message_id is not None:
+            where, params = "a.message_id=?", [message_id]
+        elif thread_id is not None:
+            where, params = "a.thread_id=?", [thread_id]
+        rows = list(self._conn.execute(f"SELECT a.* FROM attachments a WHERE {where}", params))  # noqa: S608 - fixed WHERE literals, values bound as ?
+        metas = [self._row_to_meta(r) for r in rows]
+        if include_boilerplate:
+            return metas
+        # Resolve every thread count in ONE query rather than one per row: a
+        # per-attachment lookup made list_for cost 2N+1 round-trips, which is
+        # invisible for a 3-attachment thread and pathological for a whole-store
+        # listing (45k rows).
+        counts = self.thread_counts(sha256s=[m.sha256 for m in metas])
+        return [m for m in metas if not self._is_boilerplate(m, counts.get(m.sha256, 0))]
+
+    def _is_boilerplate(self, meta, thread_count: Optional[int] = None) -> bool:
+        """Decide one attachment, preferring measured signals over the heuristic.
+
+        Measured OCR signals win when they have an opinion, because the
+        heuristic is a guess about content made from metadata and is known to
+        misfire both ways — it hid a quarterly reporting-deadline table (small,
+        quoted into six threads because it is useful) while a text-poor "access
+        denied" screenshot is content someone pasted deliberately. Blobs that
+        were never measured, or whose extraction failed, fall back to the
+        heuristic, so coverage gaps degrade to today's behaviour rather than to
+        no filtering at all.
+        """
+        from src.attachments.signals import is_decoration
+
+        threads = self._thread_count(meta.sha256) if thread_count is None else thread_count
+        verdict = is_decoration(self.get_signals(meta.sha256), threads, meta.inline)
+        if verdict is not None:
+            return verdict
+        return self._heuristic_boilerplate(meta, threads)
+
+    def _thread_count(self, sha256: str) -> int:
+        return int(
+            self._conn.execute(
+                "SELECT COUNT(DISTINCT thread_id) FROM attachments WHERE sha256=?", (sha256,)
+            ).fetchone()[0]
+        )
+
+    def _heuristic_boilerplate(self, meta, threads: int) -> bool:
+        """Metadata-only fallback: recurrence across threads, scaled by size."""
+        if not (meta.inline and meta.mime.startswith("image/")):
+            return False
+        if meta.size >= BOILERPLATE_MAX_SIZE:
+            return False
+        needed = (
+            BOILERPLATE_SMALL_MIN_THREADS
+            if meta.size < BOILERPLATE_SMALL_MAX_SIZE
+            else BOILERPLATE_LARGE_MIN_THREADS
+        )
+        return threads >= needed
+
+    def names_for(
+        self, *, thread_id: Optional[str] = None, message_ids: Optional[List[str]] = None
+    ) -> List[str]:
+        """Attachment filenames for a thread, by thread id OR any of its messages.
+
+        Both keys are needed. The attachment store threads messages with the same
+        rule as the indexer, but the two can disagree on which conversation a
+        message belongs to, so a thread id alone misses attachments filed under a
+        sibling. Matching either recovers them.
+
+        Inline decoration is excluded: this feeds a search preview, and a hit
+        advertising four signature logos tells the reader nothing.
+        """
+        keys = [k for k in ([thread_id] if thread_id else []) if k]
+        # Stored message ids keep their angle brackets; callers usually have not.
+        raw_ids = [m for m in (message_ids or []) if m]
+        ids = {i for m in raw_ids for i in (m, m.strip("<>"), f"<{m.strip('<>')}>")}
+        clauses, params = [], []
+        if keys:
+            clauses.append("thread_id IN (%s)" % ",".join("?" * len(keys)))
+            params += keys
+        if ids:
+            clauses.append("message_id IN (%s)" % ",".join("?" * len(ids)))
+            params += sorted(ids)
+        if not clauses:
+            return []
+        rows = self._conn.execute(
+            "SELECT DISTINCT filename FROM attachments "  # noqa: S608 - clauses are ? placeholders only
+            f"WHERE inline=0 AND filename != '' AND ({' OR '.join(clauses)})",
+            params,
+        )
+        return sorted({r[0] for r in rows})
+
+    def get_bytes(self, sha256: str) -> bytes:
+        blob = self.path_for(sha256)
+        if not os.path.exists(blob):
+            raise KeyError(f"no attachment blob for {sha256}")
+        with open(blob, "rb") as fh:
+            return fh.read()
+
+    def _meta_row(self, sha256: str):
+        return self._conn.execute(
+            "SELECT * FROM attachments WHERE sha256=? LIMIT 1", (sha256,)
+        ).fetchone()
+
+    def _cached_text(self, sha256: str, name: str) -> Optional[ExtractResult]:
+        """The cached result for (sha, extractor name), reporting the extractor that
+        actually produced the text (extractor_used) — same answer as the original
+        extraction. None on a cache miss."""
+        r = self._conn.execute(
+            "SELECT text, status, extractor_used FROM text_cache WHERE sha256=? AND extractor=?",
+            (sha256, name),
+        ).fetchone()
+        if r is None:
+            return None
+        return ExtractResult(
+            text=r["text"], status=r["status"], extractor=r["extractor_used"] or name
+        )
+
+    def _extract_and_cache(self, sha256: str, name: str, row) -> ExtractResult:
+        result = build_default_extractor(name).extract(
+            self.get_bytes(sha256), row["mime"], row["filename"]
+        )
+        if result.status in (Status.OCR_UNAVAILABLE, Status.BINARY):
+            # ENVIRONMENT verdicts, not facts about the attachment: OCR_UNAVAILABLE
+            # means tesseract was missing from PATH, BINARY means a parsing library
+            # was not installed. Caching either freezes the failure — a later run
+            # with a working environment reads the cache and never retries (GH #37,
+            # re-triggered by scheduled runs, which inherit no PATH).
+            return result
+        self._conn.execute(
+            """INSERT OR REPLACE INTO text_cache
+               (sha256, extractor, text, status, extractor_used, created_at)
+               VALUES (?,?,?,?,?,?)""",
+            (
+                sha256,
+                name,
+                result.text,
+                result.status,
+                result.extractor,
+                datetime.now(timezone.utc).isoformat(),
+            ),
+        )
+        self._conn.commit()
+        return result
+
+    def get_text(
+        self, sha256: str, *, extractor: Optional[str] = None, force: bool = False
+    ) -> ExtractResult:
+        name = extractor or default_extractor_name()
+        if not force:
+            cached = self._cached_text(sha256, name)
+            if cached is not None:
+                return cached
+        row = self._meta_row(sha256)
+        if row is None:
+            raise KeyError(f"unknown attachment {sha256}")
+        return self._extract_and_cache(sha256, name, row)
+
+    def fetch(self, sha256: str, *, extractor: Optional[str] = None, force: bool = False) -> dict:
+        row = self._meta_row(sha256)
+        if row is None:
+            raise KeyError(f"unknown attachment {sha256}")
+        name = extractor or default_extractor_name()
+        result = None if force else self._cached_text(sha256, name)
+        if result is None:
+            result = self._extract_and_cache(sha256, name, row)
+        return {
+            "sha256": sha256,
+            "filename": row["filename"],
+            "mime": row["mime"],
+            "size": row["size"],
+            "text": result.text,
+            "text_status": result.status,
+            "path": self.path_for(sha256),
+        }

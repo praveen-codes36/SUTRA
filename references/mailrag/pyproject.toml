@@ -1,0 +1,326 @@
+[tool.poetry]
+name = "mailrag"
+version = "0.9.0"
+description = "Local-first email RAG: turn a mail archive into a queryable, agent-accessible knowledge base"
+authors = ["Frederic Masi"]
+license = "Apache-2.0"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.14"
+# Depend on llama-index-core + the specific integration packages we import,
+# NOT the `llama-index` umbrella meta-package: the umbrella pins the openai
+# sub-packages to <0.7, which conflicts with llama-index-llms-openai-like (needs
+# >=0.7.0). The code never imports bare `llama_index`, only these sub-packages.
+llama-index-core = "^0.14.22"
+llama-index-embeddings-openai = "^0.6.0"
+llama-index-llms-openai = "^0.7.0"
+# Unified OpenAI-compatible LLM for the cleanup client (src/llm/client.py) and
+# the lmstudio answer side (Settings.llm): one LLM stack for LM Studio / NIM /
+# Ollama / vLLM / OpenAI. See P2 Step-3 unification (#39).
+llama-index-llms-openai-like = "^0.7.2"
+llama-index-llms-perplexity = "^0.5.1"
+llama-index-vector-stores-qdrant = "^0.10.0"
+# Default cross-encoder reranker (bge-m3 / A path) used by query/hybrid.py.
+# FlagEmbedding is already a main dep; this is the thin LlamaIndex wrapper. It
+# was previously pulled only transitively / installed ad-hoc in the rag env.
+llama-index-postprocessor-flag-embedding-reranker = "^0.5.0"
+# Optional NVIDIA NeMo Retriever connectors for the C/NIM experiment path
+# (dense-embedding NIM + reranking NIM). Imported lazily in src/ingest/embedder.py
+# and src/query/hybrid.py; install with `poetry install --extras nvidia`.
+llama-index-embeddings-nvidia = {version = "^0.5.1", optional = true}
+llama-index-postprocessor-nvidia-rerank = {version = "^0.6.0", optional = true}
+# 5.x, not 4.x: PYSEC-2026-3716 affects datasets < 5.0.1 and there is no 4.x
+# backport. The only 5.0.0 breaking change is IterableDataset.shuffle() now
+# sharding its input buffer; we never stream and never call it — every use here
+# is load_dataset(name, split=, cache_dir=) plus select/len/iterate/to_list,
+# all unchanged across the major.
+datasets = "^5.0.1"
+huggingface-hub = "^1.4.1"
+python-dotenv = "^1.2.1"
+pydantic = "^2.12.5"
+rich = "^14.0.0"
+# PINNED BELOW 1.19 — do not widen to a caret without re-running the suite.
+# qdrant-client 1.19.0 deleted `IDF_EMBEDDING_MODELS` from
+# qdrant_client.qdrant_fastembed (it had already been emptied to a zero-length
+# collection in 1.18). llama-index-vector-stores-qdrant still imports that name
+# at module import time — as of its latest release, 0.10.2 — so a 1.19 client
+# makes `from llama_index.vector_stores.qdrant import QdrantVectorStore` raise
+# ImportError, which takes down every dense/hybrid/MCP code path we have.
+# Upstream declares `qdrant-client>=1.16.0` with no upper bound, so the resolver
+# will happily pick 1.19 and break the build; this cap is what stops it.
+# Revisit once llama-index-vector-stores-qdrant drops the import — tracked in
+# issue #106. Note the band is a single minor version, so a security fix shipped
+# as 1.19.x rather than 1.18.x would be unreachable until the cap is lifted;
+# #106 carries that as the trigger to act early.
+# 1.18.0 also matches the Qdrant server line we run (see docker-compose.yml).
+qdrant-client = ">=1.18.0,<1.19"
+FlagEmbedding = "^1.3.0"
+questionary = "^2.1.0"
+# Full-screen TUI framework for the guided wizard (src/tui); questionary stays
+# for the `--classic` fallback and the scope verb's line-prompt picker.
+textual = "^8.2.8"
+openai = "^1.0"
+anthropic = "^0.40"
+tqdm = "^4.66"
+numpy = "^2.0"
+scikit-learn = "^1.5"
+# 6.21.2 is the CVE floor: 6.19.0 is affected by eleven advisories (CVE-2026-113786,
+# CVE-2026-113789..113795, CVE-2026-115572, -115580, -115585: unvalidated JPEG loading and
+# infinite loops, long runtimes or large memory use on hostile PDFs), all fixed by 6.21.2.
+# The last floor, 6.16.1, cleared GHSA-jp53-mhqp-8xcg, GHSA-23w6-3w8w-8484 and
+# GHSA-763m-79hh-57f2; before that 6.14.2 cleared CVE-2026-71870 and CVE-2026-71852.
+# 6.21.4 clears the next seven (GHSA-42gh-23hr-vphw, -4vqv-7265-gm2w, -5849-834g-hvw5,
+# -62m5-6wh8-28x7, -cggf-277g-3q54, -mfr5-77xh-9j7h, -x3rh-gjgm-fmqc; CVE-2026-119203..119209):
+# infinite loops and long runtimes or large memory use on hostile xref tables, page trees,
+# page labels and encrypted files.
+# pypdf parses attacker-chosen attachments, so this floor matters more than most.
+pypdf = "^6.21.4"
+python-docx = "^1.1"
+openpyxl = "^3.1"
+python-pptx = "^1.0"
+# Structure-aware attachment chunking (#89): parse spreadsheets by row-groups
+# (header repeated per chunk) so large sheets are split into embedder-sized chunks
+# instead of one giant blob bge-m3 truncates at 8192 tokens. Used in
+# src/indexing/attachment_chunking.py.
+pandas = ">=2.2,<4"
+pytesseract = "^0.3"
+pdf2image = "^1.17"
+# 13.0 is the CVE floor: 12.3.0 is affected by CVE-2026-112902, fixed only in 13.0.0 (a
+# major bump, so the old ^12.3 cap had to widen to ^13.0). 12.2 was affected by
+# CVE-2026-54059/54060/55379/55380/55798 (PYSEC-2026-2253..2257), fixed in 12.3.0.
+pillow = "^13.0"
+# Official Model Context Protocol SDK — powers the stdio MCP server
+# (src/mcp_server) that exposes the email-RAG query path to MCP clients.
+# v2 (2026-07-28) is required, not merely preferred: the 1.x line went into
+# maintenance mode on that date and now receives security fixes only, so a
+# `<2` pin would park us on a branch that no longer gets real releases.
+#
+# v2 brings its own HTTP stack (httpx2 + httpcore2, Tom Christie's httpx
+# successor under the pydantic org), so httpx — pulled in by qdrant-client —
+# and httpx2 now coexist. Different distributions, no conflict.
+#
+# One behavioural consequence worth knowing if this ever gets containerised:
+# httpx2 verifies TLS against the OS trust store (via `truststore`) rather than
+# certifi's bundle, honouring SSL_CERT_FILE / SSL_CERT_DIR first. Slim base
+# images with a sparse /etc/ssl/certs can therefore fail handshakes that used
+# to succeed. Not a live risk today — nothing here ships in a container (only
+# Qdrant does, and it is reached over plain HTTP on localhost), the devcontainer
+# is a full Debian image, and CI runs on ubuntu-latest. Re-check if a slim
+# runtime image is ever introduced.
+# 2.2.0 clears CVE-2026-59951 (pip-audit, 2026-10-26); same bump as Dependabot PR #219.
+mcp = "^2.2.0"
+# Continuous sync (src/sync, issue #101). PyYAML parses accounts.yaml (already a
+# transitive dep, declared here because we import it directly). imapclient is the
+# IMAP leg: actively maintained, and it exposes ENABLE / CONDSTORE / CHANGEDSINCE,
+# which imaplib does not. Optional — a Maildir-only or export-only user needs no
+# IMAP client; install with `poetry install --extras imap`.
+PyYAML = "^6.0"
+imapclient = {version = "^3.1.0", optional = true}
+# --- Transitive security floors (not imported directly) ---------------------
+# These are pulled in transitively (soupsieve via beautifulsoup4; transformers
+# via FlagEmbedding). We pin a minimum here purely to lift the resolved version
+# past known CVEs — see the pip-audit job in .github/workflows/ci.yml.
+#   soupsieve  — CVE-2026-49476/49477 (PYSEC-2026-3071/3072), fixed in 2.8.4;
+#                CVE-2026-85999/86000 (GHSA-gjv8-xp57-g29c, GHSA-j934-xhv5-fg8f),
+#                fixed in 2.9.0. Supersedes Dependabot PR #79.
+soupsieve = "^2.9.0"
+#   transformers — CVE-2026-5241 (PYSEC-2026-2290), fixed in 5.5.0.
+transformers = "^5.5.0"
+#   click — CVE-2026-7246 (PYSEC-2026-2132), fixed in 8.3.3; pin the 8.4 line.
+click = "^8.4.1"
+#   aiohttp — pulled in by llama-index-core / openai / fsspec.
+#             GHSA-mfx4-hv73-q22v + GHSA-mq44-7p77-q5h7 fixed in 3.14.2,
+#             GHSA-cq5v-8q36-5273 (high) fixed in 3.14.3; GHSA-2g87-pp6c-29x5 and
+#             CVE-2026-111063..111066 / 111748..111750 fixed in 3.14.4.
+aiohttp = "^3.14.4"
+#   cryptography — via pyjwt[crypto] (was azure-storage-blob until Azure was
+#                  retired in #49). GHSA-g6cj-pr64-35w5 (high) is fixed in
+#                  50.0.0. pyjwt only asks for >=3.4.0, so this floor is what
+#                  keeps a re-lock from resolving back to a vulnerable release;
+#                  50.x drops the deprecated OpenSSL 1.1.1 backend, which we
+#                  never touch.
+cryptography = "^50.0.0"
+#   nltk — via llama-index-core. Four high advisories (GHSA-6hm5-jgcp-p838,
+#          GHSA-fg7f-2386-8897, GHSA-qvv7-cg9c-w4x3, GHSA-xh95-f55m-82fw) plus the
+#          path-traversal GHSA-p4gq-832x-fm9v the CI audit used to ignore, all
+#          fixed in 3.10.0. 3.10.3 fixed the next batch (PYSEC-2026-3733..3752,
+#          -3790, -3867..3871), two of them critical (GHSA-m4rf-3fr8-xwx3,
+#          GHSA-x99w-6fgc-pmfw). Supersedes Dependabot PR #192.
+#          3.10.4 clears GHSA-j456-xh4h-cpf2 (CVE-2026-109956): WekaClassifier
+#          passed an unvalidated, caller-chosen model path to the Weka JVM,
+#          past nltk's pathsec containment. It also fixes GHSA-8mgp-746c-j5xp
+#          (PYSEC-2026-3740, CVE-2026-81726), a pathsec bypass in the
+#          model-artifact import/export APIs that had no fixed release and was
+#          ignored by ID in CI; that ignore is gone. Supersedes Dependabot PR #225.
+nltk = "^3.10.4"
+#   anyio — via mcp / httpx / httpx2 / openai / anthropic / starlette.
+#           GHSA-82r6-8w77-94w6 (critical) and GHSA-5p39-cfhj-2xmp
+#           (CVE-2026-63374, CVE-2026-64847), fixed in 4.14.2.
+anyio = "^4.14.2"
+#   httpx2 / httpcore2 — via mcp (its v2 HTTP stack). GHSA-7mj9-2mp8-4m2p (high,
+#           both packages) and GHSA-f2fp-rgf2-35cp fixed in 2.10.0;
+#           GHSA-h4x7-gw46-3wm6 and GHSA-pf96-p4fj-6566 in 2.11.0;
+#           GHSA-8xx6-hgc6-gc2m (high) in 2.12.0 (PYSEC-2026-3844..3849).
+#           httpx2 pins httpcore2 to its own version, so the two move together.
+httpx2 = "^2.12.0"
+httpcore2 = "^2.10.0"
+#   banks — via llama-index-core (prompt templating). GHSA-x8wg-4xgc-vr54
+#           (PYSEC-2026-3810), fixed in 2.4.5.
+banks = "^2.4.5"
+#   accelerate — via FlagEmbedding / peft. GHSA-4j2p-28q2-5m79 (CVE-2026-69112,
+#                PYSEC-2026-3804): path traversal via sharded-checkpoint
+#                weight_map entries, affected through 1.14.0 (the advisory
+#                names no "fixed" release; 1.15.0 is the first outside the
+#                affected range). We never load sharded checkpoints through it.
+accelerate = "^1.15.0"
+#   h2 — via httpx[http2] (the qdrant-client transport). GHSA-6hr6-w5qg-qmwg
+#        fixed in 4.4.1.
+h2 = "^4.4.1"
+#   torch — via FlagEmbedding / transformers / sentence-transformers.
+#           GHSA-rrmf-rvhw-rf47 is fixed in 2.13.0. This bump is also what
+#           unblocks the setuptools floor below: torch <=2.12.1 caps
+#           `setuptools <82`, so setuptools could not reach its own fix until
+#           torch moved. 2.13.0 relaxes that to `setuptools >=77.0.3`.
+#           Supersedes Dependabot PR #100.
+torch = "^2.13.0"
+#   setuptools — via llama-index-core (and formerly capped by torch, see above).
+#                GHSA-h35f-9h28-mq5c fixed in 83.0.0; GHSA-xmj3-9gf7-h52w fixed in
+#                84.1.0.
+setuptools = "^84.1.0"
+#   tinytag — via llama-index-core (audio-tag metadata for its file readers). CVE-2026-104266,
+#             fixed in 2.3.0. llama-index-core only asks for >=2.2.0, so this floor is
+#             what keeps the lock off the affected 2.2.x.
+tinytag = "^2.3.0"
+#   pyjwt — via mcp (pyjwt[crypto]). 2.13.0 is affected by fourteen advisories
+#           (PYSEC-2026-4140..4152, -4183). Most are fixed in 2.14.0, including
+#           GHSA-gvp8-978c-rx2q (CVE-2026-103001: decode() mutating a reused
+#           options dict, a silent claim-verification bypass, last affected
+#           2.13.0). GHSA-42vr-xj54-vc7v (CVE-2026-101918, a pre-verification
+#           RecursionError DoS) and GHSA-x33g-cr3x-6449 (CVE-2026-102275) need
+#           2.15.0. Supersedes Dependabot PR #208.
+pyjwt = "^2.15.0"
+#   urllib3 — via requests / qdrant-client. GHSA-8988-9cw3-xx77 (HTTPS-proxy
+#             TLS settings ignored), GHSA-gh4c-6fx4-qh6g (chunked-deflate
+#             infinite loop) and GHSA-vxq7-64xx-v4gw (unbounded chunk-size
+#             line), PYSEC-2026-4175..4177, all fixed in 2.8.0.
+urllib3 = "^2.8.0"
+#   fsspec — via datasets / huggingface-hub / llama-index-core / torch.
+#            GHSA-27vj-qcqg-25rc (CVE-2026-104851): template injection in
+#            ReferenceFileSystem leading to code execution, fixed in 2026.6.0.
+#            We never open a reference filesystem. datasets 5.0.1 caps fsspec
+#            at <=2026.6.0, so this floor and that cap leave exactly one
+#            release: the next fsspec advisory needs a datasets bump first.
+fsspec = ">=2026.6.0"
+#   certifi — via requests / httpx / httpcore. PYSEC-2026-4320, fixed in 2026.10.18
+#             (OSV also lists 2026.10.19 as a fix version, so the floor takes the later one);
+#             the 2026.1.4 bundle is affected.
+certifi = "^2026.10.19"
+#   filelock — via datasets / huggingface-hub / torch. CVE-2026-112907, -112913 and
+#              -112940, fixed in 4.2.1 (a major bump; the three dependents ask for
+#              `*` or `>=3.10.0`, so no cap blocks it).
+filelock = "^4.2.1"
+#   opentelemetry-api — via mcp. CVE-2026-114603, fixed in 1.45.1.
+opentelemetry-api = "^1.45.1"
+#   multidict — via aiohttp / yarl. GHSA-54p9-h82j-f925 (CVE-2026-104874), a
+#               reference leak in the items-view union/subtraction, fixed in
+#               6.9.1.
+multidict = "^6.9.1"
+#   sentence-transformers — via FlagEmbedding. GHSA-jhr6-gm9c-rqjv
+#               (CVE-2026-68770, PYSEC-2026-4164): loading a local model
+#               bypasses trust_remote_code and runs its custom Python, fixed
+#               in 5.6.0.
+sentence-transformers = "^5.6.0"
+
+[tool.poetry.extras]
+# C/NIM experiment path (NVIDIA NeMo Retriever dense embed + rerank NIMs)
+nvidia = ["llama-index-embeddings-nvidia", "llama-index-postprocessor-nvidia-rerank"]
+# IMAP source for `mailrag sync` (src/sync/imap_source.py)
+imap = ["imapclient"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
+pytest-cov = "^6.0"
+ipykernel = "^7.2.0"
+# Security floor for a dev-only transitive (ipykernel / jupyter-client), kept in
+# this group so it never enters the runtime install: GHSA-mpf4-983q-p7j4 (high),
+# GHSA-8423-8fgw-73vq and GHSA-wwv5-g3v4-889x (PYSEC-2026-3928,
+# CVE-2026-91990/91991), fixed in 6.5.8. 6.6 clears GHSA-pcg2-g6cj-q92c,
+# GHSA-pw9p-v7r6-gx4p and GHSA-r4j5-9xpp-3985 (CVE-2026-115927, -116577, -116578):
+# quadratic header parsing, an open redirect and event-loop blocking on chunked bodies.
+tornado = "^6.6"
+# The two CI quality gates, declared so a dev environment built from this file
+# is complete — previously they existed only as pinned `pip install` lines in
+# .github/workflows/ci.yml, so running them locally meant installing them by
+# hand, and whatever version you happened to get. Pinned exactly (not caret) to
+# the versions ci.yml uses: a lint/type gate that disagrees with CI about which
+# rules exist is worse than no local gate at all. Bump both here, in the `lint`
+# job of .github/workflows/ci.yml, in the justfile and in lefthook.yml together.
+ruff = "0.15.20"
+mypy = "2.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = [
+	"integration: needs live Qdrant + LLM + bge-m3 (deselected by default)",
+]
+
+# --- Ruff: lint + format -----------------------------------------------------
+# Conservative, formatter-friendly config. line-length matches the codebase
+# (most lines already sit under 100). The formatter reflows code; the linter
+# handles imports (I), pyflakes (F), pycodestyle errors/warnings (E/W).
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = [
+	# E501 (line too long): the formatter already wraps code; the residual
+	# offenders are long string literals / comments / URLs that ruff format
+	# deliberately never splits. Enforcing it here would only add noqa noise.
+	"E501",
+	# E741 (ambiguous var name, e.g. `l`): a handful of short-lived loop
+	# variables in product + test code. Renaming them is a behaviour-neutral
+	# but noisy churn we skip in this CI-only change; it is purely stylistic.
+	"E741",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Deliberate late (non-top-of-file) imports to sidestep import cycles / keep a
+# module's public helpers defined before the integration imports that use them.
+"src/data/loaders/mail_archive_x.py" = ["E402"]
+"tests/test_summary_rerank.py" = ["E402"]
+# Standalone eval scripts bootstrap sys.path / os.chdir / offline env vars
+# BEFORE importing src.*, so their imports intentionally sit below that setup.
+# S310/S311 (only seen by `just security`, the SAST run): operator-run eval tools that
+# call the operator's own endpoints and sample eval sets with seeded, non-crypto RNGs.
+"scripts/**" = ["E402", "S310", "S311"]
+# SAST in tests (`just security`): fake /tmp paths handed to mocks (S108), synthetic
+# credentials asserted never to leak (S105/S106), and a fixed-argv tool call (S607).
+"tests/**" = ["S105", "S106", "S108", "S607"]
+
+# --- mypy: lenient type-check gate -------------------------------------------
+# Deliberately NOT strict: this repo was never annotated end-to-end, so the gate
+# only checks the annotations that DO exist and never fails on third-party libs
+# that ship no stubs (ignore_missing_imports). It is a regression guard, not a
+# push toward full typing.
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+# Check function bodies even when the def carries no annotations. Without this
+# mypy silently skips any unannotated function — which meant the gate covered
+# only ~74% of src/ and, worse, gave new unannotated code a free pass, so it
+# never ratcheted. Turning it on cost six fixes; leaving it off cost coverage
+# every time someone added a function without types.
+check_untyped_defs = true
+warn_unused_ignores = false
+warn_redundant_casts = false
+files = ["src"]
+

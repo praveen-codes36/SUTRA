@@ -1,0 +1,1653 @@
+"""Sync runner: fetch -> judge -> index with stage skipping and resumption (#101).
+
+Driven end to end through :class:`MaildirSource` against real files, so these are
+genuine integration tests of the orchestration — no fake source, no network.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import functools
+import os
+import shutil
+import tempfile
+import unittest
+from email.message import EmailMessage
+from unittest import mock
+
+from src.sync.accounts import AccountConfig
+from src.sync.factory import build_source
+from src.sync.maildir_source import MaildirSource
+from src.sync.runner import index_pending, judge_pending, sync_account
+from src.sync.sources import FolderRole
+from src.sync.state import STATUS_OK, STATUS_PARTIAL, SyncState
+
+
+def _eml(message_id: str, subject="Hi", body="A body with some words in it.") -> bytes:
+    m = EmailMessage()
+    m["From"] = "alice@example.com"
+    m["To"] = "bob@example.com"
+    m["Subject"] = subject
+    m["Message-ID"] = message_id
+    m["Date"] = "Tue, 15 Jan 2026 09:30:00 +0000"
+    m.set_content(body)
+    return bytes(m)
+
+
+@contextlib.contextmanager
+def _spool_rejecting(marker: str):
+    """Make Spool.write raise for the message whose bytes contain *marker*.
+
+    Simulates a message the loader cannot parse. Injected at the spool rather
+    than seeded on disk because MaildirSource skips empty/unreadable files
+    before the spool is ever consulted.
+    """
+    from src.sync.spool import Spool, SpoolError
+
+    real = Spool.write
+
+    def fake(self, raw):
+        if marker.encode() in raw:
+            raise SpoolError("could not parse message")
+        return real(self, raw)
+
+    with mock.patch.object(Spool, "write", fake):
+        yield
+
+
+class _RunnerTest(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.d, ignore_errors=True)
+        self.maildir = os.path.join(self.d, "Maildir")
+        for sub in ("cur", "new"):
+            os.makedirs(os.path.join(self.maildir, sub))
+        self.state = SyncState(os.path.join(self.d, "sync.db"))
+        self.addCleanup(self.state.close)
+        # The index stage writes the attachment store. Pinned here as well as in
+        # conftest, so the module is safe under plain `python -m unittest` too.
+        patcher = mock.patch.dict(
+            os.environ, {"RAG_ATTACH_STORE": os.path.join(self.d, "attachments")}
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.account = AccountConfig(
+            id="acct",
+            source="maildir",
+            path=self.maildir,
+            collection="test-collection",
+            spool_root=os.path.join(self.d, "incoming"),
+        )
+
+    def _deliver(self, name: str, message_id: str, folder=None, mtime=None, **kw):
+        base = os.path.join(self.maildir, folder) if folder else self.maildir
+        os.makedirs(os.path.join(base, "cur"), exist_ok=True)
+        os.makedirs(os.path.join(base, "new"), exist_ok=True)
+        path = os.path.join(base, "cur", name)
+        with open(path, "wb") as fh:
+            fh.write(_eml(message_id, **kw))
+        if mtime is not None:
+            os.utime(path, (mtime, mtime))
+        return path
+
+    def _pending_index_keys(self, judge_configured=False):
+        return {
+            r["message_key"]
+            for r in self.state.pending("acct", "indexed", judge_configured=judge_configured)
+        }
+
+    def _keys_for(self, paths):
+        """The message_keys the ledger holds for these spool paths — what a real
+        indexer reports back as handled."""
+        rows = {
+            r["eml_path"]: r["message_key"]
+            for r in self.state.pending("acct", "indexed", judge_configured=False)
+        }
+        rows.update({r["eml_path"]: r["message_key"] for r in self.state.pending("acct", "judged")})
+        return {rows[p] for p in paths if p in rows}
+
+    def _sync(self, **kw):
+        kw.setdefault("fetch_only", True)
+        return sync_account(self.account, state=self.state, source_factory=build_source, **kw)
+
+
+class TestFetchStage(_RunnerTest):
+    def test_fetches_new_mail_into_the_spool(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._deliver("m2", "<2@x>", mtime=2000)
+        report = self._sync()
+        self.assertEqual(report.fetched, 2)
+        self.assertEqual(self.state.counts("acct")["total"], 2)
+
+    def test_spooled_files_are_real_eml_on_disk(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        row = self.state.pending("acct", "judged")[0]
+        self.assertTrue(os.path.exists(row["eml_path"]))
+        self.assertTrue(row["eml_path"].endswith(".eml"))
+
+    def test_a_second_run_fetches_nothing_new(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        second = self._sync()
+        self.assertEqual(second.fetched, 0)
+        self.assertEqual(self.state.counts("acct")["total"], 1)
+
+    def test_only_the_delta_is_fetched_on_a_later_run(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        self._deliver("m2", "<2@x>", mtime=2000)
+        report = self._sync()
+        self.assertEqual(report.fetched, 1)
+        self.assertEqual(self.state.counts("acct")["total"], 2)
+
+    def test_out_of_scope_folders_are_not_fetched(self):
+        """The scope decision is expressed in roles, so 'Junk' means junk on any
+        provider — including a Maildir++ '.Junk'."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._deliver("j1", "<j@x>", folder=".Junk", mtime=1000)
+        report = self._sync()
+        self.assertEqual(report.fetched, 1)
+
+    def test_sent_mail_is_in_scope_by_default(self):
+        """A thread without your own replies reads one-sided."""
+        self._deliver("s1", "<s@x>", folder=".Sent", mtime=1000)
+        self.assertEqual(self._sync().fetched, 1)
+
+    def test_the_same_message_in_two_folders_is_stored_once(self):
+        self._deliver("m1", "<same@x>", mtime=1000)
+        self._deliver("a1", "<same@x>", folder=".Archive", mtime=1000)
+        report = self._sync()
+        self.assertEqual(report.fetched, 1)
+        self.assertEqual(report.already_had, 1)
+        self.assertEqual(self.state.counts("acct")["total"], 1)
+
+    def test_the_cursor_is_persisted_per_folder(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        cursor, _gen = self.state.get_cursor("acct", "INBOX")
+        self.assertIsNotNone(cursor)
+        self.assertEqual(cursor.value["name"], "m1")
+
+    def test_a_limit_stops_the_run_early(self):
+        for i in range(5):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self.assertEqual(self._sync(limit=2).fetched, 2)
+
+    def test_an_unparseable_message_is_parked_without_blocking_the_folder(self):
+        """The msgvault lesson: a poison message must never wedge the watermark.
+
+        The spool is made to reject the middle message directly — an empty file
+        is skipped by MaildirSource before the spool is reached, so seeding one
+        would exercise nothing.
+        """
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._deliver("bad", "<bad@x>", mtime=1500)
+        self._deliver("m2", "<2@x>", mtime=2000)
+        with _spool_rejecting("bad@x"):
+            report = self._sync()
+        # The good mail on both sides of the poison message still arrives.
+        self.assertEqual(report.fetched, 2)
+        self.assertEqual(report.errors, 1)
+
+    def test_a_dead_source_defers_instead_of_failing_the_run(self):
+        """No network is the normal state of a laptop, not an exception."""
+
+        def broken(_account):
+            raise OSError("network is unreachable")
+
+        report = sync_account(
+            self.account, state=self.state, source_factory=broken, fetch_only=True
+        )
+        self.assertIn("fetch", report.skipped_stages)
+        self.assertEqual(report.status, STATUS_PARTIAL)
+
+    def test_the_run_record_is_always_closed(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        last = self.state.last_run("acct")
+        self.assertEqual(last["status"], STATUS_OK)
+        self.assertTrue(last["completed_at"])
+
+    def test_a_source_is_always_closed(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        closed = {}
+        real = MaildirSource(self.maildir)
+        real.close = lambda: closed.setdefault("yes", True)
+        sync_account(
+            self.account, state=self.state, source_factory=lambda _a: real, fetch_only=True
+        )
+        self.assertTrue(closed.get("yes"))
+
+
+class TestGenerationReset(_RunnerTest):
+    def test_a_generation_change_re_enumerates_without_re_fetching(self):
+        """A UIDVALIDITY bump must cost bandwidth, not LLM calls or duplicate rows."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+
+        source = MaildirSource(self.maildir)
+        with mock.patch.object(
+            MaildirSource,
+            "open_folder",
+            lambda self, folder: folder.__class__(folder.name, folder.role, generation="CHANGED"),
+        ):
+            report = sync_account(
+                self.account, state=self.state, source_factory=lambda _a: source, fetch_only=True
+            )
+        self.assertEqual(report.folders_reset, 1)
+        self.assertEqual(report.already_had, 1)  # recognised, not re-ingested
+        self.assertEqual(report.fetched, 0)
+        self.assertEqual(self.state.counts("acct")["total"], 1)
+
+
+class TestJudgeStage(_RunnerTest):
+    def _profile(self):
+        return mock.Mock(pass2_cache=os.path.join(self.d, "p2.db"), rubric="personal")
+
+    def test_judges_only_what_is_pending(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        seen = {}
+
+        def fake_run_pass(*, profile, paths, model, workers, on_outcome=None):
+            seen["paths"] = paths
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        report = judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=fake_run_pass,
+        )
+        self.assertEqual(report.judged, 1)
+        self.assertEqual(len(seen["paths"]), 1)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+
+    def test_a_dead_llm_defers_the_stage_and_keeps_the_mail(self):
+        """The expensive work is cache-protected and the mail is already on disk,
+        so an unreachable endpoint costs nothing but a delay."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+
+        def broken(**_kw):
+            raise ConnectionError("connection refused")
+
+        report = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=broken
+        )
+        self.assertIn("judge", report.skipped_stages)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 1)
+
+    def test_nothing_pending_is_a_no_op(self):
+        report = judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=lambda **kw: self.fail("should not have been called"),
+        )
+        self.assertEqual(report.judged, 0)
+
+    def test_only_the_paths_that_succeeded_are_marked_judged(self):
+        """The defect this replaces: outcomes were inferred by slicing a
+        positional prefix off the pending list, so a FAILED message was marked
+        judged (permanently, since judged_at is never cleared) while a
+        SUCCESSFUL one stayed pending."""
+        for i in range(3):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+        rows = {r["eml_path"]: r["message_key"] for r in self.state.pending("acct", "judged")}
+        paths = sorted(rows)
+        failing = paths[0]  # the FIRST path fails — the slice used to mark it judged
+
+        def fake_run_pass(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "error" if p == failing else "done")
+            return {"cached": 0, "done": len(paths) - 1, "error": 1}
+
+        report = judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=fake_run_pass,
+        )
+        self.assertEqual(report.judged, 2)
+        still_pending = {r["message_key"] for r in self.state.pending("acct", "judged")}
+        self.assertEqual(still_pending, {rows[failing]})
+
+    def test_a_failed_judge_is_recorded_as_an_error(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+
+        def fake_run_pass(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "error")
+            return {"cached": 0, "done": 0, "error": len(paths)}
+
+        judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=fake_run_pass
+        )
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+
+    def test_work_completed_before_a_mid_sweep_failure_is_credited(self):
+        """The Pass-2 cache already holds those judgments; re-paying for them
+        because the sweep died afterwards would be pure waste."""
+        for i in range(3):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+
+        def dies_halfway(*, profile, paths, model, workers, on_outcome=None):
+            on_outcome(paths[0], "done")
+            raise ConnectionError("LM Studio went away")
+
+        report = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=dies_halfway
+        )
+        self.assertIn("judge", report.skipped_stages)
+        self.assertEqual(report.judged, 1)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 2)
+
+
+class TestEmbedderIsBuiltOnlyWhenNeeded(_RunnerTest):
+    """The embedder is a ~2 GB model load. Constructing it before knowing whether
+    there is anything to index made every idle cadence tick pay for it."""
+
+    def _profile(self):
+        return mock.Mock(pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x")
+
+    def test_an_empty_delta_never_builds_the_embedder(self):
+        calls = []
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: calls.append(1) or mock.Mock(),
+            index_fn=lambda **kw: (0, set()),
+            require_judged=False,
+        )
+        self.assertEqual(calls, [], "embedder was built with nothing to index")
+        self.assertEqual(report.indexed, 0)
+
+    def test_a_non_empty_delta_builds_it_once_and_passes_it_down(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        built = mock.Mock()
+        calls = []
+        seen = {}
+
+        def factory():
+            calls.append(1)
+            return built
+
+        def fake_index(*, profile, embedder, paths, collection, embed_summary=True):
+            seen["embedder"] = embedder
+            return 3, self._keys_for(paths)
+
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=factory,
+            index_fn=fake_index,
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(len(calls), 1, "embedder should be built exactly once")
+        self.assertIs(seen["embedder"], built, "the built embedder must reach the indexer")
+
+    def test_sync_account_does_not_build_it_when_there_is_no_mail(self):
+        """The idle tick — nothing fetched, nothing spooled, no model load."""
+        calls = []
+        sync_account(
+            self.account,
+            state=self.state,
+            source_factory=build_source,
+            profile=self._profile(),
+            embedder_factory=lambda: calls.append(1) or mock.Mock(),
+        )
+        self.assertEqual(calls, [], "an idle sync tick built the embedder")
+
+    def test_two_accounts_share_one_embedder_when_the_factory_memoises(self):
+        """cli passes a memoising factory so a multi-account tick loads once, not
+        once per account."""
+        other_dir = os.path.join(self.d, "Other")
+        for sub in ("cur", "new"):
+            os.makedirs(os.path.join(other_dir, sub))
+        with open(os.path.join(other_dir, "cur", "o1"), "wb") as fh:
+            fh.write(_eml("<o@x>"))
+        other = AccountConfig(
+            id="other",
+            source="maildir",
+            path=other_dir,
+            collection="other-collection",
+            spool_root=os.path.join(self.d, "incoming-other"),
+        )
+        self._deliver("m1", "<1@x>", mtime=1000)
+        calls = []
+        factory = functools.cache(lambda: calls.append(1) or mock.Mock())
+        got = []
+
+        def fake_index(*, profile, embedder, paths, collection, embed_summary=True):
+            got.append(embedder)
+            return 3, self._keys_for(paths)
+
+        with mock.patch("src.sync.runner._default_index", side_effect=fake_index):
+            for acct in (self.account, other):
+                sync_account(
+                    acct,
+                    state=self.state,
+                    source_factory=build_source,
+                    profile=self._profile(),
+                    embedder_factory=factory,
+                )
+        self.assertEqual(
+            len(calls), 1, "the model was rebuilt per account instead of shared across the tick"
+        )
+        self.assertEqual(len(got), 2)
+        self.assertIs(got[0], got[1])
+
+
+class TestIndexStage(_RunnerTest):
+    def _profile(self):
+        return mock.Mock(pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x")
+
+    def test_indexes_pending_mail_into_the_accounts_collection(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        seen = {}
+
+        def fake_index(*, profile, embedder, paths, collection, embed_summary=True):
+            seen.update(paths=paths, collection=collection)
+            return 3, self._keys_for(paths)
+
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=fake_index,
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(seen["collection"], "test-collection")
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+    def test_a_dead_qdrant_defers_indexing_but_keeps_the_judgments(self):
+        """Docker being stopped is routine; the LLM work already done must not be
+        thrown away."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        self.state.mark_judged(
+            "acct", [r["message_key"] for r in self.state.pending("acct", "judged")]
+        )
+
+        def broken(**_kw):
+            raise ConnectionError("cannot connect to Qdrant")
+
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=broken,
+            require_judged=False,
+        )
+        self.assertIn("index", report.skipped_stages)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 1)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+
+    def test_a_later_run_picks_up_what_was_deferred(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (_ for _ in ()).throw(ConnectionError("down")),
+            require_judged=False,
+        )
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (3, self._keys_for(kw["paths"])),
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+
+def _eml_with_attachment(message_id: str, data: bytes = b"quarterly figures\n") -> bytes:
+    m = EmailMessage()
+    m["From"] = "alice@example.com"
+    m["To"] = "bob@example.com"
+    m["Subject"] = "Report"
+    m["Message-ID"] = message_id
+    m["Date"] = "Tue, 15 Jan 2026 09:30:00 +0000"
+    m.set_content("See attached.")
+    m.add_attachment(data, maintype="application", subtype="octet-stream", filename="report.bin")
+    return bytes(m)
+
+
+class TestAttachmentStoreFollowsSync(_RunnerTest):
+    """Sync keeps the attachment store as fresh as the index (#160).
+
+    Attachment TEXT reached the vector index on every sync, but the bytes behind
+    ``list_attachments`` / ``get_attachment`` were only ever written by the manual
+    ``attachments build``. Mail synced after that build was searchable by its
+    attachment content and had no attachment anyone could list or fetch.
+    """
+
+    def _profile(self):
+        return mock.Mock(pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x")
+
+    def _deliver_with_attachment(self, name="m1", message_id="<a@x>", data=b"quarterly figures\n"):
+        path = os.path.join(self.maildir, "cur", name)
+        with open(path, "wb") as fh:
+            fh.write(_eml_with_attachment(message_id, data))
+        os.utime(path, (1000, 1000))
+        self._sync()
+
+    def _index(self, **kw):
+        kw.setdefault("index_fn", lambda **k: (1, self._keys_for(k["paths"])))
+        return index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            require_judged=False,
+            **kw,
+        )
+
+    def _store(self, collection="test-collection"):
+        from src.attachments.location import resolve_attach_store
+        from src.attachments.store import AttachmentStore
+
+        store = AttachmentStore(resolve_attach_store(collection=collection))
+        self.addCleanup(store.close)
+        return store
+
+    def test_indexing_a_message_stores_its_attachment_bytes(self):
+        self._deliver_with_attachment(data=b"quarterly figures\n")
+        self._index()
+        store = self._store()
+        self.assertEqual(store.count(), 1)
+        (meta,) = store.list_for(message_id="<a@x>", include_boilerplate=True)
+        self.assertEqual(meta.filename, "report.bin")
+        self.assertEqual(store.get_bytes(meta.sha256), b"quarterly figures\n")
+
+    def test_the_bytes_land_only_in_the_accounts_own_collection_store(self):
+        from src.attachments.location import resolve_attach_store
+
+        self._deliver_with_attachment()
+        self._index()
+        root = resolve_attach_store()
+        self.assertEqual(os.listdir(root), ["test-collection"])
+        # No flat index.db at the root: that is the legacy shared store the
+        # server refuses to run against.
+        self.assertFalse(os.path.exists(os.path.join(root, "index.db")))
+
+    def test_the_report_counts_new_rows_only(self):
+        """Counting parts SEEN made every retry tick of a Qdrant outage report
+        the same attachments as stored again."""
+        self._deliver_with_attachment()
+        down = lambda **k: (_ for _ in ()).throw(ConnectionError("qdrant down"))  # noqa: E731
+        first = self._index(index_fn=down)
+        again = self._index(index_fn=down)
+        self.assertIn("stored 1 new attachment(s)", first.messages)
+        self.assertFalse([m for m in again.messages if "stored" in m])
+
+    def test_a_cause_no_retry_can_fix_is_escalated_not_deferred(self):
+        """A store directory that cannot be written fails identically on every
+        tick. Filed as a deferral it stalled indexing forever behind a quiet
+        'skipped: attachments'."""
+        self._deliver_with_attachment()
+        reached = []
+        from src.sync.runner import PermanentIndexError
+
+        for exc in (PermissionError("read-only"), PermanentIndexError("no collection")):
+            with self.subTest(exc=type(exc).__name__):
+                report = self._index(
+                    attach_fn=lambda _e=exc, **kw: (_ for _ in ()).throw(_e),
+                    index_fn=lambda **k: reached.append(1) or (1, set()),
+                )
+                self.assertEqual(report.errors, 1)
+                self.assertTrue(
+                    [m for m in report.messages if "REFUSED (needs operator action)" in m]
+                )
+                self.assertNotIn("attachments", report.skipped_stages)
+        self.assertEqual(reached, [])
+
+    def _deliver_raw(self, name, raw):
+        path = os.path.join(self.maildir, "cur", name)
+        with open(path, "wb") as fh:
+            fh.write(raw)
+        os.utime(path, (1000, 1000))
+
+    def test_one_hostile_filename_does_not_stall_the_account(self):
+        """A filename that decodes to a lone surrogate cannot be bound by sqlite.
+        Raised out of the store step it was filed as REFUSED, before anything was
+        indexed, on every tick: one crafted email froze the whole account."""
+        poison = _eml_with_attachment("<poison@x>").replace(
+            b'filename="report.bin"', b'filename="=?utf-7?q?+2AA-?="'
+        )
+        self.assertIn(b"utf-7", poison)
+        self._deliver_raw("p1", poison)
+        self._deliver_raw("g1", _eml_with_attachment("<good@x>", b"good bytes\n"))
+        self._sync()
+        report = self._index()
+        self.assertEqual(report.indexed, 2)
+        self.assertEqual(report.errors, 0)
+        self.assertFalse([m for m in report.messages if "REFUSED" in m])
+        store = self._store()
+        self.assertEqual(len(store.list_for(message_id="<good@x>")), 1)
+        (meta,) = store.list_for(message_id="<poison@x>")
+        meta.filename.encode("utf-8")  # storable text, whatever it was turned into
+
+    def test_a_part_the_store_cannot_take_is_skipped_not_fatal(self):
+        """The safety net behind the scrub: whatever else in a message makes one
+        row unbindable costs that part, not the run."""
+        from src.attachments.ingest_eml import ingest_eml
+
+        self._deliver_with_attachment(name="a1", message_id="<a@x>")
+        self._deliver_with_attachment(name="b1", message_id="<b@x>", data=b"other\n")
+        paths = sorted(
+            r["eml_path"] for r in self.state.pending("acct", "indexed", judge_configured=False)
+        )
+        store = self._store()
+        real_put = store.put
+        calls = []
+
+        def flaky(data, **kw):
+            calls.append(1)
+            if len(calls) == 1:
+                raise UnicodeEncodeError("utf-8", "\ud800", 0, 1, "surrogates not allowed")
+            return real_put(data, **kw)
+
+        with mock.patch.object(store, "put", side_effect=flaky):
+            counts = ingest_eml(paths, store)
+        self.assertEqual(counts["attachments"], 1)
+        self.assertEqual(counts["bad_parts"], 1)
+        self.assertEqual(store.count(), 1)
+
+    def test_a_store_level_failure_still_stops_the_ingest(self):
+        from src.attachments.ingest_eml import ingest_eml
+
+        self._deliver_with_attachment()
+        paths = [
+            r["eml_path"] for r in self.state.pending("acct", "indexed", judge_configured=False)
+        ]
+        store = self._store()
+        with mock.patch.object(store, "put", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                ingest_eml(paths, store)
+
+    def _store_dir(self):
+        from src.attachments.location import resolve_attach_store
+
+        return resolve_attach_store(collection="test-collection")
+
+    def test_a_locked_store_is_retried(self):
+        """A real 'database is locked', as an MCP reader mid-query produces."""
+        import sqlite3
+
+        self._store()  # create it
+        db = os.path.join(self._store_dir(), "index.db")
+        holder = sqlite3.connect(db)
+        self.addCleanup(holder.close)
+        holder.execute("BEGIN EXCLUSIVE")
+        other = sqlite3.connect(db, timeout=0)
+        self.addCleanup(other.close)
+        with self.assertRaises(sqlite3.OperationalError) as ctx:
+            other.execute("INSERT INTO store_meta (key, value) VALUES ('k', 'v')")
+        locked = ctx.exception
+        holder.rollback()
+
+        self._deliver_with_attachment()
+        report = self._index(attach_fn=lambda **kw: (_ for _ in ()).throw(locked))
+        self.assertIn("attachments", report.skipped_stages)
+        self.assertEqual(report.errors, 0)
+
+    @unittest.skipIf(os.geteuid() == 0, "root can write a read-only database")
+    def test_a_read_only_store_is_refused_not_retried_forever(self):
+        self._store().close()
+        db = os.path.join(self._store_dir(), "index.db")
+        os.chmod(db, 0o400)
+        os.chmod(self._store_dir(), 0o500)
+        try:
+            self._deliver_with_attachment()
+            report = self._index()
+        finally:
+            os.chmod(self._store_dir(), 0o700)
+            os.chmod(db, 0o600)
+        self.assertTrue([m for m in report.messages if "REFUSED (needs operator action)" in m])
+        self.assertNotIn("attachments", report.skipped_stages)
+
+    def test_a_corrupt_store_index_is_refused(self):
+        os.makedirs(self._store_dir(), exist_ok=True)
+        with open(os.path.join(self._store_dir(), "index.db"), "wb") as fh:
+            fh.write(b"this is not a sqlite database, " * 40)
+        self._deliver_with_attachment()
+        report = self._index()
+        self.assertTrue([m for m in report.messages if "REFUSED (needs operator action)" in m])
+        self.assertEqual(report.indexed, 0)
+
+    def test_sync_filling_an_unbuilt_store_leaves_it_marked_partial(self):
+        self._deliver_with_attachment()
+        self._index()
+        self.assertEqual(self._store().build_gap(), "partial")
+
+    def test_new_blobs_are_measured_in_a_bounded_pass(self):
+        from src.sync import runner
+
+        self._deliver_with_attachment()
+        with mock.patch("src.attachments.classify.classify_blobs") as classify:
+            self._index()
+        (store,), kwargs = classify.call_args
+        self.assertEqual(kwargs["limit"], runner.ATTACH_CLASSIFY_PER_RUN)
+
+    def test_a_failed_measurement_pass_does_not_fail_the_stage(self):
+        self._deliver_with_attachment()
+        with mock.patch(
+            "src.attachments.classify.classify_blobs", side_effect=RuntimeError("ocr exploded")
+        ):
+            report = self._index()
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(self._store().count(), 1)
+
+    def test_a_store_failure_defers_the_index_and_says_so(self):
+        """Indexing on regardless would mark the mail indexed and never revisit
+        it: the silent drift this stage exists to end."""
+        self._deliver_with_attachment()
+        reached = []
+
+        def broken(**kw):
+            raise OSError("disk full")
+
+        report = self._index(attach_fn=broken, index_fn=lambda **k: reached.append(1) or (1, set()))
+        self.assertIn("attachments", report.skipped_stages)
+        self.assertEqual(report.status, STATUS_PARTIAL)
+        self.assertEqual(reached, [], "the index ran although the store write failed")
+        self.assertEqual(report.indexed, 0)
+        self.assertEqual(len(self._pending_index_keys()), 1)
+
+    def test_the_next_run_after_a_store_failure_catches_up(self):
+        self._deliver_with_attachment()
+        self._index(attach_fn=lambda **kw: (_ for _ in ()).throw(OSError("disk full")))
+        report = self._index()
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(self._store().count(), 1)
+
+    def test_storing_the_same_message_twice_keeps_one_row(self):
+        from src.sync.runner import _default_attach
+
+        self._deliver_with_attachment()
+        paths = [
+            r["eml_path"] for r in self.state.pending("acct", "indexed", judge_configured=False)
+        ]
+        _default_attach(paths=paths, collection="test-collection")
+        _default_attach(paths=paths, collection="test-collection")
+        self.assertEqual(self._store().count(), 1)
+
+    def test_an_empty_delta_never_opens_the_store(self):
+        calls = []
+        self._index(attach_fn=lambda **kw: calls.append(1) or 0)
+        self.assertEqual(calls, [])
+
+    def test_the_store_is_written_before_the_embedder_is_built(self):
+        """A store failure must cost a file write, not a 2 GB model load."""
+        self._deliver_with_attachment()
+        order = []
+        index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: order.append("embedder") or mock.Mock(),
+            attach_fn=lambda **kw: order.append("attach") or 0,
+            index_fn=lambda **k: (1, self._keys_for(k["paths"])),
+            require_judged=False,
+        )
+        self.assertEqual(order, ["attach", "embedder"])
+
+    def test_an_account_with_no_collection_is_refused(self):
+        """An empty collection resolves to the store ROOT, the shared pre-split
+        layout where one corpus could list another's files."""
+        from src.sync.runner import PermanentIndexError, _default_attach
+
+        with self.assertRaises(PermanentIndexError):
+            _default_attach(paths=[], collection="")
+
+    def test_an_unexpected_error_is_an_outage_not_a_refusal(self):
+        """ValueError used to be on the permanent list, which is how a single
+        message's bad header became a refusal for the whole account."""
+        self._deliver_with_attachment()
+        report = self._index(attach_fn=lambda **kw: (_ for _ in ()).throw(ValueError("odd")))
+        self.assertIn("attachments", report.skipped_stages)
+        self.assertFalse([m for m in report.messages if "REFUSED" in m])
+
+
+class TestMultiAccount(_RunnerTest):
+    def test_two_accounts_keep_separate_ledgers_and_cursors(self):
+        other_dir = os.path.join(self.d, "Other")
+        for sub in ("cur", "new"):
+            os.makedirs(os.path.join(other_dir, sub))
+        with open(os.path.join(other_dir, "cur", "o1"), "wb") as fh:
+            fh.write(_eml("<o@x>"))
+        other = AccountConfig(
+            id="other",
+            source="maildir",
+            path=other_dir,
+            collection="other-collection",
+            spool_root=os.path.join(self.d, "incoming-other"),
+        )
+        self._deliver("m1", "<1@x>", mtime=1000)
+
+        self._sync()
+        sync_account(other, state=self.state, source_factory=build_source, fetch_only=True)
+
+        self.assertEqual(self.state.counts("acct")["total"], 1)
+        self.assertEqual(self.state.counts("other")["total"], 1)
+        self.assertIsNotNone(self.state.get_cursor("other", "INBOX")[0])
+
+    def test_the_same_message_in_two_accounts_is_kept_per_account(self):
+        """Cross-account dedup is deliberately NOT automatic — the same message
+        arriving at two of your addresses is meaningful provenance."""
+        other_dir = os.path.join(self.d, "Other")
+        for sub in ("cur", "new"):
+            os.makedirs(os.path.join(other_dir, sub))
+        with open(os.path.join(other_dir, "cur", "o1"), "wb") as fh:
+            fh.write(_eml("<same@x>"))
+        self._deliver("m1", "<same@x>", mtime=1000)
+        other = AccountConfig(
+            id="other",
+            source="maildir",
+            path=other_dir,
+            collection="other-collection",
+            spool_root=os.path.join(self.d, "incoming-other"),
+        )
+        self._sync()
+        sync_account(other, state=self.state, source_factory=build_source, fetch_only=True)
+        self.assertEqual(self.state.counts("acct")["total"], 1)
+        self.assertEqual(self.state.counts("other")["total"], 1)
+
+
+class TestSourceFactory(unittest.TestCase):
+    def test_builds_a_maildir_source(self):
+        src = build_source(AccountConfig(id="a", source="maildir", path="/tmp/x"))
+        self.assertEqual(src.name, "maildir")
+
+    def test_maildir_without_a_path_is_rejected(self):
+        with self.assertRaises(ValueError):
+            build_source(AccountConfig(id="a", source="maildir"))
+
+    def test_imap_resolves_its_secret_at_build_time(self):
+        with mock.patch("src.sync.factory.resolve_secret", return_value="pw") as resolve:
+            src = build_source(
+                AccountConfig(
+                    id="a",
+                    source="imap",
+                    host="imap.example.com",
+                    login="u",
+                    secret="keychain:svc",
+                )
+            )
+        self.assertEqual(src.name, "imap")
+        resolve.assert_called_once_with("keychain:svc")
+
+    def test_imap_missing_fields_are_named_in_the_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            build_source(AccountConfig(id="a", source="imap"))
+        self.assertIn("host", str(ctx.exception))
+
+    def test_an_unknown_source_is_rejected(self):
+        with self.assertRaises(ValueError):
+            build_source(AccountConfig(id="a", source="carrier-pigeon"))
+
+
+class TestScopeRoles(unittest.TestCase):
+    def test_the_default_scope_matches_the_documented_decision(self):
+        cfg = AccountConfig(id="a")
+        included = [r for r in FolderRole if cfg.wants(r)]
+        self.assertEqual(
+            set(included),
+            {FolderRole.INBOX, FolderRole.SENT, FolderRole.ARCHIVE, FolderRole.OTHER},
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+class TestReviewRegressions(_RunnerTest):
+    """One test per defect found by the #101 code review. Each fails on the
+    pre-fix code, so none of them can quietly stop protecting anything."""
+
+    def _profile(self):
+        return mock.Mock(
+            pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x", rubric="p"
+        )
+
+    def test_unjudged_mail_is_not_indexed_when_a_judge_stage_is_configured(self):
+        """indexed_at is set once and never cleared, so indexing during an LLM
+        outage would permanently freeze a summary-less vector."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        called = {}
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (
+                called.setdefault("yes", True) or (1, self._keys_for(kw["paths"]))
+            ),
+            require_judged=True,
+        )
+        self.assertNotIn("yes", called)
+        self.assertEqual(report.indexed, 0)
+        # It owes JUDGING, not indexing — the lifecycle keeps it out of the index
+        # queue entirely rather than filtering it at the last moment.
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 1)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+    def test_judged_mail_is_indexed_once_the_judgment_arrives(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        self.state.mark_judged(
+            "acct", [r["message_key"] for r in self.state.pending("acct", "judged")]
+        )
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (1, self._keys_for(kw["paths"])),
+            require_judged=True,
+        )
+        self.assertEqual(report.indexed, 1)
+
+    def test_a_message_that_produced_no_chunks_reaches_a_terminal_state(self):
+        """An email the indexer could not account for will not succeed on an
+        identical retry, so it is abandoned WITH an error rather than left
+        pending — leaving it pending grew the per-tick load set forever and, for
+        dedup losers, re-added the duplicate chunk on the next run."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (0, frozenset()),  # nothing survived
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 0)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+
+    def test_a_permanent_refusal_is_not_reported_as_a_transient_outage(self):
+        """A policy/legacy refusal needs an operator; filing it as 'deferred'
+        would repeat it silently on every cadence tick."""
+        from src.sync.runner import PermanentIndexError
+
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+
+        def refuses(**_kw):
+            raise PermanentIndexError("collection was built under a different policy")
+
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=refuses,
+            require_judged=False,
+        )
+        self.assertNotIn("index", report.skipped_stages)
+        self.assertEqual(report.errors, 1)
+        self.assertTrue(any("REFUSED" in m for m in report.messages))
+
+    def test_a_run_without_a_model_reports_the_missing_judge_stage(self):
+        """Otherwise the run says 'ok' while indexing mail nothing ever judged."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        report = sync_account(
+            self.account,
+            state=self.state,
+            source_factory=build_source,
+            profile=self._profile(),
+            embedder_factory=None,
+            model="",
+        )
+        self.assertTrue(any("judge" in s for s in report.skipped_stages))
+        self.assertNotEqual(report.status, STATUS_OK)
+
+    def test_an_unspoolable_message_is_durably_recorded(self):
+        """Before the fix the cursor advanced past it leaving no ledger row, no
+        .eml and no UID — unrecoverable, with --status reporting 0 errors."""
+        self._deliver("bad", "<bad@x>", mtime=1500)
+        with _spool_rejecting("bad@x"):
+            report = self._sync()
+        self.assertEqual(report.errors, 1)
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+
+    def test_a_parked_poison_message_never_enters_the_judge_or_index_stages(self):
+        self._deliver("bad", "<bad@x>", mtime=1500)
+        with _spool_rejecting("bad@x"):
+            self._sync()
+        self.assertEqual(self.state.pending("acct", "judged"), [])
+        self.assertEqual(self.state.pending("acct", "indexed"), [])
+
+    def test_parking_is_idempotent_across_re_enumeration(self):
+        self._deliver("bad", "<bad@x>", mtime=1500)
+        with _spool_rejecting("bad@x"):
+            self._sync()
+        self.state.record_poison("acct", folder="INBOX", source_uid="bad", error="again")
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+
+    def test_a_poison_row_cannot_be_impersonated_by_a_crafted_message_id(self):
+        """Poison rows live in their own table, so a sender-controlled Message-ID
+        cannot collide with one and get itself silently suppressed."""
+        self.state.record_poison("acct", folder="INBOX", source_uid="7", error="bad")
+        self.assertFalse(self.state.have_message("acct", "!poison:INBOX:7"))
+        self.state.record_fetched("acct", message_key="!poison:INBOX:7", folder="INBOX")
+        self.assertTrue(self.state.have_message("acct", "!poison:INBOX:7"))
+        self.assertEqual(len(self.state.pending("acct", "judged")), 1)
+
+
+class TestSecondRoundRegressions(_RunnerTest):
+    """Defects introduced BY the first round of fixes, found by the verification
+    council. Each fails on the first-round code."""
+
+    def _profile(self):
+        return mock.Mock(
+            pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x", rubric="p"
+        )
+
+    def test_mail_dropped_as_noise_does_not_stay_pending_forever(self):
+        """The indexer legitimately drops confident noise before chunking, so it
+        never appears in the written set. Marking only what was written left a
+        backlog that grew every tick and never drained."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        # The indexer reports it as HANDLED even though it wrote nothing for it.
+        keys = self._pending_index_keys()
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (0, keys),
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+    def test_a_dedup_loser_does_not_accumulate_in_the_pending_set(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (0, set()),
+            require_judged=False,
+        )
+        self.assertEqual(report.indexed, 0)
+        # Not pending: retrying it would win the dedup next time (its twin is
+        # absent from that delta) and add a duplicate chunk the collection
+        # already holds.
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+    def test_mail_indexed_before_being_judged_is_requeued_when_judged(self):
+        """indexed_at was write-once, so a summary arriving later could never
+        reach the vector."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        keys = {
+            r["message_key"] for r in self.state.pending("acct", "indexed", judge_configured=False)
+        }
+        index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (1, keys),
+            require_judged=False,  # the no-model path
+        )
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+        def judges(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        report = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=judges
+        )
+        self.assertEqual(report.judged, 1)
+        # Back in the index queue, so the summary actually reaches the vector.
+        self.assertEqual(self.state.counts("acct")["pending_index"], 1)
+
+    def test_a_missing_spool_file_does_not_stall_the_account(self):
+        """A deterministic failure at the same position aborted the sweep on every
+        run; with indexing gated on judging that froze the whole account."""
+        for i in range(3):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+        rows = self.state.pending("acct", "judged")
+        os.unlink(rows[0]["eml_path"])
+
+        def judges_the_rest(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        report = judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=judges_the_rest,
+        )
+        self.assertEqual(report.judged, 2)
+        self.assertEqual(report.errors, 1)
+        # The missing file must not be handed to the sweep at all, AND must reach
+        # a terminal state — leaving it pending re-reported the same failure on
+        # every tick and blocked it from indexing forever.
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+
+    def test_a_transient_error_is_cleared_once_the_message_succeeds(self):
+        """Otherwise --status's error count only ever grows and stops meaning
+        anything."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        key = self.state.pending("acct", "judged")[0]["message_key"]
+        self.state.record_error("acct", key, "one-off LLM timeout")
+        self.assertEqual(self.state.counts("acct")["errors"], 1)
+        self.state.mark_judged("acct", [key])
+        self.assertEqual(self.state.counts("acct")["errors"], 0)
+
+    def test_a_permanent_refusal_makes_the_cli_exit_non_zero(self):
+        """It deliberately does not set a skipped stage, so an exit code derived
+        only from skipped_stages recorded the tick as a clean success."""
+        from src.sync.runner import PermanentIndexError
+
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (_ for _ in ()).throw(PermanentIndexError("policy mismatch")),
+            require_judged=False,
+        )
+        self.assertEqual(report.skipped_stages, [])
+        self.assertGreater(report.errors, 0)  # what the CLI now derives rc from
+
+
+class TestThirdRoundRegressions(_RunnerTest):
+    """Defects found by the third (whole-system) audit. Each fails on 32f2e23."""
+
+    def _profile(self):
+        return mock.Mock(
+            pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x", rubric="p"
+        )
+
+    def _index_all(self, require_judged=False):
+        keys = {
+            r["message_key"]
+            for r in self.state.pending("acct", "indexed", judge_configured=require_judged)
+        }
+        return index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: (len(keys), keys),
+            require_judged=require_judged,
+        )
+
+    def test_a_mid_sweep_judge_failure_still_requeues_for_indexing(self):
+        """The success path re-queued; the outage path did not. Every message in
+        the completed prefix kept a summary-less vector forever while the ledger
+        reported the account fully done."""
+        for i in range(2):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+        self._index_all()  # indexed while unjudged (the no-model path)
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+
+        def dies_after_first(*, profile, paths, model, workers, on_outcome=None):
+            on_outcome(sorted(paths)[0], "done")
+            raise ConnectionError("LM Studio went away")
+
+        report = judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=dies_after_first,
+        )
+        self.assertEqual(report.judged, 1)
+        # The judged one must be back in the index queue with its summary.
+        self.assertEqual(self.state.counts("acct")["pending_index"], 1)
+
+    def test_a_missing_spool_file_reaches_a_terminal_state_in_the_judge_stage(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        os.unlink(self.state.pending("acct", "judged")[0]["eml_path"])
+        judge_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            model="m",
+            run_pass_fn=lambda **kw: self.fail("must not reach the sweep"),
+        )
+        counts = self.state.counts("acct")
+        self.assertEqual((counts["pending_judge"], counts["pending_index"]), (0, 0))
+        self.assertEqual(counts["errors"], 1)
+
+    def test_a_missing_spool_file_reaches_a_terminal_state_in_the_index_stage(self):
+        """Previously handed to the loader, silently skipped, misreported as a
+        dedup loser, and re-loaded on every tick forever."""
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        os.unlink(self.state.pending("acct", "indexed", judge_configured=False)[0]["eml_path"])
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=lambda **kw: self.fail("must not reach the indexer"),
+            require_judged=False,
+        )
+        self.assertEqual(self.state.counts("acct")["pending_index"], 0)
+        self.assertTrue(any("missing" in m for m in report.messages))
+
+    def test_a_deterministically_failing_judge_is_abandoned_not_retried_forever(self):
+        """Each retry is a real, possibly paid, LLM call."""
+        from src.sync.runner import MAX_JUDGE_ATTEMPTS
+
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+
+        # A second message that SUCCEEDS each round is what proves the endpoint is
+        # alive. Without that witness a failure is treated as an outage and must
+        # NOT consume the failing message's attempts (see the outage test below).
+        self._deliver("ok", "<ok@x>", mtime=1001)
+        self._sync()
+        ok_path = next(
+            r["eml_path"] for r in self.state.pending("acct", "judged") if "ok_x" in r["eml_path"]
+        )
+
+        def one_fails(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done" if p == ok_path else "error")
+            return {"cached": 0, "done": 1, "error": len(paths) - 1}
+
+        for _ in range(MAX_JUDGE_ATTEMPTS):
+            judge_pending(
+                self.account,
+                self.state,
+                profile=self._profile(),
+                model="m",
+                run_pass_fn=one_fails,
+            )
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+        self.assertEqual(self.state.counts("acct")["abandoned"], 1)
+
+    def test_the_account_converges_to_zero_pending_over_repeated_runs(self):
+        """The property all three audits kept breaking: with no new mail, repeated
+        runs must reach a fixed point rather than re-loading the same set."""
+        for i in range(4):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+
+        def judges(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        load_sizes = []
+        for _ in range(5):
+            judge_pending(
+                self.account, self.state, profile=self._profile(), model="m", run_pass_fn=judges
+            )
+            keys = {r["message_key"] for r in self.state.pending("acct", "indexed")}
+            load_sizes.append(len(keys))
+            index_pending(
+                self.account,
+                self.state,
+                profile=self._profile(),
+                embedder_factory=lambda: mock.Mock(),
+                index_fn=lambda **kw: (len(kw["paths"]), set(keys)),
+                require_judged=True,
+            )
+        counts = self.state.counts("acct")
+        self.assertEqual((counts["pending_judge"], counts["pending_index"]), (0, 0))
+        # The per-run load set drains and stays drained; it must never grow.
+        self.assertEqual(load_sizes[0], 4)
+        self.assertEqual(load_sizes[1:], [0, 0, 0, 0])
+
+
+class TestOutageBelowTheSeam(_RunnerTest):
+    """Outage tests that inject failure BELOW the seam — a real closed socket
+    through the real `run_pass` — instead of stubbing `run_pass_fn` to raise.
+
+    This distinction is not academic. Three review rounds passed while an
+    outage was modelled as an exception that production never raises: the
+    OpenAI-compatible client catches connection errors internally and reports a
+    per-message failure, so the code's outage branch was dead and every message
+    silently spent a retry. Testing at the real seam makes that impossible.
+    """
+
+    def _profile(self):
+        import os as _os
+
+        return mock.Mock(
+            pass2_cache=_os.path.join(self.d, "p2.db"),
+            chunk_size=512,
+            chunk_overlap=64,
+            qdrant_url="http://x",
+            # A rubric that SHIPS in the repo. `personal` is corpus-specific and
+            # lives in the gitignored rubrics/local/, so on a clean checkout the
+            # prompt build failed before any socket was touched — the failure
+            # then classified as a per-message `error` rather than the transport
+            # `unavailable` these tests exist to prove, and two of the three
+            # passed for the wrong reason. Caught by CI, not locally, because the
+            # local tree has the rubric.
+            rubric="work",
+        )
+
+    def _dead_env(self):
+        """Point the real client at a dead port, with retries off so the test is
+        fast. The FAILURE MODE under test is unaffected by the retry count."""
+        return {
+            "RAG_LLM_API_BASE": self._dead_endpoint_url(),
+            "RAG_LLM_API_KEY": "x",
+            "RAG_LLM_MAX_RETRIES": "0",
+            "RAG_LLM_TIMEOUT": "2",
+        }
+
+    @staticmethod
+    def _dead_endpoint_url():
+        """A port with nothing listening — a genuinely refused connection."""
+        import socket
+
+        s = socket.socket()
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+        s.close()
+        return f"http://127.0.0.1:{port}/v1"
+
+    def test_a_dead_endpoint_never_consumes_a_messages_retry_budget(self):
+        """The critical defect: three ticks against a closed port abandoned the
+        entire backlog permanently, because a transport failure was counted as a
+        per-message failure."""
+        from src.sync.runner import MAX_JUDGE_ATTEMPTS
+
+        for i in range(3):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+
+        env = self._dead_env()
+        with mock.patch.dict(os.environ, env):
+            for _ in range(MAX_JUDGE_ATTEMPTS + 2):
+                judge_pending(
+                    self.account, self.state, profile=self._profile(), model="m", workers=1
+                )
+
+        counts = self.state.counts("acct")
+        self.assertEqual(counts["abandoned"], 0, "an outage must not abandon anything")
+        self.assertEqual(counts["pending_judge"], 3, "the mail must still be waiting")
+
+        # ...and it is still judgeable once the endpoint returns.
+        def works(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        report = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=works
+        )
+        self.assertEqual(report.judged, 3)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+
+    def test_a_dead_endpoint_is_reported_as_a_skipped_stage(self):
+        self._deliver("m1", "<1@x>", mtime=1000)
+        self._sync()
+        env = self._dead_env()
+        with mock.patch.dict(os.environ, env):
+            report = judge_pending(
+                self.account, self.state, profile=self._profile(), model="m", workers=1
+            )
+        self.assertIn("judge", report.skipped_stages)
+        self.assertNotEqual(report.status, STATUS_OK)
+
+    def test_the_same_holds_with_multiple_workers(self):
+        """The threaded branch reports outcomes through a different code path."""
+        for i in range(3):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+        env = self._dead_env()
+        with mock.patch.dict(os.environ, env):
+            for _ in range(4):
+                judge_pending(
+                    self.account, self.state, profile=self._profile(), model="m", workers=3
+                )
+        self.assertEqual(self.state.counts("acct")["abandoned"], 0)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 3)
+
+
+class TestFifthRoundRegressions(_RunnerTest):
+    """Findings from the fifth (independent) review of the refactor."""
+
+    def _profile(self):
+        return mock.Mock(
+            pass2_cache=None, chunk_size=512, chunk_overlap=64, qdrant_url="http://x", rubric="p"
+        )
+
+    def _all_fail(self, *, profile, paths, model, workers, on_outcome=None):
+        for p in paths:
+            on_outcome(p, "error")
+        return {"cached": 0, "done": 0, "error": len(paths), "unavailable": 0}
+
+    def test_poison_messages_are_abandoned_when_the_endpoint_probes_healthy(self):
+        """The steady state of the queue: once good mail drains, only failures
+        remain, so 'the whole sweep failed' stops being evidence of an outage.
+        A probe distinguishes the two cases the heuristic could not."""
+        from src.sync.runner import MAX_JUDGE_ATTEMPTS
+
+        for i in range(2):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+        for _ in range(MAX_JUDGE_ATTEMPTS):
+            judge_pending(
+                self.account,
+                self.state,
+                profile=self._profile(),
+                model="m",
+                run_pass_fn=self._all_fail,
+                probe_fn=lambda model: None,  # endpoint is up
+            )
+        self.assertEqual(self.state.counts("acct")["abandoned"], 2)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)
+
+    def test_the_same_failures_are_NOT_abandoned_when_the_endpoint_is_down(self):
+        from src.sync.runner import MAX_JUDGE_ATTEMPTS
+
+        for i in range(2):
+            self._deliver(f"m{i}", f"<{i}@x>", mtime=1000 + i)
+        self._sync()
+
+        def probe_fails(model):
+            raise ConnectionRefusedError(61, "refused")
+
+        for _ in range(MAX_JUDGE_ATTEMPTS + 2):
+            report = judge_pending(
+                self.account,
+                self.state,
+                profile=self._profile(),
+                model="m",
+                run_pass_fn=self._all_fail,
+                probe_fn=probe_fails,
+            )
+        self.assertEqual(self.state.counts("acct")["abandoned"], 0)
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 2)
+        self.assertIn("judge", report.skipped_stages)
+
+    def test_a_pre_refactor_ledger_is_migrated_rather_than_bricking_sync(self):
+        """Opening a ledger written before the lifecycle refactor used to fail at
+        connect, leaving sync dead until the file was deleted (which costs a full
+        re-enumeration)."""
+        import sqlite3
+
+        path = os.path.join(self.d, "legacy.db")
+        con = sqlite3.connect(path)
+        con.executescript(
+            """CREATE TABLE messages (
+                   account_id TEXT NOT NULL, message_key TEXT NOT NULL,
+                   content_sha256 TEXT NOT NULL DEFAULT '', message_id TEXT,
+                   folder TEXT NOT NULL DEFAULT '', source_uid TEXT NOT NULL DEFAULT '',
+                   eml_path TEXT NOT NULL DEFAULT '', internal_date TEXT,
+                   fetched_at TEXT NOT NULL, judged_at TEXT, indexed_at TEXT, error TEXT,
+                   PRIMARY KEY (account_id, message_key));"""
+        )
+        con.execute(
+            "INSERT INTO messages (account_id, message_key, fetched_at, judged_at, indexed_at) "
+            "VALUES ('acct','done_key','t','t','t')"
+        )
+        con.execute(
+            "INSERT INTO messages (account_id, message_key, fetched_at, judged_at) "
+            "VALUES ('acct','judged_key','t','t')"
+        )
+        con.execute(
+            "INSERT INTO messages (account_id, message_key, fetched_at) VALUES ('acct','new_key','t')"
+        )
+        con.commit()
+        con.close()
+
+        migrated = SyncState(path)
+        self.addCleanup(migrated.close)
+        states = {
+            r["message_key"]: r["state"]
+            for r in migrated.rows("acct", ["done_key", "judged_key", "new_key"])
+        }
+        # Progress is reconstructed from the old timestamps, not thrown away.
+        self.assertEqual(states["done_key"], "done")
+        self.assertEqual(states["judged_key"], "judged")
+        self.assertEqual(states["new_key"], "new")
+        self.assertEqual(migrated.counts("acct")["pending_judge"], 1)
+
+    def test_a_refused_transition_does_not_run_its_side_effects(self):
+        """requeue on a DONE message used to null both timestamps and report
+        success while leaving the state at done — an inconsistent row."""
+        self.state.record_fetched("acct", message_key="k1")
+        self.state.mark_judged("acct", ["k1"])
+        self.state.mark_indexed("acct", ["k1"])
+        self.assertEqual(self.state.requeue("acct", ["k1"]), 0)
+        row = self.state.rows("acct", ["k1"])[0]
+        self.assertEqual(row["state"], "done")
+        self.assertIsNotNone(row["judged_at"])
+        self.assertIsNotNone(row["indexed_at"])
+
+
+class TestIndexSinceStages(_RunnerTest):
+    """An account with `index_since` downloads everything but judges and
+    indexes only mail from the bound on."""
+
+    OLD = 1000  # 1970
+    NEW = 1_790_000_000  # 2026-09
+
+    def setUp(self):
+        super().setUp()
+        self.account.index_since = "2026-01-01"
+        self._deliver("old", "<old@x>", mtime=self.OLD)
+        self._deliver("new", "<new@x>", mtime=self.NEW)
+        self._sync()
+        self.new_key = {
+            r["message_key"]
+            for r in self.state.pending("acct", "judged")
+            if r["message_id"] == "<new@x>"
+        }
+        self.assertEqual(len(self.new_key), 1)
+
+    def _profile(self):
+        return mock.Mock(
+            pass2_cache=os.path.join(self.d, "p2.db"),
+            rubric="p",
+            chunk_size=512,
+            chunk_overlap=64,
+            qdrant_url="http://x",
+        )
+
+    def test_old_mail_is_still_downloaded_but_held_back(self):
+        self.assertEqual(self.state.counts("acct")["total"], 2)
+        counts = self.state.counts("acct", since=self.account.index_since_bound())
+        self.assertEqual(counts["held_back"], 1)
+
+    def test_only_mail_from_the_bound_on_is_judged(self):
+        seen = {}
+
+        def fake_run_pass(*, profile, paths, model, workers, on_outcome=None):
+            seen["paths"] = list(paths)
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        report = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=fake_run_pass
+        )
+        self.assertEqual(report.judged, 1)
+        self.assertEqual(len(seen["paths"]), 1)
+        self.assertEqual(self._keys_for(seen["paths"]), self.new_key)
+
+    def test_only_mail_from_the_bound_on_is_indexed(self):
+        self.state.mark_judged(
+            "acct", [r["message_key"] for r in self.state.pending("acct", "judged")]
+        )
+        seen = {}
+
+        def fake_index(**kw):
+            # Read while the rows are still pending; afterwards they are done.
+            seen["keys"] = self._keys_for(kw["paths"])
+            return 1, seen["keys"]
+
+        report = index_pending(
+            self.account,
+            self.state,
+            profile=self._profile(),
+            embedder_factory=lambda: mock.Mock(),
+            index_fn=fake_index,
+            require_judged=True,
+        )
+        self.assertEqual(report.indexed, 1)
+        self.assertEqual(seen["keys"], self.new_key)
+
+    def test_held_back_mail_returns_when_the_bound_is_removed(self):
+        def fake_run_pass(*, profile, paths, model, workers, on_outcome=None):
+            for p in paths:
+                on_outcome(p, "done")
+            return {"cached": 0, "done": len(paths), "error": 0}
+
+        first = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=fake_run_pass
+        )
+        self.assertEqual(first.judged, 1)
+        self.account.index_since = None
+        second = judge_pending(
+            self.account, self.state, profile=self._profile(), model="m", run_pass_fn=fake_run_pass
+        )
+        self.assertEqual(second.judged, 1)  # the old message, released
+        self.assertEqual(self.state.counts("acct")["pending_judge"], 0)

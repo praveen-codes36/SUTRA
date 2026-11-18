@@ -1,0 +1,10 @@
+﻿case_id,evaluation_task,thread_id,expected_decision_or_outcome,expected_amount_or_limit,approver_or_owner,expected_pending_actions,decision_or_latest_status_date,gold_source_email_ids
+CASE-001,Procurement decision extraction,THR-001,Vendor B,"INR 1,790,000",Dean (Administration),Purchase order issued; delivery and installation pending,2026-09-08,E005;E007
+CASE-002,Bonafide status extraction,THR-002,38 certificates generated; 4 applications on hold,N/A,Registrar,Collect 38 certificates; obtain fee receipts for 4 incomplete applications,2026-09-19,E011;E012
+CASE-003,Event venue and logistics,THR-003,Main Auditorium and East Sports Ground on 16 Nov; Central Lawn unavailable,N/A,Dean (Student Affairs),Execute venue plan; security staffing confirmed,2026-08-21,E016;E018
+CASE-004,Maintenance cost and closure,THR-004,UTM repaired and returned to service,"INR 34,500 total",Head of Department,No pending repair action stated,2026-09-28,E021;E023;E024
+CASE-005,Reimbursement approval and payment,THR-006,Claim approved and paid,"INR 24,650",Dean (Research),None; claim closed,2026-09-05,E033;E034
+CASE-006,Procurement vendor and completion,THR-007,Two OfficeTech printers purchased and installed,"INR 59,000 total",Administrative Officer,None; request complete,2026-10-21,E038;E039;E040
+CASE-007,Schedule change detection,THR-008,Exam remains 5 Nov 2026 at 14:00; venue changed to Lecture Hall 4,N/A,Examination Cell,Revised venue circulated,2026-10-16,E043;E044
+CASE-008,Budget approval scope,THR-009,INR 3.42 lakh plan accepted for budget planning only,"INR 342,000 planned; INR 350,000 sanctioned cap",Accounts and Research Office,Individual requisitions need approval before ordering,2026-09-18,E047;E048
+CASE-009,Incident cause and resolution,THR-010,Failed second-floor distribution switch replaced; connectivity tests passed,N/A,IT Network Team,Monitor for 24 hours; close tickets if stable,2026-10-26,E050;E052

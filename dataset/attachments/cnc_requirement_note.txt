@@ -1,0 +1,4 @@
+CNC TURNING CENTRE REQUIREMENT
+Purpose: Manufacturing Lab teaching and project use.
+Mandatory: approved spindle speed range, enclosed work area, safety interlocks, and local service support.
+Technical compliance is evaluated before commercial comparison.

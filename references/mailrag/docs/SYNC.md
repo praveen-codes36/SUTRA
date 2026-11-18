@@ -1,0 +1,464 @@
+# Continuous sync — keeping a collection live
+
+A mailrag collection built from a backup export is a **snapshot**. Ingest everything
+up to 1 January and nothing after that date is ever searchable — the index quietly
+rots while looking perfectly healthy. `mailrag sync` closes that gap.
+
+The target is **1–2 days of freshness**, not real time. That choice buys a lot of
+simplicity: no daemon, no IDLE connection held open, no push infrastructure. A
+one-shot command on a timer is enough.
+
+```bash
+./mailrag sync                       # fetch new mail, judge it, index the delta
+./mailrag sync --status              # what's fresh, what's pending, when it last ran
+./mailrag sync --fetch-only          # just spool the mail (no LLM, no Qdrant)
+./mailrag sync --install-agent --conda-env mailrag --model qwen2.5:14b
+```
+
+## How it works
+
+Every stage of the existing pipeline — folder selection, noise filter, Pass-2
+judging, attachment extraction, chunking, embedding — is driven by `.eml` files on
+disk. So sync doesn't reimplement any of it. It fetches new mail, writes it as
+`.eml` into the corpus tree, and lets the normal stages run over the delta:
+
+```
+ provider ──fetch──▶ .eml spool ──▶ pass1 tag ──▶ pass2 judge ──▶ incremental index
+ (IMAP/Maildir)      <root>/incoming/           (Pass-2 cache:      (delete-by-key +
+                       YYYY/MM/                  only NEW mail       deterministic ids,
+                                                 costs LLM calls)    no rebuild)
+```
+
+Two existing properties make this cheap and safe:
+
+- **The Pass-2 cache is content-addressed.** Re-running the judge stage over
+  old+new mail costs LLM calls only for the new mail — and because the delta runs
+  through the same profile and rubric, the cleaning stays consistent with the
+  already-cleaned corpus. No separate "sync rubric" to drift.
+- **Point ids are deterministic** ([`VERBS.md § index is incremental`](VERBS.md#index-is-incremental)).
+  Indexing 40 new emails into a 20,000-email collection replaces exactly those
+  emails' chunks and touches nothing else.
+
+## Configuring an account
+
+Accounts live in `~/.mailrag/accounts.yaml`. Each entry says where mail comes
+from, which collection it feeds, and how often to look:
+
+```yaml
+accounts:
+  - id: personal
+    source: imap                       # or: maildir
+    host: imap.mail.me.com
+    port: 993
+    login: you@example.com
+    secret: keychain:mailrag.imap.personal
+    collection: personal               # the Qdrant collection to keep fresh
+    profile: ~/.mailrag/personal.json  # the cleaning profile / rubric to apply
+    spool_root: ~/mail/personal/incoming
+    exclude_roles: [junk, trash]
+    cadence: 12h
+    start_from: "2026-08-01"   # optional — see below
+    index_since: "2026-01-01"  # optional — see below
+    embed_summary: true        # MUST match how the collection was built
+```
+
+`embed_summary` must match the collection. `mailrag index` without
+`--embed-summary` produces a different index policy, and sync appending under
+the other setting is refused (correctly, but confusingly). If your backfill ran
+without summaries, set `embed_summary: false` here.
+
+### `start_from`: don't re-download history you already have
+
+With no `start_from`, the first run treats sync **as** the backfill and downloads
+every message in every in-scope folder. That is correct when sync is how the
+collection gets populated, and wrong when a backup export already covers history
+— an iCloud inbox alone can be thousands of messages.
+
+Set `start_from` to the date your export ends and the first run fetches only what
+the export missed. It is resolved **server-side** (`UID SEARCH SINCE`), so the
+watermark is placed without downloading anything first. If a folder has nothing
+since that date it is marked caught up at its newest message; if the search fails,
+mailrag falls back to a full sync rather than silently skipping mail it cannot
+bound.
+
+### `index_since`: download everything, judge and index only recent mail
+
+`start_from` limits what is downloaded. `index_since` limits what is *worked on*:
+every message is still fetched and kept in the spool, but mail dated before
+`index_since` (a UTC day boundary) is never sent to the judge LLM and never
+indexed. A message with no date is always processed, because there is no telling
+it is old.
+
+It exists for a mailbox whose history needs its own cleanup before it goes
+anywhere near the index: a business mailbox with ten years of receipts and
+shared-alias traffic, say. Without the setting, adding that account to sync makes
+the next scheduled run judge every old message unattended, one LLM call each, and
+index whatever survives.
+
+Held-back mail keeps its place in the ledger. `mailrag sync --status` reports it
+on its own line instead of as a backlog, and removing `index_since` (or moving it
+earlier) makes it pending again on the next run. Nothing is deleted either way.
+
+Multi-account falls out of this: several entries each get their own cursor and
+ledger, and can target their own collection or share one. The same message
+arriving at two of your addresses is kept per-account — that is meaningful
+provenance, not a duplicate to be silently merged.
+
+### Secrets are references, never literals
+
+`secret:` holds a *reference*, and mailrag dereferences it at connect time:
+
+| Form | Use |
+|------|-----|
+| `keychain:<service>` | macOS Keychain (default on macOS) |
+| `env:<VAR>` | CI, containers |
+| `file:<path>` | Linux; first line of a `0600` file |
+
+A plaintext password is **rejected**, not merely discouraged — `accounts.yaml`
+gets copied into repos, pasted into issues and swept into backups. Store one with:
+
+```bash
+security add-generic-password -U -a you@example.com -s mailrag.imap.personal -w
+```
+
+Note the trailing `-w` with **no value**: it prompts for the password instead of
+taking it as an argument. mailrag deliberately ships no "store it for me" helper
+— passing a password on a command line puts it in the process table, where any
+local process can read it.
+
+### Folder scope is expressed in *roles*
+
+iCloud has no `SPECIAL-USE` and uses literal names (`Sent Messages`); Gmail has
+labels; Dovecot advertises `\Sent`. So scope is set in roles — `inbox`, `sent`,
+`archive`, `drafts`, `junk`, `trash`, `other` — and means the same thing
+everywhere. The default is **everything except junk and trash**, which includes
+`sent` (a thread without your own replies reads one-sided) and `other`
+(arbitrary filed folders). Override a specific folder when the guess is wrong:
+
+```yaml
+    folder_roles:
+      "Newsletters": junk
+```
+
+An unrecognised folder resolves to `other` — which is *in* scope — rather than
+being guessed into `junk` and silently dropped.
+
+## What happens when something is down
+
+A scheduled sync runs unattended on a laptop that sleeps, changes networks, and
+has Docker stopped half the time. So each stage runs only if its backend answers,
+and anything it couldn't do is picked up next time:
+
+| Unavailable | Behaviour |
+|-------------|-----------|
+| Network / IMAP | warn, exit cleanly, retry on the next tick |
+| LLM endpoint | mail is still fetched and spooled; judging deferred, and indexing waits with it. An endpoint outage is distinguished from a per-message failure (`classify_failure`) and never consumes a message's retry budget — otherwise a weekend with LM Studio closed would abandon the whole backlog |
+| Qdrant | mail is still fetched and judged; indexing deferred |
+| Attachment store (disk full, locked) | mail is still fetched and judged; the store write is retried on the next tick and **indexing waits for it**, so a message never becomes searchable by an attachment that cannot be listed or fetched |
+
+Two failures are deliberately *not* treated as outages, because retrying cannot
+fix them and a silent "deferred" every 12 hours would hide them forever:
+
+- a collection that predates deterministic point ids, and
+- a collection built under a different index policy (see `embed_summary` above).
+
+Both are reported as `index REFUSED (needs operator action)` and are checked
+*before* the delta is loaded, judged and OCR'd — so a refusal costs one round
+trip rather than repeating the whole delta's work on every tick. The one thing
+that does repeat is the attachment-store step, which runs ahead of these checks:
+each tick re-reads the pending files (a parse and a hash per message, no model)
+and writes nothing it already holds. OCR runs only for small images it has not
+measured yet, so a repeat tick has none left to do.
+
+The attachment store has its own version of this. A lock or a full disk is an
+outage and is retried. A directory that cannot be written, a corrupt store index
+or an account with no collection fails the same way every time, so it is
+reported as `attachment store REFUSED (needs operator action)`.
+
+A message that cannot be parsed at all is **parked** in its own table with its
+error and counted by `--status`; the cursor still advances past it, so one
+poison message never wedges a folder. A spooled file that has gone missing is
+likewise skipped and recorded rather than aborting the sweep — a deterministic
+failure would otherwise recur at the same position on every run and, since
+indexing waits on judging, freeze the whole account.
+
+Indexing without a judge stage (no `--model`) is supported, and mail indexed
+that way is **re-queued** once a later run judges it, so its summary does reach
+the vector — including when that judge sweep itself fails partway through. Errors are cleared when a message finally succeeds, so the count in `--status`
+reflects outstanding problems rather than accumulating history.
+
+### The message lifecycle
+
+Every spooled message is in exactly one state, and one transition table
+(`src/sync/lifecycle.py`) decides how it moves:
+
+```
+   NEW ──judged──▶ JUDGED ──indexed──▶ DONE
+    │                 ▲                  │
+    │indexed          │judged            │judged (rubric changed)
+    ▼                 │                  ▼
+ INDEXED_UNJUDGED ────┘               JUDGED
+```
+
+`INDEXED_UNJUDGED` is a named state rather than a flag combination on purpose:
+mail indexed before its summary existed **must** return to the index queue once
+judged, and making that a table entry means no code path can forget it. Any
+non-terminal state can also go to `ABANDONED`, which is **reversible** —
+`mailrag sync --requeue` puts abandoned messages back at the front of the
+pipeline. An irreversible terminal state would turn any bug in the abandon logic
+into permanent data loss.
+
+Some failures are **terminal**, not retried: a spooled `.eml` that has been
+deleted, a message the chunker rejects, and a message whose judge call has failed
+three times. Those are abandoned with the reason recorded and counted as errors,
+because retrying them means re-loading (and re-paying for) the same failure on
+every tick while blocking everything queued behind them. A message the indexer
+produces no chunks for is treated the same way — retrying it would win the
+in-run dedup on the next tick and add a duplicate chunk the collection already
+holds.
+
+`--status` measures staleness from the last **successful** run, not the last
+attempt, and warns separately when the last run never finished — which on a
+laptop is the normal way a run ends. The full set of warnings lives in
+`src/sync/health.py`; see [What `--status` can and cannot detect](#what---status-can-and-cannot-detect).
+
+### Judge failures: outage vs poison
+
+A whole judge sweep failing is ambiguous — the endpoint may be down, or every
+message left in the queue may be one your model reliably chokes on, which is the
+*steady state* once good mail drains. mailrag settles it with one tiny probe
+(`healthcheck`): probe succeeds, the failures are charged to the messages and
+they are abandoned after three attempts; probe fails, nothing is charged and the
+stage is deferred. Transport failures are classified as outages up front and
+never consume a retry budget at all.
+
+### Attachments: text to the index, bytes to the store
+
+A synced message's attachments travel two paths in the index stage. Their
+extracted *text* is chunked into the collection, which is what `search_email`
+finds. Their *bytes* are written to the collection's attachment store
+(`~/.mailrag/attachments/<collection>/`), which is what `list_attachments` and
+`get_attachment` read. The store write runs first and is idempotent.
+
+Sync only stores what it brings in. Mail indexed through a recipe (the wizard or
+`mailrag run`) already has its store, because every recipe ends with an `attach`
+step. Mail indexed with a bare `./mailrag index`, or synced before the store step
+existed, needs one `./mailrag attachments build --profile <p>` to catch up. A store that sync starts from empty is marked partial until that build
+runs, and until then `list_attachments` refuses to answer "none" for a thread it
+holds nothing for.
+
+A message cannot stop this step. A part whose headers the parser rejects is
+skipped, at most 500 parts are taken from one message, and names and ids are
+stored at a bounded length. Every part dropped for any of those reasons is
+counted in the log, without naming the message.
+
+New small inline images are also measured for the decoration filter, up to 500
+per run. If `tesseract` is missing from the job's `PATH` nothing is recorded for
+them, so a later run with a working `PATH` measures them.
+
+The scheduler unit carries `RAG_ATTACH_STORE` when it is set in the shell that
+runs `--install-agent`. Without it, sync uses the default directory, and it must
+be the one the MCP server reads.
+
+### Known limitation: a degraded environment loses attachment text
+
+Attachment OCR shells out to `tesseract`. The generated scheduler unit pins a
+`PATH` that finds it, and the attachment store no longer caches an
+`ocr_unavailable` verdict — but the **indexing** path extracts directly rather
+than through that store, so if a run somehow executes without tesseract, the
+affected messages are indexed without their attachment text and marked done.
+They will not re-enter a delta on their own; `mailrag sync --requeue` after
+fixing the environment is the recovery.
+
+### Known limitation: incremental is not identical to a rebuild
+
+Chunk dedup is within-run only. Two emails sharing a long footer, indexed in the
+same run, store it once; indexed in separate runs, they store it twice. The
+`content_hash` payload exists to make cross-run dedup possible later, but nothing
+reads it yet. Under sync this compounds: each delta's dedup cannot see previously
+indexed mail, so shared boilerplate (disclaimers, signatures) accumulates
+duplicate chunks tick over tick. A periodic `--recreate` rebuild resets it for
+free — every judgment is cached. The cost is redundant vectors and duplicated
+hits, not wrong answers — and closing it properly requires resolving what happens when the email
+that "owns" a shared chunk is deleted.
+
+This deliberately inverts `onboard`'s fail-fast, which is right for a six-hour
+build and wrong for a background refresh. Nothing is lost, because the ledger
+tracks each stage separately; nothing is repeated, because the cache and the
+deterministic ids make re-running a stage free.
+
+The run is also resumable at any point: the cursor is committed every 20 messages,
+and a message that cannot be parsed is **parked with its error while the cursor
+advances past it**. One poison message must never wedge a folder forever.
+
+## Scheduling
+
+`mailrag sync` is the portable unit. `--install-agent` writes the platform's
+scheduler unit:
+
+- **macOS** — a launchd LaunchAgent with `StartInterval` **and `RunAtLoad`**. Not
+  cron: cron silently skips a window that passes while the machine is asleep;
+  launchd coalesces it into a single run on wake. `RunAtLoad` covers the gap
+  coalescing does not — a **restart**. A LaunchAgent loads at login, so without it
+  the first sync after every boot is one whole interval away (measured: a reboot
+  at 11:09 left the agent with zero runs at 11:35, next tick due 15:09). The cost
+  is one idle tick at install time, which is nothing.
+- **Linux** — a systemd user timer with `Persistent=true` and `OnBootSec=5min`,
+  which behaves the same way on both counts.
+
+### Per-account cadence
+
+Accounts do not all deserve the same rate. A live mailbox wants a few hours; an
+archive-only mailbox that receives a few dozen messages a month does not. So
+`cadence:` is a **per-account** setting in `accounts.yaml`:
+
+```yaml
+  - id: personal-icloud
+    cadence: 4h      # the live mailbox — sets the pace for the whole schedule
+  - id: personal-gmail
+    cadence: 24h     # archive-only and nearly dormant
+```
+
+One unit serves every account, so it ticks at the **shortest** cadence
+(`unit_interval_seconds` = the minimum), and each account is then gated on its own
+cadence inside the tick by `--due-only`, which every generated unit passes. With
+the pair above the unit fires every 4 h and Gmail sits out five ticks in six.
+
+A not-due account is skipped before any connection or model load, and the skip is
+printed to the log — a skip that left no trace would be indistinguishable from a
+scheduler that had stopped firing.
+
+Three details that matter:
+
+- **`--due-only` is opt-in and only the unit passes it.** A human running
+  `mailrag sync` means *now*; silently skipping an account they asked for would be
+  astonishing.
+- **Due is measured from the last SUCCESS**, matching `--status`. A run of failures
+  must not hold an account off, or a broken account would go quiet rather than
+  retry.
+- **A tick arriving slightly early still counts as due**, within
+  `DUE_GRACE_FRACTION` (10%) of the cadence. launchd fires a 4 h `StartInterval` at
+  4.0–4.3 h, but jitter the other way can measure 3.98 h elapsed; skipping there
+  defers the account a whole tick and silently turns a 4 h cadence into 8 h.
+
+One unit *per* account was the alternative, and is worse here: two processes would
+each load bge-m3 (~2 GB of GPU) and write the same SQLite ledger concurrently.
+
+Before this, `cadence:` was read **only when a single account was targeted** — a
+multi-account install fell back to a hardcoded `43200`, while the unit actually
+running had been hand-edited to `14400`. Config and reality had drifted apart with
+nothing able to reconcile them, so an empty cadence set is now an error rather
+than a silent default.
+
+### What the scheduler deliberately does not do
+
+**A machine asleep with the lid closed and unplugged will not sync, and that is
+intended.** macOS parks launchd timers once the machine enters standby, so no tick
+fires until it genuinely wakes — and waking a laptop on battery to load a model
+onto the GPU is not worth a few hours of index freshness. Expect gaps the length
+of a closed night; they are not a fault, and `--status` is tuned not to cry wolf
+about them.
+
+The most common way this feature fails is a scheduler running mailrag outside its
+conda environment, dying on the first import, silently, for weeks. So pass
+`--conda-env`, and note that the unit always writes a log file.
+
+The generated unit also pins `RAG_LLM_API_BASE` and `QDRANT_URL` to `localhost`
+in its own environment block. This is not redundant with `.env`: that file is
+written for the **devcontainer**, where `host.docker.internal` resolves — on the
+host it does not, so a unit relying on it would fail every tick forever while
+reporting the LLM and vector store as unavailable. If your endpoints live
+elsewhere, edit that block in the generated unit. The CLI has no flag for it. Only
+the Python helpers in `src/sync/schedule.py` take an `environment=` override. The backstop is
+`sync --status`.
+
+### What `--status` can and cannot detect
+
+Because a closed, unplugged laptop legitimately produces no runs, **age alone can
+never mean "broken"** — only "stale". A threshold tight enough to catch a broken
+schedule would fire every ordinary night and be trained into noise. So the checks
+in `src/sync/health.py` split by what the evidence actually supports:
+
+| Warning | Trigger | Why it is unambiguous |
+|---|---|---|
+| the last run ended in `'<status>'` | newest run is not `ok` | The schedule is firing and failing. Invisible to an age check, whose newest attempt is always recent. |
+| the last run never finished | newest run still `running` | A tick killed by sleep or shutdown leaves `completed_at` NULL. |
+| no run has EVER completed successfully | no `ok` run on record | The install has never worked at all. |
+| index is stale — last SUCCESSFUL sync was *N*h ago | over **24 h** since the last `ok` | Informational. Longer than a closed night, shorter than a lost day. |
+
+The staleness bound was **48 h** when the interval was 12 h. Against the 4 h
+interval actually installed, that let twelve consecutive missed ticks pass without
+a word — which is how a 20 h outage went unnoticed until someone thought to ask.
+Keep the bound proportionate if you change the interval.
+
+**An idle tick is cheap, so a short interval is affordable.** The embedder is
+passed down as a factory rather than an instance, and is called only once the
+delta is known to be non-empty — so a tick that finds no new mail never loads
+bge-m3 (~2 GB onto the GPU). The factory is also memoised across accounts, so a
+multi-account tick loads the model once, not once per account. Pick each account's
+`cadence:` from how fresh you want that mailbox, not from what a wasted model load
+costs — and note a not-due account is cheaper still, skipped before it even opens a
+connection.
+
+## Deletes
+
+Deleting mail on the server does **not** remove it from the index. This is an
+archive: the collection is built from a backup and keeps what it has seen. There
+is no reconciliation sweep.
+
+## Adding a provider
+
+A source contributes exactly two provider-specific things — **how you enumerate
+new mail** and **what a cursor is**. Everything else is already generic. Implement
+[`MessageSource`](../src/sync/sources.py) and register it in
+[`factory.py`](../src/sync/factory.py):
+
+```python
+class MessageSource(Protocol):
+    name: str
+    def capabilities(self) -> SourceCaps: ...
+    def list_folders(self) -> list[Folder]: ...
+    def open_folder(self, folder) -> Folder: ...   # returns it with a live generation
+    def initial_cursor(self, folder) -> Cursor: ...
+    def fetch_delta(self, folder, cursor) -> Iterator[RawMessage]: ...
+    def advance(self, cursor, message) -> Cursor: ...
+    def close(self) -> None: ...
+```
+
+Cursors are **opaque**: `(kind, value)` where the source owns `value` entirely, plus
+a **generation** — the provider's "everything you knew is void" signal. That's
+`UIDVALIDITY` for IMAP, a 404-on-`historyId` for Gmail, `cannotCalculateChanges`
+for JMAP. One concept, one reset path, and a reset costs bandwidth alone because
+the ledger recognises re-enumerated mail.
+
+Shipped today: `imap` and `maildir`. The seam is designed for Gmail (`historyId`),
+JMAP (`Email/changes`) and Microsoft Graph (delta tokens) without schema changes.
+
+### Notes on iCloud specifically
+
+- Endpoint `imap.mail.me.com:993`; an **app-specific password** is required.
+- CONDSTORE/QRESYNC/IDLE are advertised **only after login** — a frontend proxy
+  rewrites the pre-auth `CAPABILITY` response. mailrag re-reads capabilities post
+  login, and treats CONDSTORE as an optimisation the UID watermark never needs.
+- No `SPECIAL-USE`; map by name (handled by the role table).
+- Roughly five concurrent connections, and Mail.app is probably holding some — so
+  mailrag uses exactly one, with no pipelining.
+- Fetches use `BODY.PEEK[]`, so syncing never marks your mail read.
+
+Verified against a live account (2026-07-28): pre-auth `CAPABILITY` advertises 8
+capabilities, post-auth 19 — CONDSTORE, QRESYNC, UIDPLUS, IDLE and ESEARCH all
+appear only after login, and `MOVE` is absent. Of 26 folders, only two carried a
+SPECIAL-USE flag (`\Sent`, `\Trash`); everything else — including `Junk`,
+`Drafts` and `Archive` — was classified by the name table.
+
+## Reference
+
+| Path | What it is |
+|------|------------|
+| `~/.mailrag/accounts.yaml` | account config |
+| `~/.mailrag/sync_state.db` | cursors, message ledger, run history (safe to delete — costs a re-enumerate) |
+| `~/.mailrag/sync.log` | scheduled-run output |
+| `<spool_root>/YYYY/MM/*.eml` | the spooled mail itself |
+
+> The spool must be visible to the profile's `selection_rules`, or the delta is
+> silently invisible to `resolve_index_files` and nothing new ever gets indexed.

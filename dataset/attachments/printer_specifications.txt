@@ -1,0 +1,3 @@
+DEPARTMENT PRINTER REQUIREMENTS
+Quantity: 2 network laser printers
+Mandatory: Ethernet networking, automatic duplex printing, and minimum one-year onsite warranty.

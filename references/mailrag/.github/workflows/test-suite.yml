@@ -1,0 +1,62 @@
+name: Test Suite
+
+"on":
+  # `pytest` is a required check: NO paths-ignore here, a filtered-out run would
+  # leave the PR waiting forever. It skips drafts instead (`if` below), and a job
+  # skipped by its `if` reports success; `gh pr ready` then runs it for real.
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "test-suite-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  # Supersede stale PR runs, but never cancel a push to main: every commit on
+  # main gets a finished run.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pytest:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    # ~3.5 min median, 7.2 min slowest green run: 20 leaves headroom, not 6 hours.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      # pytesseract/pdf2image are Python shims around BINARIES that the runner
+      # image does not carry. Without these the whole OCR path ran degraded in
+      # CI — every attachment-OCR test that did not mock `sys.modules` exercised
+      # the "engine missing" branch instead of real OCR, so image and scanned-PDF
+      # extraction was effectively untested here. The missing-binary branch is
+      # still covered: those tests strip PATH explicitly rather than relying on
+      # the runner happening to lack tesseract.
+      - name: Install OCR binaries
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr poppler-utils
+
+      - name: Install Poetry
+        run: python -m pip install --upgrade pip poetry
+
+      - name: Install dependencies
+        # --all-extras so the optional NVIDIA connectors are installed and the
+        # NimEmbedder / NIM-reranker tests actually RUN (not importorskip) in CI.
+        run: poetry install --with dev --all-extras --no-interaction --no-root
+
+      - name: Run full test suite
+        # --cov-fail-under=85: current coverage is ~88%; the floor sits a few
+        # points below so ordinary churn doesn't trip the gate while a real
+        # regression still does. Raise it as coverage climbs.
+        run: poetry run python -m pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=85 -q

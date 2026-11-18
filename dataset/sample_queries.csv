@@ -1,0 +1,16 @@
+﻿query_id,query,expected_thread_id,expected_email_ids,reference_answer
+Q001,What was the final decision on the CNC machine procurement?,THR-001,E005;E007,Vendor B selected for INR 17.9 lakh. Dean (Administration) approved on 8 September 2026; purchase order issued on 11 September. Delivery and installation remain pending.
+Q002,Who approved the CNC machine purchase and what is still pending?,THR-001,E005;E006;E007,Dean (Administration) approved it. Purchase order has been issued; delivery and installation remain pending.
+Q003,What documents are required for a bonafide certificate?,THR-002,E009;E010,Institute ID copy and current semester fee receipt.
+Q004,How many bonafide applications were completed and how many are on hold?,THR-002,E011;E012,38 certificates generated; four applications are on hold because fee receipts are missing.
+Q005,Which venues are approved for the annual technical fest on 16 November?,THR-003,E014;E016,Main Auditorium and East Sports Ground are approved for 16 November. Central Lawn is unavailable that day.
+Q006,What is the latest status of technical fest security arrangements?,THR-003,E017;E018,"Security staffing confirmed: six guards per shift at Main Auditorium, four at East Sports Ground, and one coordinating supervisor."
+Q007,What was the final cost to repair the UTM and when was it returned to service?,THR-004,E021;E022;E023;E024,"INR 28,000 inspection/calibration plus INR 6,500 connector replacement, total INR 34,500. Returned to service on 28 September 2026."
+Q008,When and where is the AI in Manufacturing seminar?,THR-005,E025;E028,"12 November 2026, 10:00-13:00, Seminar Hall 2. Hall reserved 09:00-14:00."
+Q009,What was the approved faculty travel reimbursement and payment status?,THR-006,E032;E033;E034,"INR 24,650 approved and transferred on 4 September 2026; claim closed."
+Q010,Which printer vendor was selected and what was the total order value?,THR-007,E037;E038;E039;E040,"OfficeTech selected for two printers at INR 29,500 each, total INR 59,000. Delivered and installed."
+Q011,Did the Manufacturing Processes examination date change?,THR-008,E042;E043;E044,No. It remains on 5 November 2026 at 14:00; only the venue changed to Lecture Hall 4.
+Q012,Does acceptance of the revised consumables plan authorize purchases?,THR-009,E047;E048,No. Accepted for budget planning only. Individual requisitions still require approval before ordering.
+Q013,What caused the Engineering Block network outage and what is its status?,THR-010,E049;E050;E052,A failed second-floor distribution switch caused the outage. It was replaced and connectivity tests passed; monitoring continues for 24 hours.
+Q014,Find messages related to Vendor B's technical compliance.,THR-001,E002;E003,Vendor B met all mandatory technical specifications and offered delivery within eight weeks.
+Q015,Which email confirms that the UTM can be used again?,THR-004,E024,"The 28 September maintenance email confirms the connector replacement, successful verification, and return to service."
