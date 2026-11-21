@@ -8,14 +8,15 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+/build/
 develop-eggs/
-dist/
+/dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
+!Frontend/src/lib/
 parts/
 sdist/
 var/
@@ -25,6 +26,10 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Node / Frontend
+node_modules/
+Frontend/dist/
 
 # Virtual environments
 .venv/
