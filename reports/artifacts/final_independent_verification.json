@@ -1,0 +1,233 @@
+{
+  "metadata": {
+    "report_title": "ANVAYA Non-RAG AI/ML Final Independent Verification & Baseline Comparison",
+    "timestamp": "2026-11-21T22:15:00+05:30",
+    "auditor": "Independent Senior AI/ML Code Auditor",
+    "repository_root": "C:\\Official-Email-Intelligence",
+    "active_branch": "anvaya-reliability-upgrade",
+    "upgrade_commit": "5f6f69907ba9c43b18479214d14c7901680e40f8",
+    "audit_head_commit": "9c744be6c141d0175b144bb9783f08cf22ca1029",
+    "frozen_baseline_tag": "anvaya-ai-ml-baseline-v1.0",
+    "frozen_baseline_commit": "a13786d1914562f96d40398b8325713316c14d86",
+    "pre_upgrade_commit": "793eb52",
+    "python_version": "Python 3.12.15",
+    "final_verdict": "CONDITIONAL PASS"
+  },
+  "comparative_metrics": {
+    "frozen_baseline_a13786d": {
+      "status": "IMPORT_FAILED",
+      "error": "ModuleNotFoundError: No module named 'sutra.models'",
+      "note": "Commit a13786d omitted sutra/models/ from git tracking at tag creation time. Native execution failed.",
+      "unit_tests_run": 0,
+      "unit_tests_passed": 0
+    },
+    "pre_upgrade_baseline_793eb52": {
+      "status": "COMPLETED",
+      "sample_benchmark_score": 100.0,
+      "usability_score": 10.0,
+      "usability_measurement_mode": "hardcoded_placeholder",
+      "thread_reconstruction_passed": true,
+      "retrieval_metrics": {
+        "recall_at_5": 0.9667,
+        "precision_at_5": 0.48,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.9742,
+        "thread_hit_at_1": 1.0
+      },
+      "citation_metrics": {
+        "precision": 1.0,
+        "recall": 0.9667,
+        "f1": 0.9831,
+        "fabricated_citations": 0,
+        "permissive_fallback_present": true
+      },
+      "case_accuracy": 1.0,
+      "heldout_evaluation": {
+        "total": 45,
+        "passed": 14,
+        "accuracy": 0.3111,
+        "category_accuracy": {
+          "paraphrase": 0.70,
+          "new_thread_query": 0.3333,
+          "cross_thread": 0.00,
+          "trap": 0.40,
+          "negative_abstain": 0.00
+        },
+        "must_have_fact_coverage": 0.5926,
+        "abstention_accuracy": 0.00
+      },
+      "synthetic_evaluation": {
+        "total": 15,
+        "passed": 12,
+        "accuracy": 0.8000
+      },
+      "anti_hardcode_violations": 11,
+      "real_llm_provider": "silent_mock_fallback",
+      "unit_tests_total": 101,
+      "unit_tests_passed": 101
+    },
+    "upgraded_implementation_HEAD": {
+      "status": "COMPLETED",
+      "sample_benchmark_score": 100.0,
+      "usability_score": 10.0,
+      "usability_measurement_mode": "dynamically_measured",
+      "thread_reconstruction_passed": true,
+      "retrieval_metrics": {
+        "recall_at_5": 0.9667,
+        "precision_at_5": 0.48,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.9742,
+        "thread_hit_at_1": 1.0
+      },
+      "citation_metrics": {
+        "precision": 1.0,
+        "recall": 0.9667,
+        "f1": 0.9831,
+        "fabricated_citations": 0,
+        "permissive_fallback_present": false
+      },
+      "case_accuracy": 1.0,
+      "heldout_evaluation": {
+        "total": 45,
+        "passed": 17,
+        "accuracy": 0.3778,
+        "category_accuracy": {
+          "paraphrase": 0.70,
+          "new_thread_query": 0.3333,
+          "cross_thread": 0.00,
+          "trap": 0.40,
+          "negative_abstain": 0.30
+        },
+        "must_have_fact_coverage": 0.5926,
+        "abstention_accuracy": 0.30
+      },
+      "synthetic_evaluation": {
+        "total": 15,
+        "passed": 13,
+        "accuracy": 0.8667
+      },
+      "anti_hardcode_violations": 0,
+      "real_llm_provider": "4_real_adapters_with_pydantic_retry_and_caching",
+      "unit_tests_total": 134,
+      "unit_tests_passed": 134
+    }
+  },
+  "usability_formula_audit": {
+    "formula": "lat_score (4.0 * max(0, 1 - (lat - 500)/1500)) + prov_score (3.0 * (1 - fab_ratio)) + stability_score (3.0 * (1 - crash_ratio))",
+    "scenarios": {
+      "nominal": {
+        "latency_ms": 12.4,
+        "fabricated_citations": 0,
+        "crashes": 0,
+        "expected_score": 10.0,
+        "actual_score": 10.0,
+        "status": "PASS"
+      },
+      "high_latency_1000ms": {
+        "latency_ms": 1000.0,
+        "fabricated_citations": 0,
+        "crashes": 0,
+        "expected_score": 8.67,
+        "actual_score": 8.67,
+        "status": "PASS"
+      },
+      "citation_fabrication_50pct": {
+        "latency_ms": 15.0,
+        "fabricated_ratio": 0.5,
+        "crashes": 0,
+        "expected_score": 8.5,
+        "actual_score": 8.5,
+        "status": "PASS"
+      },
+      "retrieval_crash": {
+        "latency_ms": 15.0,
+        "fabricated_citations": 0,
+        "crashes": 1,
+        "expected_score": 7.0,
+        "actual_score": 7.0,
+        "status": "PASS"
+      }
+    }
+  },
+  "real_llm_provider_verification": {
+    "status": "NOT VERIFIED",
+    "reason": "Missing live API credentials (GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY unset) and local Ollama daemon offline at localhost:11434.",
+    "adapter_implementations_verified": [
+      "GeminiLLMProvider",
+      "OpenAILLMProvider",
+      "AnthropicLLMProvider",
+      "OllamaLLMProvider",
+      "MockLLMProvider"
+    ],
+    "unit_tests_passed": "8/8 in tests/test_llm_provider.py",
+    "features_verified": [
+      "Strict credential check (raises ValueError when api_key is missing)",
+      "Strict provider type check (raises ValueError for unknown providers)",
+      "Pydantic schema retry loop (retries up to max_retries before error)",
+      "Disk response caching (.cache/llm_responses/)",
+      "Exponential backoff on network failure"
+    ]
+  },
+  "citation_adversarial_verification": {
+    "total_tests": 16,
+    "tests_passed": 16,
+    "pass_rate": 1.0,
+    "scenarios_covered": [
+      "1. Valid email ID and exact quotation (PASS)",
+      "2. Fabricated email ID (REJECT)",
+      "3. Valid email ID, fabricated quotation (REJECT)",
+      "4. Correct quotation from wrong email (REJECT)",
+      "5. Altered numerical amount (REJECT)",
+      "6. Altered date (REJECT)",
+      "7. Wrong vendor (REJECT)",
+      "8. Empty quotation (REJECT)",
+      "9. Attachment quotation (PASS if source exists)",
+      "10. Minor whitespace differences (PASS)",
+      "11. Minor punctuation differences (PASS)",
+      "12. Unsupported claim with valid quote (FLAGGED/REJECTED via EvidenceValidator)",
+      "13. Repeated quotation exact offsets (PASS)",
+      "14. Fabricated attachment reference (REJECT)"
+    ],
+    "currency_equivalence_verified": [
+      "INR 17.9 lakh == 1790000",
+      "INR 17,90,000 == 1790000",
+      "Rs. 17,90,000 == 1790000"
+    ]
+  },
+  "anti_hardcode_audit": {
+    "ast_check_passed": true,
+    "violations_found": 0,
+    "modules_audited": [
+      "sutra/ingestion/",
+      "sutra/retrieval/",
+      "sutra/intelligence/",
+      "sutra/models/"
+    ]
+  },
+  "metamorphic_verification": {
+    "total_tests": 5,
+    "passed": 5,
+    "pass_rate": 1.0,
+    "checks": [
+      "Corpus email shuffling order invariance",
+      "Missing metadata cascade resilience",
+      "Entity substitution consistency",
+      "Cross-thread perturbation stability",
+      "Subject line normalization invariance"
+    ]
+  },
+  "rag_interface_contracts": {
+    "status": "COMPATIBLE",
+    "contracts_verified": [
+      "HybridRetriever.retrieve_results -> List[RetrievalResult]",
+      "HybridRetriever.retrieve -> Tuple[List[Email], List[ThreadSummary]]",
+      "RetrievalDocument schema (doc_id, content, thread_id, level, dense_vector, metadata)",
+      "RetrievalResult schema (chunk_id, text, score, level, source_id, metadata)",
+      "ThreadSummary schema (thread_id, decisions, actions, lifecycle_state)",
+      "Decision dataclass (decision_id, text, maker, rationale, status, evidence_quote, email_id)",
+      "Action dataclass (action_id, description, assignee, assigner, deadline, status, evidence_quote, email_id)",
+      "CitationVerifier.filter_and_validate(thread_id, cited_ids, quotes_by_email) -> List[Citation]"
+    ],
+    "handoff_doc_verified": "docs/ANVAYA_AI_ML_HANDOFF.md"
+  }
+}
