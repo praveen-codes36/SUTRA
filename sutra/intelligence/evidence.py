@@ -243,20 +243,20 @@ class EvidenceValidator:
         # ---------------------------------------------------------------------
         # Defense 4: Conditionality Misrepresentation Check
         # ---------------------------------------------------------------------
-        claims_unconditional = any(u in exc_lower for u in ["unconditional", "unconditionally", "without condition", "full authorization"])
-        source_is_conditional = any(c in source_lower for c in ["budget planning only", "subject to", "conditional", "does not authorize", "prerequisite"])
+        claims_unconditional = any(u in exc_lower for u in ["unconditional", "unconditionally", "without condition", "full authorization", "is authorized", "direct purchase"])
+        source_is_conditional = any(c in source_lower for c in ["budget planning only", "subject to", "conditional", "does not authorize", "prerequisite", "still follow", "procurement rules"])
         if claims_unconditional and source_is_conditional:
             return (
                 False,
-                f"Conditionality mismatch: excerpt claims unconditional status for conditional statement in source '{source_id}'",
+                f"Conditionality mismatch: excerpt claims authorization or unconditional status when source '{source_id}' is conditional or requires separate approvals",
                 0.0,
             )
 
-        if "authorized procurement" in exc_lower or "procurement is authorized" in exc_lower:
-            if "does not authorize procurement" in source_lower or "budget planning only" in source_lower:
+        if any(p in exc_lower for p in ["authorized procurement", "procurement is authorized", "purchase is authorized", "authorized purchase", "authorizes purchases", "authorizes purchase", "direct purchase"]):
+            if "does not authorize procurement" in source_lower or "budget planning only" in source_lower or "does not authorize" in source_lower or "still follow" in source_lower:
                 return (
                     False,
-                    f"Conditionality mismatch: excerpt claims procurement authorization when source '{source_id}' explicitly denies it",
+                    f"Conditionality mismatch: excerpt claims purchase authorization when source '{source_id}' is conditional or requires separate approvals under procurement rules",
                     0.0,
                 )
 
