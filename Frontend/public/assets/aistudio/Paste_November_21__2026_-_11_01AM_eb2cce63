@@ -1,0 +1,547 @@
+PART 1 — MASTER PROMPT (paste first; attach sutra_demo_data.json)
+
+<<< COPY EVERYTHING BELOW THIS LINE UNTIL "END OF MASTER PROMPT" >>>
+
+0. ROLE AND NON-NEGOTIABLES
+
+You are a senior product team in one: Principal Product Designer, Enterprise UX Architect, Creative Director, Senior React + TypeScript Engineer, React Three Fiber developer, Motion Engineer, Accessibility Specialist and Frontend Performance Engineer.
+
+Build the complete frontend of SUTRA, an AI-powered institutional email intelligence platform, as a working, responsive React + TypeScript application. It must look and behave like a mature enterprise product that universities, government departments and research institutions could adopt. It is not a generic SaaS dashboard, not a Gmail clone, not a ChatGPT clone and not a design mock-up.
+
+Non-negotiable rules (apply to every phase):
+
+Never call an LLM or any AI SDK from the browser. Never put API keys in source. Do not use the Gemini API, @google/genai, or process.env.API_KEY. All intelligence comes from the team's FastAPI backend (live mode) or from the attached labelled demo annotations (demo mode).
+Never fabricate data, statistics, users, approvals, owners, deadlines or completion states. If a value is unknown, show it as unknown (see §3.7).
+Demo data and live data must never mix. A failed live call must show an error state, never a fake success.
+Output complete, runnable code. No TODO, no pseudo-code, no "rest unchanged", no ... inside code. Keep each file under ~350 lines by splitting components, so nothing is truncated.
+Do not add capabilities that are not in this brief. SUTRA does not send, reply to, forward or edit email; it does not approve, reject or purchase anything; it does not sync Gmail/Outlook in the MVP.
+Do not claim certifications or regulatory compliance. Do not invent customers, partners, contact details or institutional statistics.
+Never show the word "ANVAYA". The product is SUTRA.
+1. PRODUCT IDENTITY
+Name: SUTRA. Full name: SUTRA — AI-Powered Institutional Email Intelligence Platform. Tagline: Every Connection. One Intelligence.
+Meaning: from the Sanskrit सूत्र (sūtra): a thread, a connecting principle, a coherent link. Use "सूत्र" only in the logo lockup and one landing-page brand moment, set in a font that supports Devanagari (e.g., Noto Sans Devanagari / Tiro Devanagari Hindi).
+Philosophy: Institutional knowledge is scattered across emails, replies, forwards, attachments and decisions. SUTRA connects these into searchable, contextual, actionable, evidence-backed knowledge.
+Mission: Help organisations preserve, understand and act on the knowledge they create through communication.
+Vision: A trusted intelligence layer for communication history: discover decisions, track responsibilities, decide with evidence.
+SUTRA is: an institutional email-intelligence platform; an evidence-backed retrieval system; a conversation-intelligence workspace; a decision-and-action discovery platform.
+SUTRA is not: an email client or delivery tool; a Gmail/Outlook replacement; a generic chatbot; an autonomous approval or purchasing system.
+Tone of voice: calm, precise, accountable, institutional. No hype, no emoji, no exclamation marks.
+Logo (implement as an inline SVG component Logo.tsx, variants onLight and onDark)
+
+A single continuous thread (smooth cubic curve) passing through three nodes: two small end nodes and a larger central node (the intelligence point).
+
+svg
+<!-- on light surfaces -->
+<svg viewBox="0 0 48 48" fill="none">
+  <path d="M8 38 C8 27 20 31 24 24 C28 17 39 21 40 10" stroke="#102D2A" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="8" cy="38" r="3" fill="#102D2A"/><circle cx="40" cy="10" r="3" fill="#102D2A"/>
+  <circle cx="24" cy="24" r="4.6" fill="#D5B77B" stroke="#102D2A" stroke-width="1.6"/>
+</svg>
+<!-- on dark (forest) surfaces: thread #D5B77B, end nodes #F5F2EA, central node #D5B77B with #F5F2EA outline -->
+
+Lockup: mark + wordmark "SUTRA" (Manrope 700, letter-spacing ≈ 0.14em) + optionally "सूत्र" below in the Devanagari font. Provide a favicon version (mark only).
+
+2. GROUND TRUTH (do not contradict)
+2.1 The five mandatory product capabilities (from the problem statement)
+Email ingestion and organisation (conversations + topics).
+Conversation summarisation.
+Decision and action extraction.
+Natural-language search with RAG.
+Source attribution and grounding.
+2.2 Official evaluation weights (display exactly if an evaluation view is built)
+Criterion	Weight
+RAG response accuracy & source grounding	25%
+Information retrieval accuracy	20%
+Email thread reconstruction & topic organisation	15%
+Conversation summarisation	15%
+Decision & action-item extraction	15%
+Usability & practical applicability	10%
+2.3 The supplied synthetic benchmark (attached as sutra_demo_data.json)
+
+52 fictional emails · 10 threads (THR-001…THR-010) · 11 text/CSV attachments · 15 sample queries · 9 evaluation cases. All people, institutions (domain northbridge.edu), vendors and amounts are fictional. CSV fields: email_id, thread_id, sender, recipients, subject, timestamp, body, in_reply_to, attachments. recipients and attachments are ;-separated; in_reply_to is empty for thread roots; timestamps are UTC (Z); email bodies sometimes state times in IST; senders are addresses only (no display names), so role labels such as "Dean (Administration)" are derived from the address and must be flagged as inferred (§3.5). MVP limits: CSV ingestion required; no Gmail/Outlook sync; no sending or modifying email.
+
+3. DOMAIN SEMANTICS THE UI MUST HONOUR
+
+These rules exist because the benchmark deliberately contains look-alike cases. Getting them wrong makes the product misleading.
+
+3.1 Decisions are typed — never collapse them
+
+DecisionType: APPROVAL, CONDITIONAL_APPROVAL, LIMITED_SCOPE_ACCEPTANCE, REJECTION, RECOMMENDATION, SELECTION, CONFIRMATION.
+
+A RECOMMENDATION is not an approval (Head of Department recommends → Dean approves). Show a distinct label and the person's capacity ("Recommended by", "Approved by", "Confirmed by").
+A CONDITIONAL_APPROVAL shows its conditions, each with a state: FULFILLED (with the evidence email), PENDING, or NOT_EVIDENCED.
+A LIMITED_SCOPE_ACCEPTANCE shows "Authorizes" and "Does not authorize" lists side by side. "Accepted for budget planning only" must never read as purchase authorisation.
+An approval ceiling ("up to INR 28,000") is a ceiling, not an actual spend.
+A relayed statement (e.g., Purchase reporting that Accounts confirmed a budget) shows attribution_note.
+3.2 Approval ≠ completion
+
+Show decision state and execution state separately. An approved purchase with "delivery and installation pending" is Awaiting action, not Completed.
+
+3.3 Time
+Store/transport UTC. Display in the organisation timezone (default Asia/Kolkata, labelled "IST") with a one-click "show UTC" toggle and the exact UTC value in a tooltip.
+Event date ≠ message date: when text says "transferred on 4 September" in a message sent on 5 September, show both ("Event 4 Sep · reported 5 Sep").
+In-text times keep their label (e.g., "12:30 IST"); never relabel them as UTC.
+A date-only deadline means end of day in the organisation timezone.
+deadline_state: NONE, UPCOMING, OVERDUE, MET, MISSED, UNDETERMINED. UNDETERMINED (e.g., delivered but no delivery date stated) is shown as such — never as late or on time.
+Relative deadlines ("within eight weeks of order confirmation") are shown as text; never convert them to an invented calendar date.
+All "latest / overdue / upcoming" logic uses an as_of time. In demo mode as_of = 2026-10-30T11:00:00Z (end of the corpus); in live mode use the server's as_of if supplied, else the current time. Always show the as_of where status is shown.
+3.4 Money
+Format with Indian digit grouping (en-IN): INR 17,90,000. Always keep the original text ("INR 17.9 lakh") available beside the normalised value (1,790,000), via a global "Amounts: original / normalised / both" preference.
+Label each amount's role (Quoted, Estimate, Ceiling, Approved, Paid, Total, Cap, Planned, Eligible) and basis (per unit / total).
+Derived calculations (e.g., 28,000 + 6,500 = 34,500) are shown as a calculation block: operands, each linked to its source citation, then the result, labelled "Derived calculation". Never show an unexplained sum.
+3.5 People and roles
+
+Show role (e.g., "Dean (Administration)") with the address on hover. If role_source is INFERRED_FROM_ADDRESS, show a small "role inferred from address" marker with an explanatory tooltip. Never invent a person's name.
+
+3.6 Provenance
+
+Every claim, decision and action carries provenance: EXPLICIT (stated in an email), DERIVED_CALC (computed from cited operands), INFERRED (model judgement). Use consistent visual treatment everywhere: EXPLICIT = solid, DERIVED = hatched/“calc” marker, INFERRED = dashed outline + "Inferred" label. An inferred item must never be the sole basis for an approval, amount or owner.
+
+3.7 Unknown is a valid value (display rules)
+Situation	Show
+No owner stated	"Owner not stated"
+No deadline stated	"No deadline stated"
+Thread ended complete, no pending item	"No pending action stated in the emails" (distinct from "unknown")
+Completion not evidenced	"No completion evidence in the available emails"
+Backend did not report a status/field	"Not reported"
+Nothing found	"I could not find sufficient supporting information in the available email records."
+3.8 Answer statuses
+
+ANSWERED, PARTIAL, INSUFFICIENT_EVIDENCE, CONFLICTING_EVIDENCE, CLARIFICATION_NEEDED, DEGRADED (retrieval degraded, e.g., "semantic search unavailable; keyword results shown"), FAILED (processing error). Each has a distinct icon + text + colour banner (never colour alone). Do not show any numeric "confidence score". If the backend supplies confidence.level (HIGH/MEDIUM/LOW) with reasons, show it labelled "Evidence confidence (defined rubric)" with the reasons; otherwise show nothing.
+
+3.9 Thread status classes
+
+OPEN, AWAITING_ACTION, PARTIALLY_COMPLETE, MONITORING, COMPLETED, UNKNOWN (each with icon + text). MONITORING means completion depends on an observation period.
+
+3.10 Access model (frontend responsibilities)
+
+Visibility is enforced only by the backend. The UI must: never reveal titles, counts or hints for inaccessible content; treat 404 as "not available" (neutral, same wording as "not found"); never claim permissions it cannot enforce. In demo mode, personas apply a client-side illustration of "thread participant" visibility, clearly labelled "Demo persona — visibility illustrated in the browser, not enforced".
+
+4. DESIGN SYSTEM
+4.1 Colour tokens (exact foundations + verified accessible companions)
+Token	Hex	Use	Verified WCAG contrast
+--forest	
+#102D2A	Brand, sidebar, primary buttons, headings	on ivory 13.12:1; ivory on it 13.12:1
+--gold	
+#D5B77B	Accents and non-text only (rules, icons on dark, active-nav bar, focus ring on dark, 3D thread)	on forest 7.61:1; on ivory only 1.72:1 → never use as text or as the only boundary on light
+--ivory	
+#F5F2EA	App background	—
+--charcoal	
+#202B35	Primary text	on ivory 12.87:1; on white 14.40:1
+--white	
+#FFFFFF	Surfaces	—
+--muted	
+#7B8581	Non-text only: input/control borders, dividers on controls	on white 3.81:1, on ivory 3.40:1 (meets 3:1 for UI components; fails 4.5:1 as text)
+--border	
+#E5E2D9	Decorative hairlines only (1.16:1 on ivory)	decorative
+--green-surface	
+#E8EFEA	Tinted panels, selected rows	forest on it 12.56:1
+--text-muted (companion)	
+#5A6560	Secondary text	on ivory 5.42:1, on white 6.06:1, on green-surface 5.18:1
+--gold-text (companion)	
+#7A5C1E	Gold-toned text/links on light	on ivory 5.56:1, on white 6.22:1, on green-surface 5.32:1
+--forest-2 (companion)	
+#1B4A45	Hover/selected on dark surfaces	ivory on it 8.89:1; gold on it 5.16:1
+--on-dark-muted (companion)	
+#B8C4BE	Secondary text on forest	on forest 8.16:1
+Success	text 
+#1E6B45 on 
+#E3F1E8	Status	5.55:1 (on ivory 5.79:1)
+Warning	text 
+#8A5A00 on 
+#FBF0D9	Status	5.24:1 (on ivory 5.30:1)
+Error	text 
+#A3342B on 
+#F9E4E1	Status	5.58:1 (on ivory 6.09:1)
+Info	text 
+#1F5A8A on 
+#E1ECF5	Status	6.07:1 (on ivory 6.50:1)
+
+All ratios above were computed with the WCAG relative-luminance formula. Do not use any pairing that is not listed or that you have not verified to be ≥ 4.5:1 for text and ≥ 3:1 for UI components.
+Focus ring: 2 px --forest outline + 2 px ivory offset on light surfaces; 2 px --gold outline on dark surfaces. Always visible, never removed. Define tokens as CSS variables and extend the Tailwind theme with them. Use forest for navigation, primary actions and identity; ivory as the foundation; gold sparingly.
+Avoid: gradients (except one extremely subtle forest tonal field on the landing hero), neon, purple "AI" styling, glassmorphism, oversized rounded cards, random decorative circles, stock AI illustrations, cyberpunk styling.
+
+4.2 Typography
+
+Headings Manrope (or Plus Jakarta Sans); body and data Inter with tabular numerals for amounts, dates and IDs; one restrained serif (e.g., Newsreader/Cormorant Garamond) only for the landing-page hero headline. Scale (px): 12 / 13 / 14 / 16 / 20 / 24 / 32 / 48 (48 for the landing hero only). Application pages use ≤ 24 px for page titles. Load fonts with display=swap. Email bodies and source excerpts use Inter 14–15 px, line height 1.55, max measure ≈ 72 characters.
+
+4.3 Shape, spacing, depth
+
+4/8-pt spacing scale. Radius: 4 px for controls/tables, 8 px for panels/drawers, 0 for full-width structural bands; do not make every container a rounded card. Prefer ruled, editorial structure (hairlines, column grids, definition lists) to stacked floating cards. Shadows only for overlays (drawers, popovers, dialogs). Never repeat the same three-card layout twice on the landing page.
+
+4.4 Component library (components/ui, all keyboard-accessible, documented in code with props)
+
+Button (primary/secondary/ghost/danger-quiet, loading), IconButton, Input, SearchField, Textarea, Select/Dropdown (listbox pattern), MultiSelect filter, DateRange, Tabs, SegmentedControl, Badge/StatusPill (icon + text), ProvenanceTag, RolePill, Table (sortable, sticky header, caption, row selection), Pagination, Breadcrumbs, Tooltip, Popover, Drawer (focus-trapped, Esc closes), Dialog, Toast (aria-live), Skeleton, EmptyState, ErrorState (with request_id and Retry), ServiceUnavailable, Banner (info/warn/error/demo), Stat (KPI with source label), DefinitionList, Timeline, CodeQuote (highlighted excerpt), CommandPalette, Switch, Checkbox, Radio, FileDropzone, ProgressBar (determinate only when real progress exists), Stepper.
+
+5. MOTION AND 3D
+5.1 General
+
+Framer Motion for route transitions (≤ 200 ms fade/translate-4px), drawers, list reveals, micro-interactions; SVG/CSS for light indicators; React Three Fiber + Three.js only in the three meaningful scenes below, lazy-loaded (React.lazy + Suspense), mounted only when visible (IntersectionObserver), paused when off-screen or the tab is hidden. Respect prefers-reduced-motion (no parallax, no looping; show a settled static frame). A single useCapability() hook decides 3D vs fallback: fall back to the SVG/CSS alternative when WebGL is unavailable, prefers-reduced-motion is set, viewport width < 768 px, navigator.hardwareConcurrency ≤ 4, navigator.deviceMemory ≤ 4 (when exposed), or the user disables "3D visuals" in Settings. Cap dpr at 1.75. Use instancing; ≤ ~60 animated objects per scene. Provide a text alternative (aria-label/visually-hidden description); canvases are aria-hidden and non-focusable. If a 3D dependency cannot be resolved in this environment, ship the SVG/CSS fallback and continue — never leave the app broken.
+
+5.2 Scene A — Landing hero ("the thread connects")
+
+Colours: forest ground, ivory message plates, one gold thread, one gold central node. Content: 52 small rounded message plates grouped into 10 clusters of sizes 7, 5, 6, 6, 4, 6, 6, 4, 4, 4 (the real benchmark thread sizes), and one continuous thin gold thread (a Catmull-Rom curve through the cluster centres, rendered as a thin tube) with a gold central node (wireframe ring) at the centre. Timeline (seconds, then loop gently): 0–2 plates appear scattered with subtle drift; 2–5 the thread draws itself through the cluster centres; 5–8 plates ease into their clusters while thin connection lines fade in between consecutive messages in each cluster; 8+ the structure settles, with a very slow orbit (±8°) and a faint 'breathing'; every ~24 s the plates loosen slightly and re-settle (smooth, never a hard reset). Desktop pointer gives ≤ 3° parallax (disabled on touch/reduced motion). Fallback: an SVG composition of the same structure with CSS stroke-dashoffset thread-draw animation.
+
+5.3 Scene B — Workflow ("from messages to intelligence")
+
+A sticky, scroll-driven scene with four stages revealed by scroll progress and by four visible step buttons (keyboard and touch accessible): 1 Email messages (scattered plates) → 2 Connected conversations (plates gather into thread clusters, connecting lines) → 3 Extracted decisions (selected nodes within clusters turn gold) → 4 Institutional intelligence (clusters link to the gold central node). Synchronise a caption panel for each stage. The landing page text may mention "illustrated with the supplied synthetic benchmark (52 emails, 10 conversations)" but must not show any other statistic. Reduced-motion/low-power fallback: a static four-panel SVG diagram.
+
+5.4 Scene C — Intelligence constellation (Overview page; real data, informative)
+
+SVG-first (2.5D with layered parallax), optional lazy 3D toggle. Nodes = emails; clusters = threads (labelled with thread key and title); edges = in_reply_to relationships; node colour by thread status; gold ring = the email carries a decision (derived from the decisions' evidence); hover/focus tooltip (email ID, sender role, local time); click opens the Evidence drawer; legend always visible; keyboard operable; accessible table alternative ("View as list"). It must be computed from the data actually loaded and must never be decorative.
+
+5.5 Thread relationship visualisation (Thread Intelligence page; SVG)
+
+A clean vertical or horizontal message graph: nodes at chronological positions (ordinal spacing; annotate large gaps like "68 days later"), directed reply arcs (child → parent), timestamps, sender role chips, badges for decision (gold), action, attachment. Nodes are buttons: click scrolls to and highlights the message in the timeline; the selected node and timeline message stay in sync.
+
+6. ARCHITECTURE
+6.1 Stack
+
+React 18 · TypeScript (strict) · Vite · Tailwind CSS · Framer Motion · Lucide React · React Router · TanStack Query · zod (response validation) · React Three Fiber/Three (lazy, optional) · PapaParse (CSV pre-check). No other heavy libraries. If the AI Studio scaffold differs from this (file layout or bundler), keep the scaffold's constraints and adapt; do not fight the environment.
+
+6.2 Configuration (all via Vite env, with safe defaults)
+VITE_DATA_MODE=demo            # demo | live   (default demo for AI Studio preview)
+VITE_ALLOW_MODE_SWITCH=true    # show the demo/live switch in Settings
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_ROUTER_MODE=hash          # hash | browser  (hash is safest inside the AI Studio preview iframe)
+VITE_ORG_TIMEZONE=Asia/Kolkata
+VITE_REQUEST_TIMEOUT_MS=20000
+VITE_ANSWER_TIMEOUT_MS=45000
+VITE_UPLOAD_TIMEOUT_MS=120000
+VITE_MAX_UPLOAD_MB=100
+VITE_CSRF_HEADER=X-CSRF-Token
+
+Endpoint map in src/config/endpoints.ts. Defaults follow the team PRD; every entry is overridable by VITE_ENDPOINT_<NAME> and no component may contain a hard-coded path.
+
+Key	Method & default path	Alternate from the brief
+authLogin / authLogout / authMe	POST /auth/login · POST /auth/logout · GET /auth/me	—
+ingestionCreate	POST /ingestion/jobs (multipart: emails_csv, attachments_zip or attachments[], options)	/ingestion
+ingestionList / ingestionGet / ingestionRecords	GET /ingestion/jobs · /ingestion/jobs/{job_id} · /ingestion/jobs/{job_id}/records?status=	—
+emailsList / emailsGet	GET /emails · /emails/{email_id}	—
+threadsList / threadsGet	GET /threads · /threads/{thread_key}	—
+threadSummary / threadSummaryRefresh	GET /threads/{thread_key}/summary · POST /threads/{thread_key}/summary/refresh	POST /threads/{id}/summarize
+threadReconstruction	GET /threads/{thread_key}/reconstruction	—
+search	POST /search (retrieval only)	—
+answers	POST /answers ({question, thread_scope?, session_id?, stream?})	POST /chat
+answerGet / answerFeedback	GET /answers/{answer_id} · POST /answers/{answer_id}/feedback	—
+citationGet	GET /citations/{citation_id}	—
+decisionsList / decisionGet	GET /decisions · /decisions/{id}	—
+actionsList / actionPatch	GET /action-items · PATCH /action-items/{id} (review override; show only if the user's role allows)	GET /actions
+attachmentsList / attachmentGet / attachmentText / attachmentDownloadUrl	GET /attachments · /attachments/{id} · /attachments/{id}/text · /attachments/{id}/download-url	—
+topics	GET /topics	—
+analyticsOverview	GET /analytics/overview	—
+evaluationRuns / evaluationRun	POST+GET /evaluation/runs · GET /evaluation/runs/{run_id}	—
+health	GET /health/ready	/health
+6.3 API layer rules (src/services, src/adapters)
+One apiClient (fetch wrapper): base URL, credentials: 'include' for cookie sessions, JSON/multipart handling, timeouts via AbortController, retries only for idempotent GETs (max 2, jittered), Idempotency-Key (crypto.randomUUID()) on POST /ingestion/jobs and POST /answers, CSRF header on state-changing requests (read the token the backend provides), upload progress via XMLHttpRequest.
+Envelope: success {data, meta{request_id,next_cursor,total_estimate,scope}}; error {error{code,message,details,request_id}}. Map every error code to a specific, human message and component state (AUTH_REQUIRED → sign-in; FORBIDDEN → "not permitted for your role"; NOT_FOUND → neutral "not available"; RATE_LIMITED → show retry-after; DEPENDENCY_UNAVAILABLE/UPSTREAM_TIMEOUT → service-unavailable state with retry; VALIDATION_ERROR → field messages). Always surface request_id in error states.
+Validation: zod schemas mirroring the interfaces in §6.5, lenient (unknown fields allowed; missing optional fields safe). On parse failure show "The service returned an unexpected response" with a Retry and log details to the console; never crash and never render partial garbage.
+Pagination: cursor-based (limit, cursor); limit ≤ 100; show page controls and total estimate when provided.
+Normalisers at the service boundary: convert the brief's legacy answer shape (answer, claims[].source_email_ids, sources[], limitations[]) into the internal Answer; accept conditions as strings or objects; accept missing provenance (treat as EXPLICIT only if the backend says so, otherwise show "provenance not reported").
+Two adapters, one interface (DataSource): liveAdapter (HTTP) and demoAdapter (reads src/data/demoData.ts). The mode is chosen by VITE_DATA_MODE and, if allowed, the Settings switch (persisted in localStorage). There is no automatic fallback from live to demo. In live mode with the backend offline show the ServiceUnavailable state (with the configured base URL, GET health result and a Retry).
+Demo mode banner (persistent, top of every workspace page, not dismissible): "Demo dataset — the supplied synthetic benchmark with pre-authored annotations. Not live backend output." Every KPI and chart derived from demo data carries a small "Demo annotation" source label.
+6.4 Demo adapter behaviour
+Load sutra_demo_data.json (attached) into src/data/demoData.ts as a typed constant (DemoDataset, §6.5) — convert the JSON verbatim; do not rewrite, shorten, translate or "improve" any email text, quote or annotation.
+emails/threads/decisions/actions/summaries/attachments: support the same filters, sorting and cursor pagination as the live contract, computed in memory.
+Personas (personas[]): a persona picker on the sign-in screen. If a persona has an address, filter threads/emails/ledger to threads where that address is sender or recipient of any message ("thread participant" policy); personas without an address (inst.admin, sysadmin, compliance) see all threads in demo only for illustration. Label: "Demo persona — visibility illustrated in the browser, not enforced."
+search in demo mode is a plain client-side keyword filter over emails, attachments, threads, decisions and actions. Label it "Demo keyword search (not AI retrieval)".
+answers in demo mode: match the submitted question (case/whitespace/punctuation-insensitive) and optional thread_scope against answers[].matches[]; return that pre-authored Answer. If nothing matches, return a truthful message: "Demo mode answers the suggested questions only. Connect the backend (live mode) to ask free-form questions." — never invent an answer. Clarification answers carry options[]; clicking an option re-submits {question, thread_scope}. Every demo answer displays a "Pre-authored demo answer — not generated by a model" tag.
+ingestion: the preloaded job job-demo-benchmark is shown in history. A new upload in demo mode performs only the in-browser pre-check (§7 Page 8) and states: "Processing requires the backend. This is a browser-side pre-check." No pipeline step is shown as complete.
+Time-of-day greeting uses the browser clock; the user name is the persona's display_name. Never invent a real person's name.
+6.5 TypeScript contract (src/types/api.ts) — use verbatim; it type-checks under strict
+ts
+// ============ SUTRA frontend contract (mirrors PRD v1.0 §12 wire format; snake_case) ============
+export type ISODateTime = string; // UTC ISO-8601 ("...Z") unless a field name ends with _local
+
+// ---- Envelope & errors ----
+export interface ApiMeta { request_id?: string; next_cursor?: string | null; total_estimate?: number | null; scope?: string }
+export interface ApiEnvelope<T> { data: T; meta?: ApiMeta }
+export type ApiErrorCode =
+  | 'AUTH_REQUIRED' | 'FORBIDDEN' | 'NOT_FOUND' | 'VALIDATION_ERROR' | 'CONFLICT' | 'PAYLOAD_TOO_LARGE'
+  | 'UNSUPPORTED_MEDIA_TYPE' | 'RATE_LIMITED' | 'DEPENDENCY_UNAVAILABLE' | 'UPSTREAM_TIMEOUT' | 'INTERNAL_ERROR';
+export interface ApiErrorBody { error: { code: ApiErrorCode | (string & {}); message: string; details?: unknown[]; request_id?: string } }
+
+// ---- People ----
+export type RoleSource = 'DIRECTORY' | 'INFERRED_FROM_ADDRESS';
+export interface Person { address: string; role: string | null; role_source: RoleSource | null; is_shared_mailbox?: boolean }
+
+// ---- Attachments ----
+export type AttachmentStatus =
+  | 'READY' | 'MISSING_FILE' | 'UNSUPPORTED' | 'OVERSIZE' | 'ENCRYPTED' | 'CORRUPT' | 'MALWARE_FLAGGED' | 'EXTRACTION_FAILED' | 'PENDING';
+export interface AttachmentSummary {
+  attachment_id: string; filename: string; status: AttachmentStatus;
+  size_bytes?: number | null; detected_mime?: string | null; status_detail?: string | null;
+}
+export interface AttachmentDetail extends AttachmentSummary {
+  email_id: string; thread_key: string; text_content: string | null;
+  table: { columns: string[]; rows: string[][] } | null; ocr_confidence?: number | null;
+}
+
+// ---- Emails ----
+export interface Mention {
+  kind: 'AMOUNT' | 'DATE' | 'TIME' | 'IDENTIFIER' | 'QUANTITY';
+  original_text: string; normalized_value: string | number; unit: string | null; timezone_label: string | null;
+}
+export interface EmailMessage {
+  email_id: string; thread_key: string; subject: string | null;
+  timestamp: ISODateTime; timestamp_local?: string;
+  sender: Person; recipients: Person[];
+  body_raw: string; body_preview?: string;
+  in_reply_to: string | null; attachments: AttachmentSummary[];
+  quality_flags: string[]; mentions?: Mention[]; category?: string | null;
+}
+
+// ---- Threads ----
+export type ThreadStatusClass = 'OPEN' | 'AWAITING_ACTION' | 'PARTIALLY_COMPLETE' | 'MONITORING' | 'COMPLETED' | 'UNKNOWN';
+export type ThreadIntegrity = 'COMPLETE' | 'PARTIAL' | 'CONFLICT';
+export type ReviewState = 'NONE' | 'PENDING' | 'CONFIRMED' | 'CORRECTED' | 'REJECTED';
+export interface ThreadListItem {
+  thread_key: string; title: string | null; category: string | null; status_class: ThreadStatusClass;
+  integrity: ThreadIntegrity; first_message_at: ISODateTime; last_message_at: ISODateTime;
+  message_count: number; participants: Person[]; attachment_count?: number;
+}
+export interface ThreadEdge {
+  child_email_id: string; parent_email_id: string | null;
+  edge_type: 'REPLY_TO' | 'FORWARD_OF' | 'SAME_TOPIC_CANDIDATE'; anomaly?: string | null;
+}
+export interface ThreadDetail extends ThreadListItem {
+  message_ids: string[]; edges: ThreadEdge[];
+  reconstruction: { method: string; confidence: number; review_state: ReviewState };
+}
+
+// ---- Summaries ----
+export type VerificationStatus = 'VERIFIED' | 'DRAFT_UNVERIFIED' | 'FAILED';
+export interface CitedStatement { text: string; email_ids: string[] }
+export interface TimelineEvent { date: ISODateTime; event: string; email_ids: string[] }
+export interface LatestStatus { class: ThreadStatusClass; text: string; as_of_email_id: string; as_of_time: ISODateTime }
+export interface ThreadSummaryContent {
+  purpose: string; initial_context: string; discussion_points: CitedStatement[]; timeline: TimelineEvent[];
+  latest_status: LatestStatus; pending_action_ids: string[]; pending_note: string | null;
+  deadlines: CitedStatement[]; unresolved: CitedStatement[];
+}
+export interface ThreadSummary {
+  thread_key: string; summary_version: number; verification_status: VerificationStatus; stale: boolean;
+  generated_by?: string; content: ThreadSummaryContent;
+}
+
+// ---- Evidence, decisions, actions ----
+export type Provenance = 'EXPLICIT' | 'DERIVED_CALC' | 'INFERRED';
+export interface Evidence {
+  email_id: string; quote: string; role?: 'PRIMARY' | 'CORROBORATING' | 'CONTEXT';
+  attachment_id?: string | null; attachment_filename?: string | null;
+}
+export type AmountRole = 'QUOTED' | 'ESTIMATE' | 'CEILING' | 'APPROVED' | 'PAID' | 'TOTAL' | 'CAP' | 'PLANNED' | 'ELIGIBLE' | 'OTHER';
+export interface Amount { role: AmountRole; value_inr: number | null; original_text: string; basis: 'TOTAL' | 'PER_UNIT' | null; derived?: boolean }
+export type DecisionType =
+  | 'APPROVAL' | 'CONDITIONAL_APPROVAL' | 'LIMITED_SCOPE_ACCEPTANCE' | 'REJECTION' | 'RECOMMENDATION' | 'SELECTION' | 'CONFIRMATION';
+export type DecisionStatus = 'ACTIVE' | 'CONDITION_PENDING' | 'FULFILLED' | 'SUPERSEDED' | 'WITHDRAWN';
+export type ConditionState = 'FULFILLED' | 'PENDING' | 'NOT_EVIDENCED' | null;
+export interface ConditionItem { text: string; state?: ConditionState; evidence_email_ids?: string[] }
+export interface DecisionScope { authorizes: string[]; excludes: string[]; conditions: Array<ConditionItem | string> }
+export interface Decision {
+  decision_id: string; thread_key: string; type: DecisionType; subject: string; outcome: string;
+  approver: Person | null; recommended_by: Person | null; confirmed_by: Person | null;
+  attribution_note?: string | null; authority_basis?: string | null;
+  decided_at: ISODateTime; event_date?: string | null; amounts: Amount[]; scope: DecisionScope;
+  status: DecisionStatus; supersedes_id?: string | null; provenance: Provenance;
+  confidence?: number | null; review_state: ReviewState; evidence: Evidence[];
+}
+export type ActionKind = 'REQUEST' | 'INSTRUCTION' | 'COMMITMENT' | 'CONDITIONAL_NEXT_STEP';
+export type ActionStatus = 'OPEN' | 'DONE' | 'CONDITIONAL' | 'CANCELLED' | 'SUPERSEDED' | 'IN_PROGRESS' | 'BLOCKED';
+export type DeadlineState = 'NONE' | 'UPCOMING' | 'OVERDUE' | 'MET' | 'MISSED' | 'UNDETERMINED';
+export interface Deadline { date: string | null; text: string | null; precision: 'DATE' | 'DATETIME' | 'RELATIVE' | null }
+export interface ActionItem {
+  action_id: string; thread_key: string; action_kind: ActionKind; task: string;
+  owner: Person | null; owner_basis: 'EXPLICIT' | 'INFERRED' | null; requested_by: Person | null;
+  deadline: Deadline; status: ActionStatus; deadline_state: DeadlineState; completed_at?: ISODateTime | null;
+  provenance: Provenance; confidence?: number | null; review_state: ReviewState; status_basis: string;
+  evidence: Evidence[]; completion_evidence: Evidence[];
+}
+
+// ---- Answers (RAG) ----
+export type AnswerStatus =
+  | 'ANSWERED' | 'PARTIAL' | 'INSUFFICIENT_EVIDENCE' | 'CONFLICTING_EVIDENCE'
+  | 'CLARIFICATION_NEEDED' | 'DEGRADED' | 'FAILED';
+export interface Citation {
+  citation_id: string; email_id: string; thread_id: string; timestamp: ISODateTime;
+  sender?: Person | null; subject?: string | null; quote: string;
+  attachment_id?: string | null; attachment_filename?: string | null;
+  evidence_role?: 'PRIMARY' | 'CORROBORATING' | 'CONTEXT';
+  verification?: { email_exists: boolean; access_ok: boolean; quote_found: boolean; values_match?: boolean };
+}
+export interface CalculationOperand { label: string; value_inr: number; citation_ids: string[] }
+export interface Calculation { operation: 'SUM' | 'DIFFERENCE' | 'PRODUCT'; operands: CalculationOperand[]; result_inr: number }
+export interface AnswerBlock { claim_id: string; claim_type: Provenance; text: string; citation_ids: string[]; calculation?: Calculation }
+export interface ClarificationOption { label: string; question: string; thread_scope: string | null }
+export interface Answer {
+  answer_id: string; status: AnswerStatus; question?: string; intents?: string[]; as_of?: ISODateTime;
+  answer_blocks: AnswerBlock[];
+  structured?: { decision_ids?: string[]; action_ids?: string[]; latest_status?: { class: ThreadStatusClass; text: string; as_of_email_id: string } };
+  caveats: string[]; citations: Citation[];
+  confidence?: { level: 'HIGH' | 'MEDIUM' | 'LOW'; reasons: string[] } | null;
+  validation?: { passed: boolean; repairs: number; removed_claims: number };
+  search_scope?: { threads_searched: number; date_range: [string, string] } | null;
+  suggestions?: string[]; options?: ClarificationOption[]; thread_scope?: string | null;
+  provenance?: 'DEMO_PREAUTHORED' | 'LIVE';
+}
+export interface ChatRequest { question: string; thread_scope?: string | null; session_id?: string | null; filters?: Record<string, unknown>; stream?: boolean }
+// Proposed legacy contract from the product brief; normalise into Answer at the service boundary.
+export interface LegacyChatAnswer {
+  answer: string; status: 'answered' | 'insufficient_evidence' | 'conflicting_evidence' | 'clarification_needed' | 'error';
+  claims: Array<{ text: string; source_email_ids: string[] }>;
+  sources: Array<{ email_id: string; thread_id: string; subject: string; timestamp: ISODateTime }>;
+  limitations: string[];
+}
+
+// ---- Ingestion ----
+export type IngestionStageName =
+  | 'file_received' | 'schema_validation' | 'records_parsed' | 'threads_reconstructed' | 'attachments_registered' | 'index_prepared' | 'workspace_ready';
+export interface IngestionStage { name: IngestionStageName; status: 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED' | 'SKIPPED' }
+export interface IngestionJob {
+  job_id: string; status: 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'COMPLETED_WITH_ERRORS' | 'FAILED' | 'CANCELLED';
+  source_file_name?: string | null; created_at: ISODateTime | null; finished_at: ISODateTime | null;
+  counts: { rows_total: number; rows_ok: number; rows_failed: number; rows_duplicate: number; attachments_linked: number; threads: number };
+  warnings: string[]; stages: IngestionStage[];
+}
+export interface IngestionRecordError { row_number: number; status: 'FAILED' | 'DUPLICATE_EXACT' | 'CONFLICTING_DUPLICATE'; reason_code: string; message?: string }
+
+// ---- Misc ----
+export interface HealthStatus { status: 'ok' | 'degraded' | 'down'; version?: string; components?: Record<string, 'ok' | 'degraded' | 'down'> }
+export interface Persona { persona_id: string; display_name: string; role_code: string; address: string | null }
+export interface DemoMeta {
+  dataset: string; as_of: ISODateTime; is_demo: true; visibility_policy: 'THREAD_PARTICIPANT' | 'MESSAGE_PARTICIPANT';
+  counts: { emails: number; threads: number; attachments: number; sample_queries: number; evaluation_cases: number }; notice: string;
+}
+export interface DemoAnswerEntry { demo_key: string; matches: Array<{ question: string; scope: string | null }>; answer: Answer }
+export interface DemoDataset {
+  meta: DemoMeta; personas: Persona[]; directory: Person[]; emails: EmailMessage[]; attachments: AttachmentDetail[];
+  threads: ThreadDetail[]; summaries: ThreadSummary[]; decisions: Decision[]; actions: ActionItem[];
+  answers: DemoAnswerEntry[]; ingestion_jobs: IngestionJob[]; suggested_questions: string[];
+}
+
+Create zod schemas that mirror these interfaces (src/services/schemas.ts) and infer nothing different from them.
+
+6.6 Project structure
+src/
+  app/            App.tsx, router.tsx, providers.tsx (QueryClient, Mode, Persona, Prefs, Toasts)
+  config/         env.ts, endpoints.ts
+  adapters/       dataSource.ts (interface), liveAdapter.ts, demoAdapter.ts, normalisers.ts
+  services/       apiClient.ts, schemas.ts, emailService.ts, threadService.ts, intelligenceService.ts,
+                  decisionService.ts, actionService.ts, ingestionService.ts, healthService.ts
+  hooks/          useCapability.ts, useAsOf.ts, useDebounce.ts, useUrlFilters.ts, useReducedMotion.ts, usePrefs.ts
+  types/          api.ts
+  data/           demoData.ts (typed constant generated verbatim from the attached JSON)
+  lib/            format.ts (dates/IST/UTC, INR en-IN, durations), semantics.ts (labels, colours, icons per enum),
+                  quote.ts (locate and highlight a quote in a body), a11y.ts
+  styles/         tokens.css, globals.css
+  components/
+    ui/ layout/ navigation/ dashboard/ emails/ threads/ intelligence/ decisions/ actions/ ingestion/
+    brand/ (Logo.tsx, Wordmark.tsx)  visualizations/ (HeroScene, WorkflowScene, Constellation, ThreadGraph, SvgFallbacks)
+    evidence/ (EvidenceDrawer, CitationChip, SourceCard, CalculationBlock, ProvenanceTag, ModeBanner)
+  pages/          LandingPage, SignInPage, OverviewPage, EmailExplorerPage, ThreadPage, AskSutraPage,
+                  DecisionsPage, ActionsPage, ImportPage, SettingsPage, EvaluationPage (optional), NotFoundPage
+6.7 Routing
+
+VITE_ROUTER_MODE switches HashRouter ↔ BrowserRouter in one place. Routes: / · /signin · /app/overview · /app/emails (optional ?email=E005) · /app/threads (list) · /app/threads/:threadId (:threadId is the thread_key, e.g., THR-001) · /app/ask (optional ?thread=THR-001) · /app/decisions · /app/actions · /app/import · /app/settings · /app/evaluation (optional) · * → NotFound. Workspace routes are guarded: live mode → GET auth/me (401 → /signin); demo mode → persona required (else /signin). Filters live in the URL query string (shareable, restores on reload). Lazy-load every page.
+
+7. PAGE SPECIFICATIONS
+Workspace shell (all /app/* pages)
+Left sidebar (forest): logo lockup; workspace chip ("Northbridge — demo workspace" in demo mode; real name from the backend in live mode — a read-only chip, not a switcher, because the MVP is single-workspace); nav: Overview, Email Explorer, Thread Intelligence, Ask SUTRA, Decisions, Action Tracker, Data Ingestion, Settings; active item = gold left bar + --forest-2 background. Collapse/expand (icon-only rail with tooltips; remembered). Bottom: user avatar (initials), name, role, workspace status (live: health result; demo: "Demo dataset"), Sign out.
+Top bar: breadcrumbs; global search (opens the command palette with ⌘/Ctrl+K; searches emails, threads, decisions, actions, attachments; demo = keyword filter, live = POST search; results show level (message / attachment), thread key, snippet, and an "Ask SUTRA about this" action); notifications indicator that lists only real signals derived from available data (backend health problems, the latest ingestion job state, decisions flagged for review, failed ingestion rows) — if none, "No notices"; no fake notifications; user menu.
+Mobile/tablet: sidebar becomes a drawer; top bar condenses.
+Persistent ModeBanner in demo mode; ErrorBoundary per route with a recoverable error screen.
+PAGE 1 — Landing (/)
+
+Public, editorial, calm, exceptionally polished. Sticky header: logo; Product, Capabilities, How it works, Trust and security (smooth-scroll anchors); Sign in; Get started (both → /signin).
+
+Hero — small descriptor "AI-Powered Institutional Email Intelligence"; headline "Every Connection. One Intelligence." (serif, 48–64 px max); copy "Transform fragmented institutional email conversations into connected, searchable and evidence-backed knowledge."; primary CTA Explore SUTRA (→ /signin), secondary Discover how it works (scrolls to workflow); Scene A at right (fallback per §5.1).
+Problem — editorial two-column layout with a numbered list (not cards): decisions buried in threads; approvals and responsibilities hard to trace; critical information spread across replies and attachments; manual review wastes institutional time.
+Solution — the five capabilities: intelligent email organisation; conversation summarisation; decision and action extraction; natural-language intelligence search; verifiable source attribution. Use a ruled list with a distinctive layout (e.g., left numeral, centre title/description, right small "evidence" glyph), not three equal cards. Include one small, real product visual (an evidence citation chip next to a quoted line from the benchmark, e.g., the E048 quotation "Revised plan accepted for budget planning only. This is not purchase authorization…").
+How SUTRA works — Scene B with the five steps listed beside it: 1 Import official email records · 2 Organise messages into conversations · 3 Analyse and retrieve relevant information · 4 Extract decisions and actions · 5 Deliver evidence-backed intelligence. (Scene B has four visual stages; map steps 3–4 to stage 3 and step 5 to stage 4, and say so in the caption.)
+Trust and security — evidence-backed answers; source traceability; permission-aware retrieval (enforced by the backend); secure data handling; explicit unknowns and conflicting information. No certification or compliance claims. Show a small illustrative "answer anatomy" diagram (claim → citation → original email).
+Closing — headline "Make institutional knowledge accessible, connected and accountable."; CTA Enter the SUTRA workspace.
+Footer — product description, navigation, a "Documentation (placeholder)" link that opens a dialog stating documentation is not yet published, "© SUTRA". No invented contact details, partners or customers.
+PAGE 1b — Sign-in (/signin)
+
+Live mode: email + password → POST auth/login (cookie session); handle an MFA-required response with a code field; generic error on failure; lockout / rate-limit messages. Demo mode: persona picker (cards of the 7 personas with role and a one-line description of what that role may see) and "Enter demo workspace". Never present demo sign-in as real authentication.
+
+PAGE 2 — Overview (/app/overview)
+Greeting: "Good morning/afternoon/evening, {display_name}" + "Here is the current state of your institutional email intelligence workspace." + as_of stamp.
+KPI row (Stat components): Total emails · Total conversations · Decisions identified · Pending action items (pending = OPEN + CONDITIONAL, with a footnote). Source: live analytics/overview or list total_estimate; if unavailable show "—" with a reason, never a made-up number. In demo mode: label "Demo annotation".
+Recent activity (tabbed): Latest messages (by sent time — do not call them "recently imported" unless the data has import timestamps) · Recently updated conversations · Latest decisions · Recently extracted action items.
+Conversation overview table: subject, main participants (roles), last activity (IST), message count, status pill, "Open conversation".
+Intelligence overview: decisions by type and status; actions by status; recently discussed topics (category + last activity); activity timeline; Scene C constellation. Only analytics supported by loaded data.
+Quick actions: Import email dataset · Explore conversations · Ask SUTRA · Review pending actions.
+Empty state (no data): a welcoming editorial panel explaining SUTRA needs an authorised email dataset before it can generate intelligence; primary action Import dataset.
+PAGE 3 — Email Explorer (/app/emails)
+
+Three-part layout (desktop): Filters (left) · List (centre) · Preview (right). Filters: sender, subject, date range, thread, topic/category, attachment availability; all in URL params; "Clear filters". List rows: subject, sender (role pill), recipients (first + "+n"), 2-line body preview, local time, thread chip (click filters/opens), attachment icon with count; selected row highlighted; pagination. Preview: full subject, sender, recipients (roles), local time + UTC toggle, original body (verbatim, preserved line breaks), attachments (open in the Evidence drawer; show status and size; for READY text/CSV show the extracted text/table), "reply-to" link (parent email), extracted mentions (e.g., "INR 17.9 lakh → INR 1,790,000" chips; "12:30 IST" kept as IST), badges for decisions/actions that cite this email, and Open complete conversation. A "Show original / cleaned body" toggle only if the backend provides both. It must feel like an intelligence explorer, not a mailbox: no compose, no star, no archive, no delete. Mobile: list → full-screen preview sheet.
+
+PAGE 4 — Thread Intelligence (/app/threads and /app/threads/:threadId)
+List route: filterable table of conversations (category, status, participant, date, has pending actions, has decision), sortable.
+Detail header: subject, thread key, message count, participants (role pills), last activity (IST + as_of), topic/category, status pill, reconstruction badge (method, confidence, "review needed" if not NONE), integrity banner when PARTIAL/CONFLICT ("An earlier message in this conversation is missing from the data").
+Summary panel (visually prominent): purpose · initial context · key developments · Latest status (with as_of_email_id link and time) · pending actions (linked) or "No pending action stated in the emails" · deadlines (with deadline_state chips) · unresolved items. Every sentence has citation chips. Banners for DRAFT_UNVERIFIED, FAILED and stale ("Summary updating — newer messages exist"). "Refresh summary" (POST threadSummaryRefresh) only in live mode and only if permitted.
+Relationship visualisation (§5.5), pinned above or beside the timeline.
+Conversation timeline: every message chronologically — sender (role), recipients (roles), local time (+UTC toggle), subject where it differs, verbatim body, attachments, "In reply to E00x" link, badges (decision/action). Selected message highlighted; deep link #E005.
+Decisions section: cards or ruled rows: type chip (distinct per §3.1), subject, who (approver / recommender / confirmer with label), date, amounts (with role/basis), scope (authorizes / does not authorize), conditions with states, provenance tag, evidence chips. Recommendation vs approval is visually unmistakable.
+Action items section: task, owner (or "Owner not stated"), deadline (or "No deadline stated") + deadline_state chip, status, status basis, provenance (inferred items dashed), evidence, completion evidence.
+Source navigation: clicking any citation chip, E00x link or timeline node scrolls to and highlights the exact original message (focus moves there; announce via aria-live), or opens the Evidence drawer when the source is an attachment.
+Ask about this conversation button → /app/ask?thread=<key>.
+PAGE 5 — Ask SUTRA (/app/ask) — the flagship, evidence-first
+
+Not a chat clone. A two-region workspace.
+
+Main region (left, ~60%): header "Ask SUTRA" with a scope selector ("All conversations" or a chosen conversation; remembers ?thread=); the conversation of questions and answers; the composer; Previous questions (stored in this browser only — say so).
+Welcome state: headline "What would you like to understand?"; copy "Ask questions across your institutional email conversations. SUTRA retrieves relevant evidence and presents answers you can verify."; suggested questions as buttons: What happened with the CNC machine procurement? · Who approved the procurement and for what amount? · What is still pending? · Which applications are on hold and why? · What decisions were made in the latest discussion? · Summarise the complete conversation. (In demo mode also offer: What was the final cost to repair the UTM and when was it returned to service? · Does acceptance of the revised consumables plan authorize purchases?) Ambiguous questions may return CLARIFICATION_NEEDED with option buttons.
+Composer: multiline textarea, Enter submits / Shift+Enter newline, Send button (disabled when empty; loading state with Cancel via AbortController), "Clear" action, character guidance. No simulated "steps": while waiting show an indeterminate "Retrieving and verifying evidence…" state; release answer text only when the backend returns the (already validated) answer; for streaming (SSE) show a "verifying sources…" placeholder until the final validated payload arrives.
+Answer card: status banner (icon + text, §3.8); as_of; each answer block as a paragraph with its claim-level citation chips immediately after the claim ([1], [2] with accessible names like "Source E005, Dean (Administration), 8 September 2026"); provenance tag per block (explicit/derived/inferred); calculation block where present; decision highlight strip when structured.decision_ids are present (type, who, date, amounts, scope); pending actions strip with deadline_state chips; Latest status vs History toggle when structured.latest_status exists; caveats list ("Limitations") — always visible; evidence-confidence badge only per §3.8; feedback (Helpful / Not helpful / Wrong / Missing source) in live mode → POST answerFeedback.
+Citation hover/click: popover with Email ID, subject, sender (role), date (IST), the verbatim excerpt with the quoted passage highlighted, and verification badges (email exists · access ok · quote found · values match — shown only when provided); click → Evidence drawer.
+Evidence panel (right, ~40%; becomes a bottom sheet on small screens): updates with the selected/last answer. Sections: Directly supported facts (EXPLICIT) · Derived calculations · Inferences (INFERRED, dashed) · Missing information / limitations · Conflicting evidence (side by side, with times and senders, when status is CONFLICTING_EVIDENCE) · Retrieved sources (SourceCards: email ID, subject, sender role, local time, thread chip, highlighted excerpt, attachment chips; expandable to the full original email; "Open complete conversation").
+No-evidence behaviour: for INSUFFICIENT_EVIDENCE show exactly "I could not find sufficient supporting information in the available email records.", the search scope searched (if provided) and suggested next steps; never an invented answer.
+Follow-ups: the composer keeps context (session_id, thread_scope); show "Following up on: …" chip and let the user detach context.
+Degraded/error: DEGRADED banner; FAILED/network errors with retry and request_id.
+PAGE 6 — Decisions (/app/decisions)
+Summary strip (real counts): Total · Approvals (APPROVAL + CONDITIONAL_APPROVAL) · Rejections (REJECTION; show 0 as "None identified") · Requiring review (review_state = PENDING) — plus smaller counts for Limited-scope acceptances, Recommendations, Confirmations so nothing is conflated.
+Table columns: Decision (subject + one-line outcome), Related thread, Who (with capacity label), Date (IST), Type chip, Status, Source (evidence chips). Sortable; paginated.
+Filters: type, date range, approver/person, topic/category, status, explicit/inferred; URL-persisted.
+Details drawer: complete decision text; related conversation link; decision date (+UTC); who and capacity; explicit/derived/inferred indicator; amounts with roles; authorizes / does not authorize; conditions with states and evidence; attribution_note; evidence excerpts with highlighted quotes; "Open source email". Include an Approval chain view for the thread (recommendation → approval → confirmation → execution) built from the thread's decisions and actions.
+Do not offer to approve, reject, edit or export-as-authorisation anything.
+PAGE 7 — Action Tracker (/app/actions)
+Summary: Total · Pending (OPEN) · In progress (IN_PROGRESS, else "Not reported by backend") · Completed (DONE) · Blocked (BLOCKED, else "Not reported by backend") · Conditional (CONDITIONAL) · Unknown status (any unrecognised value). Never show "0" for a status the backend does not report.
+Table: task; assigned person/team (or "Owner not stated"; show "owner inferred" marker when owner_basis = INFERRED); due (date with IST, relative text, or "No deadline stated") + deadline_state chip; status; related conversation; source email(s); provenance (dashed for INFERRED).
+Filters: status, assigned person, due-date range, deadline state, conversation, provenance.
+Drawer: full task; source evidence (quotes); owner and basis; due date and precision; status basis text; completion evidence; related messages (link to timeline). Label the view "Intelligence view — SUTRA does not assign, execute or update tasks." A review-override control (PATCH) appears only in live mode and only if the signed-in role is permitted; otherwise absent (not disabled-and-misleading).
+PAGE 8 — Data Ingestion (/app/import)
+Upload panel: drag-and-drop or file picker for emails.csv (accepted: .csv); optional attachments (.zip or multiple files); shows file name, size, type, real upload progress (XHR), and validation status.
+In-browser pre-check (PapaParse) before upload — clearly labelled "Browser pre-check (the backend validates authoritatively)": required columns present (case-insensitive: email_id, thread_id, sender, recipients, subject, timestamp, body, in_reply_to, attachments), row count, duplicate email_ids, unparseable timestamps, empty bodies, attachment names not matched to supplied files, file size ≤ VITE_MAX_UPLOAD_MB. Errors list row numbers, field and reason; offer "Download error report (CSV)".
+Processing workflow (Stepper) with exactly these steps: 1 File received · 2 Schema validation · 3 Email records parsed · 4 Threads reconstructed · 5 Attachments registered · 6 Search index prepared · 7 Intelligence workspace ready. A step is shown complete only when the backend job reports it (poll GET ingestionGet every 2 s until a terminal state; stop on unmount). Failed stages show the reason. In demo mode steps stay "Not started — requires the backend".
+Import results: accepted, rejected, duplicate, warnings, threads detected, attachments linked/processing status; failed-record table (GET ingestionRecords?status=FAILED) with row reference and reason code; Reprocess only if the backend supports it and the role allows.
+Import history: table of jobs (status, source file, timestamps when provided, counts). The preloaded benchmark (52 records accepted, 0 rejected, 0 duplicates, 10 threads, 11 attachments linked) appears in demo mode and is described accurately as the supplied benchmark.
+No Gmail/Outlook credentials, connectors or OAuth anywhere. A short note: "Live mailbox connectors are planned for a later phase."
+PAGE 9 — Settings (/app/settings)
+
+Sections (tabs or ruled sections): Profile (name, address/role, from auth/me or persona) · Workspace (name, timezone, visibility policy shown read-only with a plain-language explanation) · Role and permissions (the role's description; a read-only "Default role model" reference table — labelled documentation, enforced by the backend) · Security (sessions and multi-factor authentication are managed by the backend: show the actual state from auth/me if provided, otherwise "Not available in this deployment" — no fake toggles) · Data access (how visibility works: participant-based access, derived summaries visible only if all cited emails are visible, no existence leaks, audit of access by the backend) · Application preferences (frontend-only, stored in this browser and labelled so): density (comfortable/compact), time display (IST / UTC), amount display (original / normalised / both), reduced motion override, 3D visuals on/off, sidebar default · Data mode (only if VITE_ALLOW_MODE_SWITCH): Demo ↔ Live with an explanatory dialog and the configured base URL and health check. Clearly distinguish frontend settings from backend-enforced permissions.
+
+PAGE 10 (optional) — Evaluation (/app/evaluation)
+
+Show the official weights (§2.2) exactly, and list runs from GET evaluation/runs if the endpoint exists. In demo mode state "No evaluation runs in demo mode." Never display invented scores.
+
+Shared: Evidence drawer (EvidenceDrawer)
+
+Opens from any citation/source/email link. Tabs: Email (headers, local time + UTC, verbatim body with the cited quote located and highlighted via lib/quote.ts; if the quote is not found show "Quoted passage could not be located in this message" — never silently skip) · Attachment (filename, status, size; extracted text or table with the cited row highlighted; states for UNSUPPORTED, ENCRYPTED, CORRUPT, OVERSIZE, MISSING_FILE, EXTRACTION_FAILED with plain explanations; "low-confidence OCR" caution when ocr_confidence is low; download via attachmentDownloadUrl only in live mode) · Thread (mini timeline with the message highlighted, "Open complete conversation"). Verification badges when provided. Focus-trapped, Esc closes, returns focus to the trigger.
+
+8. RESPONSIVENESS, ACCESSIBILITY, PERFORMANCE
+Breakpoints: ≥1280 desktop (primary), 1024–1279 laptop, 768–1023 tablet, <768 mobile. Sidebars → drawers; evidence panels stack below answers or become bottom sheets; tables scroll horizontally inside their own container or convert to structured cards on mobile; no page-level horizontal overflow at any width; keep all major functionality on mobile.
+WCAG 2.2 AA: semantic landmarks (header, nav, main, aside, footer), skip-to-content link, one h1 per page, tables with caption and header scope, labelled form fields, aria-live="polite" for answers/toasts/status changes, visible focus everywhere, keyboard operation of every control (drawers trap focus, menus follow listbox/menu patterns), minimum 44×44 px touch targets, colour never the only signal, prefers-reduced-motion honoured, lang="en", correct language handling for Devanagari text.
+Performance: route-level code splitting; 3D lazily loaded and only when visible; no autoplay video; avoid heavy libraries; memoise lists; paginate (don't render unbounded lists); stable component identities; images/SVG optimised; no layout shift from fonts; no console errors or warnings; zero TypeScript errors under strict.
+9. INTERACTION AND QUALITY RULES
+Every visible control works. If an action is not available (role, mode, backend capability), hide it or show it disabled with a tooltip that says why — never a dead button.
+Implement and test: navigation, global search, filters, tabs, dropdowns, drawers, dialogs, upload, expand/collapse, citation navigation, thread-message selection, follow-up questions, loading skeletons, empty states, error states, toasts.
+Design quality: do not make every section a rounded rectangle; do not repeat three-card layouts; do not use huge headings in the application; do not put 3D in every component; do not fill space with meaningless charts or fake analytics; do not use arbitrary gradients; information density matters. The product must read as designed by an experienced enterprise product team — calm, authoritative, precise.
+10. DELIVERY PROTOCOL
+First reply to this message: a short Understanding & plan (stack decisions, any scaffold constraints you detected, how you will handle 3D fallbacks, and any assumption). No code yet. Then wait.
+I will then send phase prompts one at a time. For each phase: output the complete contents of every created or changed file, each under a heading with its full path; do not rewrite files from earlier phases unless the phase asks you to or a defect requires it.
+End every phase with a Phase report: files created/changed; how to run; a self-check against the phase acceptance list (pass/fail with one line each); known limitations. Do not claim a check passed unless you traced the code path for it.
+If any requirement conflicts with the AI Studio environment, say so explicitly and propose the smallest compliant alternative; never silently drop a requirement.
+
+<<< END OF MASTER PROMPT >>>

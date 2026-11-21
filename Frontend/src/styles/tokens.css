@@ -1,0 +1,57 @@
+:root {
+  /* Foundation colour tokens (Master §4.1) */
+  --forest: #102D2A;
+  --gold: #D5B77B;
+  --ivory: #F5F2EA;
+  --charcoal: #202B35;
+  --white: #FFFFFF;
+  --muted: #7B8581;
+  --border: #E5E2D9;
+  --green-surface: #E8EFEA;
+
+  /* Verified WCAG AA companion tokens */
+  --text-muted: #5A6560;
+  --gold-text: #7A5C1E;
+  --forest-2: #1B4A45;
+  --on-dark-muted: #B8C4BE;
+
+  /* Semantic status tokens (all >= 4.5:1 text contrast on status surface & ivory) */
+  --status-success-text: #1E6B45;
+  --status-success-bg: #E3F1E8;
+  --status-warning-text: #8A5A00;
+  --status-warning-bg: #FBF0D9;
+  --status-error-text: #A3342B;
+  --status-error-bg: #F9E4E1;
+  --status-info-text: #1F5A8A;
+  --status-info-bg: #E1ECF5;
+
+  /* Typography */
+  --font-display: 'Manrope', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+
+  /* 4/8-pt spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii (Master §4.3) */
+  --radius-control: 4px;
+  --radius-panel: 8px;
+  --radius-band: 0px;
+
+  /* Overlay shadows only */
+  --shadow-overlay: 0 12px 32px -8px rgba(16, 45, 42, 0.16), 0 4px 12px -4px rgba(16, 45, 42, 0.08);
+
+  /* Focus rings */
+  --focus-ring-light: 2px solid #102D2A;
+  --focus-ring-dark: 2px solid #D5B77B;
+}
