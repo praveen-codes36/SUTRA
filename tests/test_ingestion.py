@@ -47,6 +47,30 @@ class TestIngestionModule(unittest.TestCase):
         self.assertIsNotNone(e005)
         self.assertEqual(e005.sender_role, "Dean (Administration)")
 
+    def test_timestamp_robustness(self):
+        from sutra.ingestion.normalizers import parse_iso_timestamp
+        # Standard ISO
+        dt1 = parse_iso_timestamp("2026-09-08T14:30:00Z")
+        self.assertEqual(dt1.year, 2026)
+        # Space-separated
+        dt2 = parse_iso_timestamp("2026-09-08 14:30:00")
+        self.assertEqual(dt2.month, 9)
+        # Slash-separated
+        dt3 = parse_iso_timestamp("2026/09/08")
+        self.assertEqual(dt3.day, 8)
+        # Empty string fallback
+        dt_fallback = parse_iso_timestamp("")
+        self.assertEqual(dt_fallback.year, 1970)
+
+    def test_clean_email_body_unicode_and_zero_width(self):
+        raw = "\u200bअनुमोदन प्राप्त हो गया है।\n\r\n\rApproved and verified.\ufeff\n\n\n\nFinal."
+        cleaned = clean_email_body(raw)
+        self.assertNotIn("\u200b", cleaned)
+        self.assertNotIn("\ufeff", cleaned)
+        self.assertIn("अनुमोदन", cleaned)
+        self.assertIn("Approved and verified.", cleaned)
+        self.assertNotIn("\n\n\n", cleaned)
+
 
 if __name__ == "__main__":
     unittest.main()

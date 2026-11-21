@@ -17,6 +17,10 @@ from tests.test_generalization import TestGeneralizationIntelligence
 from tests.test_deadline_compliance import TestDeadlineComplianceEngine
 from tests.test_generalized_intelligence import TestGeneralizedIntelligenceMetamorphic
 from tests.test_evaluation_metrics import TestEvaluationMetrics
+from tests.test_anti_hardcode import TestAntiHardcode
+from tests.test_metamorphic import TestMetamorphicSuite
+from tests.test_citation_verification import TestCitationVerifier
+from tests.test_llm_provider import TestLLMProviders
 
 DATASET_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dataset"))
 

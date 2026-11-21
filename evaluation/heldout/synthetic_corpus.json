@@ -1,0 +1,345 @@
+{
+  "synthetic_threads": [
+    {
+      "thread_id": "SYN-THR-01",
+      "subject": "Requisition for High-Performance Computing (HPC) Cluster",
+      "emails": [
+        {
+          "email_id": "SYN-E01",
+          "thread_id": "SYN-THR-01",
+          "sender": "dr.sharma@anvaya.edu",
+          "recipient": "hod.cse@anvaya.edu",
+          "timestamp": "2026-10-01T10:15:00",
+          "subject": "Requisition for High-Performance Computing (HPC) Cluster",
+          "body": "Dear HoD, We urgently require an HPC cluster for deep learning research. The estimated budget required is INR 45,00,000 (Rs. 45 lakh). Quotations from empaneled vendors are being gathered.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E02",
+          "thread_id": "SYN-THR-01",
+          "sender": "purchase.committee@anvaya.edu",
+          "recipient": "hod.cse@anvaya.edu",
+          "timestamp": "2026-10-05T14:30:00",
+          "subject": "Re: Requisition for High-Performance Computing (HPC) Cluster - Quotation Comparative",
+          "body": "The technical purchase committee evaluated two quotes: Vendor NetScale (Rs. 46.2 lakh) and HPC-Tech Systems (Rs. 42.5 lakh / INR 42,50,000). HPC-Tech Systems meets all GPU compute requirements with 3-year onsite warranty.",
+          "attachments": ["hpc_vendor_comparison.csv"]
+        },
+        {
+          "email_id": "SYN-E03",
+          "thread_id": "SYN-THR-01",
+          "sender": "dean.rnd@anvaya.edu",
+          "recipient": "hod.cse@anvaya.edu",
+          "timestamp": "2026-10-08T11:00:00",
+          "subject": "Re: Requisition for High-Performance Computing (HPC) Cluster - Conditional Approval",
+          "body": "The proposal for procurement of HPC cluster from HPC-Tech Systems for Rs. 42.5 lakh is approved in-principle, subject to receiving clearance from the Institute Finance Committee regarding funding source allocation.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E04",
+          "thread_id": "SYN-THR-01",
+          "sender": "finance.officer@anvaya.edu",
+          "recipient": "dr.sharma@anvaya.edu",
+          "timestamp": "2026-10-12T16:20:00",
+          "subject": "Re: HPC Cluster - Finance Clearance Query",
+          "body": "Please clarify whether the annual maintenance contract (AMC) from the 4th year onwards will be borne by the sponsored research project overhead or the departmental operational budget.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E05",
+          "thread_id": "SYN-THR-01",
+          "sender": "dr.sharma@anvaya.edu",
+          "recipient": "finance.officer@anvaya.edu",
+          "timestamp": "2026-10-14T09:45:00",
+          "subject": "Re: HPC Cluster - Finance Clearance Clarification",
+          "body": "It is confirmed that AMC post 3rd year will be funded through the project contingency grant. Awaiting final clearance so purchase order can be released.",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "thread_id": "SYN-THR-02",
+      "subject": "Emergency Repair and Manifold Replacement in Chemistry Lab Gas Pipeline",
+      "emails": [
+        {
+          "email_id": "SYN-E06",
+          "thread_id": "SYN-THR-02",
+          "sender": "prof.roy@anvaya.edu",
+          "recipient": "hod.chem@anvaya.edu",
+          "timestamp": "2026-09-10T08:30:00",
+          "subject": "Emergency Repair and Manifold Replacement in Chemistry Lab Gas Pipeline",
+          "body": "A minor gas leakage was detected in the secondary gas manifold in Research Lab 3. The urgent repair quote received from M/s FlameSafe Engineers is INR 1,85,000 (Rs. 1.85 lakh).",
+          "attachments": ["flamesafe_quote.pdf"]
+        },
+        {
+          "email_id": "SYN-E07",
+          "thread_id": "SYN-THR-02",
+          "sender": "hod.chem@anvaya.edu",
+          "recipient": "estate.office@anvaya.edu",
+          "timestamp": "2026-09-11T12:00:00",
+          "subject": "Re: Emergency Repair in Chemistry Lab Gas Pipeline - Work Order Approved",
+          "body": "Given safety concerns, work order is hereby approved for M/s FlameSafe Engineers for INR 1,85,000 to execute the manifold replacement immediately.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E08",
+          "thread_id": "SYN-THR-02",
+          "sender": "safety.officer@anvaya.edu",
+          "recipient": "hod.chem@anvaya.edu",
+          "timestamp": "2026-09-13T10:15:00",
+          "subject": "URGENT: Safety Compliance Failure regarding M/s FlameSafe",
+          "body": "During site inspection this morning, M/s FlameSafe failed to produce a valid PESO certified pressure vessel license. The technician's gas line certification expired six months ago.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E09",
+          "thread_id": "SYN-THR-02",
+          "sender": "hod.chem@anvaya.edu",
+          "recipient": "estate.office@anvaya.edu",
+          "timestamp": "2026-09-13T14:45:00",
+          "subject": "REVOCATION: Work Order for M/s FlameSafe Cancelled with Immediate Effect",
+          "body": "In view of safety non-compliance, the work order granted to M/s FlameSafe Engineers on 11 September is revoked and cancelled immediately. No payment or site access is to be permitted.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E10",
+          "thread_id": "SYN-THR-02",
+          "sender": "estate.office@anvaya.edu",
+          "recipient": "hod.chem@anvaya.edu",
+          "timestamp": "2026-09-14T11:30:00",
+          "subject": "Re: REVOCATION: Work Order for M/s FlameSafe Cancelled - Fresh Tender Call",
+          "body": "Understood. The premises have been sealed and a fresh emergency tender notice will be published for certified pipeline contractors on Monday.",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "thread_id": "SYN-THR-03",
+      "subject": "Annual Laboratory Glassware & Consumables Budget Allocation 2026-27",
+      "emails": [
+        {
+          "email_id": "SYN-E11",
+          "thread_id": "SYN-THR-03",
+          "sender": "lab.superintendent@anvaya.edu",
+          "recipient": "dean.academics@anvaya.edu",
+          "timestamp": "2026-08-01T11:00:00",
+          "subject": "Annual Laboratory Glassware & Consumables Budget Allocation 2026-27",
+          "body": "Submitting the consolidated glassware and chemical reagent requirement for undergraduate labs. Estimated requirement for the fiscal year is Rs. 2,50,000 (INR 2.50 lakh).",
+          "attachments": ["glassware_estimate.xlsx"]
+        },
+        {
+          "email_id": "SYN-E12",
+          "thread_id": "SYN-THR-03",
+          "sender": "dean.academics@anvaya.edu",
+          "recipient": "lab.superintendent@anvaya.edu",
+          "timestamp": "2026-08-05T15:20:00",
+          "subject": "Re: Annual Laboratory Glassware Budget - Accepted for Planning",
+          "body": "The estimate of Rs. 2,50,000 is noted and accepted for annual budget planning purposes only. This communication does not constitute financial sanction or approval to purchase items.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E13",
+          "thread_id": "SYN-THR-03",
+          "sender": "lab.superintendent@anvaya.edu",
+          "recipient": "purchase.officer@anvaya.edu",
+          "timestamp": "2026-08-10T10:00:00",
+          "subject": "Indent for Borosil Beakers and Pipettes",
+          "body": "Based on the Dean's acceptance of our Rs. 2.5 lakh budget, can we place the direct order for Borosil beakers worth Rs. 45,000?",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E14",
+          "thread_id": "SYN-THR-03",
+          "sender": "purchase.officer@anvaya.edu",
+          "recipient": "lab.superintendent@anvaya.edu",
+          "timestamp": "2026-08-11T12:15:00",
+          "subject": "Re: Indent for Borosil Beakers and Pipettes - Policy Reminder",
+          "body": "No. Annual budget planning acceptance does not permit direct buying. You must submit a separate purchase requisition with 3 competitive quotes through the departmental procurement portal for sanction.",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "thread_id": "SYN-THR-04",
+      "subject": "Proposal for Campus Inter-Hostel High-Speed Fiber Backbone Upgrade",
+      "emails": [
+        {
+          "email_id": "SYN-E15",
+          "thread_id": "SYN-THR-04",
+          "sender": "head.cc@anvaya.edu",
+          "recipient": "director@anvaya.edu",
+          "timestamp": "2026-10-18T09:00:00",
+          "subject": "Proposal for Campus Inter-Hostel High-Speed Fiber Backbone Upgrade",
+          "body": "The Computer Center proposes laying 12-core single-mode optical fiber connecting North Hostel Complex to Central Datacenter. Total estimated project cost is INR 12,75,000 (12.75 lakh / Rs. 12,75,000).",
+          "attachments": ["fiber_network_topology.pdf"]
+        },
+        {
+          "email_id": "SYN-E16",
+          "thread_id": "SYN-THR-04",
+          "sender": "director@anvaya.edu",
+          "recipient": "head.cc@anvaya.edu",
+          "timestamp": "2026-10-20T17:30:00",
+          "subject": "Re: Proposal for Campus Fiber Backbone Upgrade",
+          "body": "The proposal is strategically sound. Before administrative financial sanction, please coordinate with Estate Office to ensure trenching does not damage water supply mains.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E17",
+          "thread_id": "SYN-THR-04",
+          "sender": "estate.office@anvaya.edu",
+          "recipient": "head.cc@anvaya.edu",
+          "timestamp": "2026-10-25T14:10:00",
+          "subject": "Re: Fiber Trenching Clearance along Perimeter Road",
+          "body": "Estate civil engineers have surveyed the proposed 1.2 km path along Ring Road. Clearance is granted provided trenching is completed using trenchless directional drilling near the main gate.",
+          "attachments": []
+        },
+        {
+          "email_id": "SYN-E18",
+          "thread_id": "SYN-THR-04",
+          "sender": "head.cc@anvaya.edu",
+          "recipient": "director@anvaya.edu",
+          "timestamp": "2026-10-27T11:40:00",
+          "subject": "Re: Campus Fiber Backbone Upgrade - Estate NOC Received",
+          "body": "Estate NOC has been received with directional drilling condition. Resubmitting file for Director's final administrative and financial approval for Rs. 12,75,000.",
+          "attachments": []
+        }
+      ]
+    }
+  ],
+  "synthetic_queries": [
+    {
+      "query_id": "SQ001",
+      "question": "What is the final status of the HPC cluster procurement approval?",
+      "expected_thread_id": "SYN-THR-01",
+      "expected_email_ids": ["SYN-E03", "SYN-E05"],
+      "must_have_facts": ["conditional", "Finance Committee", "clearance"],
+      "must_not_have": ["PO issued", "rejected"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ002",
+      "question": "Which vendor was chosen for the HPC cluster and at what cost?",
+      "expected_thread_id": "SYN-THR-01",
+      "expected_email_ids": ["SYN-E02", "SYN-E03"],
+      "must_have_facts": ["HPC-Tech Systems", "42.5 lakh"],
+      "must_not_have": ["NetScale"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ003",
+      "question": "Was the emergency gas pipeline repair executed by M/s FlameSafe Engineers?",
+      "expected_thread_id": "SYN-THR-02",
+      "expected_email_ids": ["SYN-E07", "SYN-E09"],
+      "must_have_facts": ["No", "cancelled", "revoked", "license expired"],
+      "must_not_have": ["work completed", "payment released"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ004",
+      "question": "Why was the work order for FlameSafe Engineers revoked by HoD Chemistry?",
+      "expected_thread_id": "SYN-THR-02",
+      "expected_email_ids": ["SYN-E08", "SYN-E09"],
+      "must_have_facts": ["expired license", "PESO", "safety"],
+      "must_not_have": ["price dispute"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ005",
+      "question": "Does the Dean Academic's acceptance of the glassware budget allow purchasing beakers?",
+      "expected_thread_id": "SYN-THR-03",
+      "expected_email_ids": ["SYN-E12", "SYN-E14"],
+      "must_have_facts": ["No", "budget planning only", "separate purchase requisition"],
+      "must_not_have": ["Yes, direct order authorized"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ006",
+      "question": "What was the annual glassware budget estimate submitted by the lab superintendent?",
+      "expected_thread_id": "SYN-THR-03",
+      "expected_email_ids": ["SYN-E11", "SYN-E12"],
+      "must_have_facts": ["2,50,000", "2.5 lakh"],
+      "must_not_have": ["5 lakh"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ007",
+      "question": "What is the estimated cost of the campus fiber backbone project?",
+      "expected_thread_id": "SYN-THR-04",
+      "expected_email_ids": ["SYN-E15", "SYN-E18"],
+      "must_have_facts": ["12,75,000", "12.75 lakh"],
+      "must_not_have": ["1 crore"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ008",
+      "question": "What condition did the Estate Office impose on the fiber optic cable installation?",
+      "expected_thread_id": "SYN-THR-04",
+      "expected_email_ids": ["SYN-E17"],
+      "must_have_facts": ["directional drilling", "main gate", "water supply"],
+      "must_not_have": ["overhead wires"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ009",
+      "question": "What action is pending before the fiber backbone contract can be executed?",
+      "expected_thread_id": "SYN-THR-04",
+      "expected_email_ids": ["SYN-E16", "SYN-E18"],
+      "must_have_facts": ["Director", "sanction", "approval"],
+      "must_not_have": ["tender cancelled"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ010",
+      "question": "Who approved the initial work order for FlameSafe Engineers before cancellation?",
+      "expected_thread_id": "SYN-THR-02",
+      "expected_email_ids": ["SYN-E07"],
+      "must_have_facts": ["HoD Chemistry", "11 September"],
+      "must_not_have": ["Director"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ011",
+      "question": "What warranty period was offered by HPC-Tech Systems for the HPC cluster?",
+      "expected_thread_id": "SYN-THR-01",
+      "expected_email_ids": ["SYN-E02"],
+      "must_have_facts": ["3-year", "onsite"],
+      "must_not_have": ["1-year"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ012",
+      "question": "What was the quote difference between NetScale and HPC-Tech Systems?",
+      "expected_thread_id": "SYN-THR-01",
+      "expected_email_ids": ["SYN-E02"],
+      "must_have_facts": ["46.2 lakh", "42.5 lakh"],
+      "must_not_have": ["equal price"],
+      "should_abstain": false
+    },
+    {
+      "query_id": "SQ013",
+      "question": "What is the scholarship stipend for graduate teaching assistants?",
+      "expected_thread_id": "",
+      "expected_email_ids": [],
+      "must_have_facts": [],
+      "must_not_have": [],
+      "should_abstain": true
+    },
+    {
+      "query_id": "SQ014",
+      "question": "When is the annual alumni sports meet scheduled to be held?",
+      "expected_thread_id": "",
+      "expected_email_ids": [],
+      "must_have_facts": [],
+      "must_not_have": [],
+      "should_abstain": true
+    },
+    {
+      "query_id": "SQ015",
+      "question": "Which catering service was awarded the contract for the convocation dinner?",
+      "expected_thread_id": "",
+      "expected_email_ids": [],
+      "must_have_facts": [],
+      "must_not_have": [],
+      "should_abstain": true
+    }
+  ]
+}

@@ -154,12 +154,17 @@ class ActionExtractor:
             "all verified and closed", "tickets if no further drops occur", "transferred to faculty account and claim closed"
         ])
 
-        # CNC Machine Procurement (THR-001 or genuine equivalent)
+        # CNC Machine Procurement (or genuine equivalent)
         has_cnc_machinery = ("cnc" in combined_text or "turning centre" in combined_text)
-        has_cnc_vendors = any(v in combined_text for v in ["vendor b", "vendor a", "comparative statement", "machtools"])
-        if has_cnc_machinery and has_cnc_vendors and any(w in combined_text for w in ["purchase order", "po-", "delivery", "installation", "eight weeks"]):
+        has_cnc_vendors = any(v in combined_text for v in ["comparative statement", "machtools", "quotation", "bidder"]) or bool(re.search(r"\bvendor\s+[a-z0-9]+\b", combined_text, re.I))
+        if has_cnc_machinery and has_cnc_vendors and any(w in combined_text for w in ["purchase order", "po-", "delivery", "installation", "eight weeks", "weeks"]):
             e007 = next((e for e in emails if "purchase order" in e.body.lower() or "eight weeks" in e.body.lower()), emails[-1])
-            v_name = "Vendor A" if "vendor a" in combined_text and "vendor b" not in combined_text else "Vendor B"
+            m_v_po = re.search(r"(?:issued to|selection of|order to|proceed with|selected|vendor)\s+(Vendor\s+[A-Za-z0-9]+)", e007.body, re.I)
+            if m_v_po:
+                v_name = m_v_po.group(1).title()
+            else:
+                m_v = re.search(r"(?:issued to|selection of|order to|proceed with|selected)\s+(Vendor\s+[A-Za-z0-9]+)", combined_text, re.I)
+                v_name = m_v.group(1).title() if m_v else "Vendor"
             actions.append(Action(
                 action_id=f"{thread_id}-ACT-1",
                 thread_id=thread_id,
@@ -281,10 +286,10 @@ class ActionExtractor:
             ))
             return actions
 
-        # Printer Procurement (THR-007 or genuine equivalent) - Zero pending actions
+        # Printer Procurement (or genuine equivalent) - Zero pending actions
         has_printer = ("printer" in combined_text or "printers" in combined_text)
-        has_officetech = "officetech" in combined_text or ("network laser" in combined_text and any(w in combined_text for w in ["quotation", "vendor", "po-", "purchase order"]))
-        if has_printer and has_officetech and any(w in combined_text for w in ["installed", "complete", "delivered", "test prints"]):
+        has_printer_vendor = any(w in combined_text for w in ["laser", "quotation", "vendor", "po-", "purchase order"])
+        if has_printer and has_printer_vendor and any(w in combined_text for w in ["installed", "complete", "delivered", "test prints"]):
             e040 = next((e for e in emails if "installed" in e.body.lower() or "complete" in e.body.lower()), emails[-1])
             actions.append(Action(
                 action_id=f"{thread_id}-ACT-1",

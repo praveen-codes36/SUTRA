@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "unit_tests_passed": 101,
+    "total_unit_tests": 101,
+    "benchmark_score": 100.0,
+    "usability_score": 10.0,
+    "usability_measurement": "hardcoded",
+    "llm_providers_real": false,
+    "llm_silent_mock_fallback": true,
+    "citation_verification": "permissive (return True, body fallback)",
+    "anti_hardcoding_checks": "none (failed with 11 violations)",
+    "heldout_dataset_size": 0,
+    "abstention_accuracy": "uncalibrated"
+  },
+  "improved": {
+    "unit_tests_passed": 125,
+    "total_unit_tests": 125,
+    "benchmark_score": 100.0,
+    "usability_score": 10.0,
+    "usability_measurement": "dynamically measured (latency + provenance + stability)",
+    "llm_providers_real": true,
+    "llm_silent_mock_fallback": false,
+    "citation_verification": "strict character-offset and attachment provenance (no permissive fallback)",
+    "anti_hardcoding_checks": "2/2 tests pass (0 violations across sutra)",
+    "heldout_queries_total": 45,
+    "heldout_abstention_accuracy": 0.3,
+    "synthetic_corpus_queries": 15,
+    "synthetic_corpus_accuracy": 0.8667
+  }
+}

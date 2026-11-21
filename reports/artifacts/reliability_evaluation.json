@@ -1,0 +1,805 @@
+{
+  "timestamp": 1795270563.1733959,
+  "full_benchmark": {
+    "overall_score": 100.0,
+    "weights": {
+      "rag_accuracy_and_grounding (25%)": 25.0,
+      "information_retrieval (20%)": 20.0,
+      "thread_reconstruction (15%)": 15.0,
+      "conversation_summarization (15%)": 15.0,
+      "decision_action_extraction (15%)": 15.0,
+      "usability_and_architecture (10%)": 10.0
+    },
+    "thread_reconstruction": {
+      "expected_threads": 10,
+      "actual_threads": 10,
+      "total_emails": 52,
+      "score": 1.0,
+      "passed": true
+    },
+    "queries": {
+      "total_queries": 15,
+      "correct_citations": 15,
+      "accuracy": 1.0,
+      "metrics": {
+        "mean_recall_at_5": 0.9667,
+        "mean_precision_at_5": 0.48,
+        "mean_mrr_at_5": 1.0,
+        "mean_ndcg_at_5": 0.9742,
+        "mean_thread_hit_at_1": 1.0,
+        "mean_citation_precision": 1.0,
+        "mean_citation_recall": 0.9667,
+        "mean_citation_f1": 0.9831,
+        "total_fabricated_citations": 0,
+        "total_citations": 36,
+        "mean_latency_ms": 9.96
+      },
+      "details": [
+        {
+          "query_id": "Q001",
+          "query": "What was the final decision on the CNC machine procurement?",
+          "gold_eids": [
+            "E005",
+            "E007"
+          ],
+          "cited_eids": [
+            "E005",
+            "E007"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 11.11,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q002",
+          "query": "Who approved the CNC machine purchase and what is still pending?",
+          "gold_eids": [
+            "E005",
+            "E006",
+            "E007"
+          ],
+          "cited_eids": [
+            "E005",
+            "E006",
+            "E007"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 11.28,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.6,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q003",
+          "query": "What documents are required for a bonafide certificate?",
+          "gold_eids": [
+            "E009",
+            "E010"
+          ],
+          "cited_eids": [
+            "E009",
+            "E010"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 10.56,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q004",
+          "query": "How many bonafide applications were completed and how many are on hold?",
+          "gold_eids": [
+            "E011",
+            "E012"
+          ],
+          "cited_eids": [
+            "E011",
+            "E012"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 10.05,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q005",
+          "query": "Which venues are approved for the annual technical fest on 16 November?",
+          "gold_eids": [
+            "E014",
+            "E016"
+          ],
+          "cited_eids": [
+            "E014",
+            "E016"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 9.56,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q006",
+          "query": "What is the latest status of technical fest security arrangements?",
+          "gold_eids": [
+            "E017",
+            "E018"
+          ],
+          "cited_eids": [
+            "E017",
+            "E018"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 9.39,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q007",
+          "query": "What was the final cost to repair the UTM and when was it returned to service?",
+          "gold_eids": [
+            "E021",
+            "E022",
+            "E023",
+            "E024"
+          ],
+          "cited_eids": [
+            "E021",
+            "E022",
+            "E023",
+            "E024"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 10.55,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.8,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q008",
+          "query": "When and where is the AI in Manufacturing seminar?",
+          "gold_eids": [
+            "E025",
+            "E028"
+          ],
+          "cited_eids": [
+            "E025",
+            "E028"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 10.13,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q009",
+          "query": "What was the approved faculty travel reimbursement and payment status?",
+          "gold_eids": [
+            "E032",
+            "E033",
+            "E034"
+          ],
+          "cited_eids": [
+            "E032",
+            "E033",
+            "E034"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 11.92,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.6,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q010",
+          "query": "Which printer vendor was selected and what was the total order value?",
+          "gold_eids": [
+            "E037",
+            "E038",
+            "E039",
+            "E040"
+          ],
+          "cited_eids": [
+            "E037",
+            "E038",
+            "E039",
+            "E040"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 8.78,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.8,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q011",
+          "query": "Did the Manufacturing Processes examination date change?",
+          "gold_eids": [
+            "E042",
+            "E043",
+            "E044"
+          ],
+          "cited_eids": [
+            "E042",
+            "E043",
+            "E044"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 7.98,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.6,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q012",
+          "query": "Does acceptance of the revised consumables plan authorize purchases?",
+          "gold_eids": [
+            "E047",
+            "E048"
+          ],
+          "cited_eids": [
+            "E047",
+            "E048"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 8.69,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.4,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q013",
+          "query": "What caused the Engineering Block network outage and what is its status?",
+          "gold_eids": [
+            "E049",
+            "E050",
+            "E052"
+          ],
+          "cited_eids": [
+            "E049",
+            "E050",
+            "E052"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 10.35,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.6,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q014",
+          "query": "Find messages related to Vendor B's technical compliance.",
+          "gold_eids": [
+            "E002",
+            "E003"
+          ],
+          "cited_eids": [
+            "E002"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 9.61,
+          "recall_at_5": 0.5,
+          "precision_at_5": 0.2,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 0.6131,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 0.5,
+          "fabricated_citations": []
+        },
+        {
+          "query_id": "Q015",
+          "query": "Which email confirms that the UTM can be used again?",
+          "gold_eids": [
+            "E024"
+          ],
+          "cited_eids": [
+            "E024"
+          ],
+          "matched": true,
+          "abstained": false,
+          "latency_ms": 9.39,
+          "recall_at_5": 1.0,
+          "precision_at_5": 0.2,
+          "mrr_at_5": 1.0,
+          "ndcg_at_5": 1.0,
+          "thread_hit_at_1": 1.0,
+          "citation_precision": 1.0,
+          "citation_recall": 1.0,
+          "fabricated_citations": []
+        }
+      ]
+    },
+    "cases": {
+      "total_cases": 9,
+      "passed_cases": 9,
+      "accuracy": 1.0,
+      "details": [
+        {
+          "case_id": "CASE-001",
+          "thread_id": "THR-001",
+          "task": "Procurement decision extraction",
+          "passed": true,
+          "gold_evidence": [
+            "E005",
+            "E007"
+          ]
+        },
+        {
+          "case_id": "CASE-002",
+          "thread_id": "THR-002",
+          "task": "Bonafide status extraction",
+          "passed": true,
+          "gold_evidence": [
+            "E011",
+            "E012"
+          ]
+        },
+        {
+          "case_id": "CASE-003",
+          "thread_id": "THR-003",
+          "task": "Event venue and logistics",
+          "passed": true,
+          "gold_evidence": [
+            "E016",
+            "E018"
+          ]
+        },
+        {
+          "case_id": "CASE-004",
+          "thread_id": "THR-004",
+          "task": "Maintenance cost and closure",
+          "passed": true,
+          "gold_evidence": [
+            "E021",
+            "E023",
+            "E024"
+          ]
+        },
+        {
+          "case_id": "CASE-005",
+          "thread_id": "THR-006",
+          "task": "Reimbursement approval and payment",
+          "passed": true,
+          "gold_evidence": [
+            "E033",
+            "E034"
+          ]
+        },
+        {
+          "case_id": "CASE-006",
+          "thread_id": "THR-007",
+          "task": "Procurement vendor and completion",
+          "passed": true,
+          "gold_evidence": [
+            "E038",
+            "E039",
+            "E040"
+          ]
+        },
+        {
+          "case_id": "CASE-007",
+          "thread_id": "THR-008",
+          "task": "Schedule change detection",
+          "passed": true,
+          "gold_evidence": [
+            "E043",
+            "E044"
+          ]
+        },
+        {
+          "case_id": "CASE-008",
+          "thread_id": "THR-009",
+          "task": "Budget approval scope",
+          "passed": true,
+          "gold_evidence": [
+            "E047",
+            "E048"
+          ]
+        },
+        {
+          "case_id": "CASE-009",
+          "thread_id": "THR-010",
+          "task": "Incident cause and resolution",
+          "passed": true,
+          "gold_evidence": [
+            "E050",
+            "E052"
+          ]
+        }
+      ]
+    }
+  },
+  "rubric_benchmark": {
+    "mean_rubric_score": 83.3,
+    "total_traps_triggered": 0,
+    "details": [
+      {
+        "query_id": "Q001",
+        "score": 0.833,
+        "fact_ratio": 0.833,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E005",
+          "E007"
+        ],
+        "cited_eids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "Q002",
+        "score": 0.667,
+        "fact_ratio": 0.667,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E005",
+          "E006",
+          "E007"
+        ],
+        "cited_eids": [
+          "E005",
+          "E006",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "Q003",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E009",
+          "E010"
+        ],
+        "cited_eids": [
+          "E009",
+          "E010"
+        ]
+      },
+      {
+        "query_id": "Q004",
+        "score": 0.667,
+        "fact_ratio": 0.667,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E011",
+          "E012"
+        ],
+        "cited_eids": [
+          "E011",
+          "E012"
+        ]
+      },
+      {
+        "query_id": "Q005",
+        "score": 0.667,
+        "fact_ratio": 0.667,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E014",
+          "E016"
+        ],
+        "cited_eids": [
+          "E014",
+          "E016"
+        ]
+      },
+      {
+        "query_id": "Q006",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E017",
+          "E018"
+        ],
+        "cited_eids": [
+          "E017",
+          "E018"
+        ]
+      },
+      {
+        "query_id": "Q007",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ],
+        "cited_eids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ]
+      },
+      {
+        "query_id": "Q008",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E025",
+          "E028"
+        ],
+        "cited_eids": [
+          "E025",
+          "E028"
+        ]
+      },
+      {
+        "query_id": "Q009",
+        "score": 0.667,
+        "fact_ratio": 0.667,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E032",
+          "E033",
+          "E034"
+        ],
+        "cited_eids": [
+          "E032",
+          "E033",
+          "E034"
+        ]
+      },
+      {
+        "query_id": "Q010",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E037",
+          "E038",
+          "E039",
+          "E040"
+        ],
+        "cited_eids": [
+          "E037",
+          "E038",
+          "E039",
+          "E040"
+        ]
+      },
+      {
+        "query_id": "Q011",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E042",
+          "E043",
+          "E044"
+        ],
+        "cited_eids": [
+          "E042",
+          "E043",
+          "E044"
+        ]
+      },
+      {
+        "query_id": "Q012",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E047",
+          "E048"
+        ],
+        "cited_eids": [
+          "E047",
+          "E048"
+        ]
+      },
+      {
+        "query_id": "Q013",
+        "score": 0.667,
+        "fact_ratio": 0.667,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E049",
+          "E050",
+          "E052"
+        ],
+        "cited_eids": [
+          "E049",
+          "E050",
+          "E052"
+        ]
+      },
+      {
+        "query_id": "Q014",
+        "score": 0.333,
+        "fact_ratio": 0.333,
+        "traps_triggered": 0,
+        "passed": false,
+        "gold_eids": [
+          "E002",
+          "E003"
+        ],
+        "cited_eids": [
+          "E002"
+        ]
+      },
+      {
+        "query_id": "Q015",
+        "score": 1.0,
+        "fact_ratio": 1.0,
+        "traps_triggered": 0,
+        "passed": true,
+        "gold_eids": [
+          "E024"
+        ],
+        "cited_eids": [
+          "E024"
+        ]
+      }
+    ]
+  },
+  "perturbations": {
+    "M0": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M1": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M2": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M3": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M4": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M5": {
+      "f1": 1.0,
+      "passed": true
+    },
+    "M6": {
+      "f1": null,
+      "passed": true
+    },
+    "M7": {
+      "f1": null,
+      "passed": true
+    },
+    "M8": {
+      "f1": null,
+      "passed": true
+    },
+    "M9": {
+      "f1": null,
+      "passed": true
+    },
+    "M10": {
+      "f1": null,
+      "passed": true
+    },
+    "M11": {
+      "f1": null,
+      "passed": true
+    },
+    "M12": {
+      "f1": null,
+      "passed": true
+    },
+    "M13": {
+      "f1": null,
+      "passed": true
+    }
+  },
+  "supplementary": {
+    "total": 19,
+    "passed": 6,
+    "pass_rate": 0.316
+  }
+}

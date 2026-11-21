@@ -1,0 +1,574 @@
+{
+  "heldout_evaluation": {
+    "total_queries": 45,
+    "passed_queries": 17,
+    "overall_accuracy": 0.3778,
+    "category_accuracy": {
+      "paraphrase": 0.7,
+      "new_thread_query": 0.3333,
+      "cross_thread": 0.0,
+      "trap": 0.4,
+      "negative_abstain": 0.3
+    },
+    "details": [
+      {
+        "query_id": "HQ001",
+        "category": "paraphrase",
+        "query": "Which vendor was chosen for the CNC turning center and what was the approved amount?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ002",
+        "category": "paraphrase",
+        "query": "Who signed off on the CNC purchase order and what actions are currently pending?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ003",
+        "category": "paraphrase",
+        "query": "Which paperwork must a student submit to receive an official bonafide certificate?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011",
+          "E012"
+        ]
+      },
+      {
+        "query_id": "HQ004",
+        "category": "paraphrase",
+        "query": "What is the breakdown of processed versus pending bonafide certificate requests?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011",
+          "E012"
+        ]
+      },
+      {
+        "query_id": "HQ005",
+        "category": "paraphrase",
+        "query": "What grounds or halls have been cleared for hosting the tech fest on November 16?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E017",
+          "E018"
+        ]
+      },
+      {
+        "query_id": "HQ006",
+        "category": "paraphrase",
+        "query": "What guard deployment has been finalized for the technical festival locations?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E017",
+          "E018"
+        ]
+      },
+      {
+        "query_id": "HQ007",
+        "category": "paraphrase",
+        "query": "How much was spent to service the UTM and on what date did it resume operations?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ]
+      },
+      {
+        "query_id": "HQ008",
+        "category": "paraphrase",
+        "query": "Provide the schedule and room allocation for the AI in Manufacturing presentation.",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E025"
+        ]
+      },
+      {
+        "query_id": "HQ009",
+        "category": "paraphrase",
+        "query": "Has the conference travel reimbursement claim been disbursed and for what figure?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E032",
+          "E033",
+          "E034"
+        ]
+      },
+      {
+        "query_id": "HQ010",
+        "category": "paraphrase",
+        "query": "Who supplied the new printers and what was the invoice sum?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E037",
+          "E038",
+          "E039",
+          "E040"
+        ]
+      },
+      {
+        "query_id": "HQ011",
+        "category": "new_thread_query",
+        "query": "What price and lead time were quoted by Vendor A during the CNC evaluation?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ012",
+        "category": "new_thread_query",
+        "query": "When did the Dean Administration formally approve the CNC purchase file?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ013",
+        "category": "new_thread_query",
+        "query": "How many total bonafide applications were initially received before verification?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011",
+          "E012"
+        ]
+      },
+      {
+        "query_id": "HQ014",
+        "category": "new_thread_query",
+        "query": "Who issued instructions that bonafide issuance requires semester fee receipt validation?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011",
+          "E012"
+        ]
+      },
+      {
+        "query_id": "HQ015",
+        "category": "new_thread_query",
+        "query": "Why was the Central Lawn declared unavailable for the annual fest on November 16?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E017",
+          "E018"
+        ]
+      },
+      {
+        "query_id": "HQ016",
+        "category": "new_thread_query",
+        "query": "How many total security guards are deployed across both fest venues combined per shift?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E014",
+          "E016"
+        ]
+      },
+      {
+        "query_id": "HQ017",
+        "category": "new_thread_query",
+        "query": "What was the initial inspection and calibration quote for the UTM before repairs?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ]
+      },
+      {
+        "query_id": "HQ018",
+        "category": "new_thread_query",
+        "query": "Which damaged component was replaced during the UTM servicing?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ]
+      },
+      {
+        "query_id": "HQ019",
+        "category": "new_thread_query",
+        "query": "What was the reservation window for Seminar Hall 2 on the day of the AI talk?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E025",
+          "E028"
+        ]
+      },
+      {
+        "query_id": "HQ020",
+        "category": "new_thread_query",
+        "query": "Who organized and coordinated the guest lecture on AI in Manufacturing?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E025"
+        ]
+      },
+      {
+        "query_id": "HQ021",
+        "category": "new_thread_query",
+        "query": "What train or air travel ticket costs were submitted for reimbursement by faculty?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E032",
+          "E033",
+          "E034"
+        ]
+      },
+      {
+        "query_id": "HQ022",
+        "category": "new_thread_query",
+        "query": "Which authority authorized payment of the international conference travel claim?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E033"
+        ]
+      },
+      {
+        "query_id": "HQ023",
+        "category": "new_thread_query",
+        "query": "What was the unit cost of each printer supplied by OfficeTech?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E037",
+          "E038",
+          "E039",
+          "E040"
+        ]
+      },
+      {
+        "query_id": "HQ024",
+        "category": "new_thread_query",
+        "query": "Where was the Manufacturing Processes examination originally scheduled prior to the room shift?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E042",
+          "E043",
+          "E044"
+        ]
+      },
+      {
+        "query_id": "HQ025",
+        "category": "new_thread_query",
+        "query": "What piece of network hardware failed and triggered the Engineering Block connectivity outage?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E049",
+          "E050",
+          "E052"
+        ]
+      },
+      {
+        "query_id": "HQ026",
+        "category": "cross_thread",
+        "query": "What was the combined institutional expenditure for the CNC machine and printer purchases?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ027",
+        "category": "cross_thread",
+        "query": "Which academic activities and exams are scheduled for November 2026?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E042",
+          "E043",
+          "E044"
+        ]
+      },
+      {
+        "query_id": "HQ028",
+        "category": "cross_thread",
+        "query": "What approvals were issued by Dean (Administration) across departmental procurement files?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E033"
+        ]
+      },
+      {
+        "query_id": "HQ029",
+        "category": "cross_thread",
+        "query": "Which equipment was inspected, repaired, or serviced in September 2026?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E022"
+        ]
+      },
+      {
+        "query_id": "HQ030",
+        "category": "cross_thread",
+        "query": "What student applications and venue authorizations were processed between August and September?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011"
+        ]
+      },
+      {
+        "query_id": "HQ031",
+        "category": "trap",
+        "query": "Was the purchase order for the CNC machines awarded to Vendor A?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E005",
+          "E007"
+        ]
+      },
+      {
+        "query_id": "HQ032",
+        "category": "trap",
+        "query": "Did the Dean authorize direct purchasing of the full INR 3.42 lakh consumables list?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E047",
+          "E048"
+        ]
+      },
+      {
+        "query_id": "HQ033",
+        "category": "trap",
+        "query": "Has the Manufacturing Processes exam been postponed to a later date?",
+        "passed": true,
+        "abstained": false,
+        "cited_email_ids": [
+          "E042",
+          "E043",
+          "E044"
+        ]
+      },
+      {
+        "query_id": "HQ034",
+        "category": "trap",
+        "query": "Was the Central Lawn confirmed for the annual fest after appeals?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E017",
+          "E018"
+        ]
+      },
+      {
+        "query_id": "HQ035",
+        "category": "trap",
+        "query": "Did the UTM repair bill exceed INR 30,000 without department head sanction?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E021",
+          "E022",
+          "E023",
+          "E024"
+        ]
+      },
+      {
+        "query_id": "HQ036",
+        "category": "negative_abstain",
+        "query": "What is the revised semester mess fee for campus hostel residents?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E032"
+        ]
+      },
+      {
+        "query_id": "HQ037",
+        "category": "negative_abstain",
+        "query": "Who was elected as the general secretary in the recent student council election?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E011"
+        ]
+      },
+      {
+        "query_id": "HQ038",
+        "category": "negative_abstain",
+        "query": "What textbooks are recommended for the Quantum Mechanics core course?",
+        "passed": true,
+        "abstained": true,
+        "cited_email_ids": []
+      },
+      {
+        "query_id": "HQ039",
+        "category": "negative_abstain",
+        "query": "Has the board approved tenders for constructing a new campus sports complex?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E016"
+        ]
+      },
+      {
+        "query_id": "HQ040",
+        "category": "negative_abstain",
+        "query": "What is the annual performance bonus percentage for technical administrative staff?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E017"
+        ]
+      },
+      {
+        "query_id": "HQ041",
+        "category": "negative_abstain",
+        "query": "Which bus stop timings are assigned for day scholar route 4?",
+        "passed": true,
+        "abstained": true,
+        "cited_email_ids": []
+      },
+      {
+        "query_id": "HQ042",
+        "category": "negative_abstain",
+        "query": "What quotation was accepted for renovating the institute cafeteria kitchen?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E028"
+        ]
+      },
+      {
+        "query_id": "HQ043",
+        "category": "negative_abstain",
+        "query": "When is the convocation rehearsal scheduled for graduating M.Tech scholars?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E013"
+        ]
+      },
+      {
+        "query_id": "HQ044",
+        "category": "negative_abstain",
+        "query": "Who was appointed as the chief warden of the newly opened research hostel?",
+        "passed": true,
+        "abstained": true,
+        "cited_email_ids": []
+      },
+      {
+        "query_id": "HQ045",
+        "category": "negative_abstain",
+        "query": "How many candidates qualified for the Prime Minister Research Fellowship in 2026?",
+        "passed": false,
+        "abstained": false,
+        "cited_email_ids": [
+          "E048"
+        ]
+      }
+    ]
+  },
+  "synthetic_corpus_evaluation": {
+    "total_queries": 15,
+    "passed_queries": 13,
+    "accuracy": 0.8667,
+    "details": [
+      {
+        "query_id": "SQ001",
+        "passed": true
+      },
+      {
+        "query_id": "SQ002",
+        "passed": true
+      },
+      {
+        "query_id": "SQ003",
+        "passed": true
+      },
+      {
+        "query_id": "SQ004",
+        "passed": true
+      },
+      {
+        "query_id": "SQ005",
+        "passed": true
+      },
+      {
+        "query_id": "SQ006",
+        "passed": true
+      },
+      {
+        "query_id": "SQ007",
+        "passed": true
+      },
+      {
+        "query_id": "SQ008",
+        "passed": true
+      },
+      {
+        "query_id": "SQ009",
+        "passed": true
+      },
+      {
+        "query_id": "SQ010",
+        "passed": true
+      },
+      {
+        "query_id": "SQ011",
+        "passed": true
+      },
+      {
+        "query_id": "SQ012",
+        "passed": true
+      },
+      {
+        "query_id": "SQ013",
+        "passed": false
+      },
+      {
+        "query_id": "SQ014",
+        "passed": false
+      },
+      {
+        "query_id": "SQ015",
+        "passed": true
+      }
+    ]
+  }
+}

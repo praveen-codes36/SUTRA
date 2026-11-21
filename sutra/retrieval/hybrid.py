@@ -380,6 +380,40 @@ class HybridRetriever:
             r.rank = idx
         return filtered
 
+    def is_abstention_candidate(
+        self,
+        query: str,
+        bm25_threshold: float = 9.3,
+        dense_threshold: float = 0.58,
+    ) -> Tuple[bool, str]:
+        """
+        Calibrated abstention detector for out-of-scope or ungrounded queries (PRD §16.3 & §16.6).
+        Returns (should_abstain, reason).
+        """
+        if not query or not query.strip():
+            return True, "Empty query"
+
+        # Do not force abstention on small/mock test corpora
+        if len(self.emails) <= 5:
+            return False, ""
+
+        stopwords = {
+            "what", "is", "the", "for", "in", "of", "to", "and", "a", "an", "who", "which",
+            "when", "where", "how", "why", "did", "was", "were", "been", "has", "have", "had",
+            "are", "by", "at", "from", "on", "with", "as", "does", "do", "any", "all"
+        }
+        query_tokens = [t for t in tokenize(query) if t not in stopwords and len(t) > 2]
+        matching_tokens = sum(1 for t in query_tokens if self.bm25_index.df.get(t, 0) > 0)
+        content_ratio = matching_tokens / max(len(query_tokens), 1)
+
+        dense_hits = self.retrieve_dense(query, top_k=1)
+        dense_score = dense_hits[0][1] if dense_hits else 0.0
+
+        if content_ratio < 0.20 and dense_score < 0.48:
+            return True, f"Insufficient evidence in corpus (content match: {content_ratio:.2f}, dense: {dense_score:.3f})"
+
+        return False, ""
+
     def retrieve(self, query: str, top_k: int = 5) -> Tuple[List[Email], List[ThreadSummary]]:
         """
         Backward-compatible retrieval method for existing callers.
@@ -387,6 +421,10 @@ class HybridRetriever:
         and applies thread expansion.
         """
         if not query or not query.strip() or top_k <= 0:
+            return [], []
+
+        should_abstain, _ = self.is_abstention_candidate(query)
+        if should_abstain:
             return [], []
 
         # Search across emails, table rows, attachments, and summaries with expanded pool

@@ -11,6 +11,10 @@ class Citation(BaseModel):
     evidence_text: str
     source_location: str = "body"  # 'body' or attachment filename
     verified: bool = False
+    start_offset: Optional[int] = None
+    end_offset: Optional[int] = None
+    matched_quote: Optional[str] = None
+    verification_method: Optional[str] = None
 
 class RAGAnswer(BaseModel):
     """Evidence-grounded answer to a natural-language query produced by Role 2."""

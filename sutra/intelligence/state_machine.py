@@ -68,10 +68,11 @@ class ThreadLifecycleTracker:
         transitions: List[DecisionTransition] = []
         emails_by_id = {e.email_id: e for e in emails}
 
+        default_trig = emails[0].email_id if emails else ""
         for d in decisions:
             if d.is_conditional:
                 # Transition from proposed -> conditionally_approved
-                trig = d.evidence_references[0] if d.evidence_references else "E000"
+                trig = d.evidence_references[0] if d.evidence_references else default_trig
                 ts = emails_by_id[trig].iso_timestamp if trig in emails_by_id else ""
                 transitions.append(DecisionTransition(
                     decision_id=d.decision_id,
@@ -82,7 +83,7 @@ class ThreadLifecycleTracker:
                     timestamp=ts,
                 ))
             elif d.status == "approved":
-                trig = d.evidence_references[0] if d.evidence_references else "E000"
+                trig = d.evidence_references[0] if d.evidence_references else default_trig
                 ts = emails_by_id[trig].iso_timestamp if trig in emails_by_id else ""
                 transitions.append(DecisionTransition(
                     decision_id=d.decision_id,
@@ -94,7 +95,7 @@ class ThreadLifecycleTracker:
                 ))
 
             if d.superseded_by:
-                trig = d.evidence_references[-1] if d.evidence_references else "E000"
+                trig = d.evidence_references[-1] if d.evidence_references else default_trig
                 ts = emails_by_id[trig].iso_timestamp if trig in emails_by_id else ""
                 transitions.append(DecisionTransition(
                     decision_id=d.decision_id,
@@ -113,11 +114,12 @@ class ThreadLifecycleTracker:
         transitions: List[ActionTransition] = []
         emails_by_id = {e.email_id: e for e in emails}
 
+        default_trig = emails[0].email_id if emails else ""
         for a in actions:
             if a.status == ActionStatus.NONE_STATED:
                 continue
 
-            trig = a.evidence_references[0] if a.evidence_references else "E000"
+            trig = a.evidence_references[0] if a.evidence_references else default_trig
             ts = emails_by_id[trig].iso_timestamp if trig in emails_by_id else ""
 
             # Creation transition
