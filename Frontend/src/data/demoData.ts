@@ -1,0 +1,7127 @@
+import type { DemoDataset } from '../types/api';
+
+export const DEMO_DATASET: DemoDataset = {
+  "meta": {
+    "dataset": "Official benchmark (synthetic)",
+    "as_of": "2026-10-30T11:00:00Z",
+    "is_demo": true,
+    "visibility_policy": "THREAD_PARTICIPANT",
+    "counts": {
+      "emails": 52,
+      "threads": 10,
+      "attachments": 11,
+      "sample_queries": 15,
+      "evaluation_cases": 9
+    },
+    "notice": "Demo dataset: emails and attachments are the supplied synthetic benchmark. Summaries, decisions, actions and answers are pre-authored annotations, not live model output."
+  },
+  "personas": [
+    {
+      "persona_id": "inst.admin",
+      "display_name": "Demo Institutional Administrator",
+      "role_code": "INSTITUTION_ADMIN",
+      "address": null
+    },
+    {
+      "persona_id": "head.mech",
+      "display_name": "Demo Department Head",
+      "role_code": "DEPT_HEAD",
+      "address": "mech.hod@northbridge.edu"
+    },
+    {
+      "persona_id": "faculty.mech",
+      "display_name": "Demo Faculty Member",
+      "role_code": "FACULTY",
+      "address": "mech.faculty@northbridge.edu"
+    },
+    {
+      "persona_id": "staff.purchase",
+      "display_name": "Demo Administrative Staff",
+      "role_code": "ADMIN_STAFF",
+      "address": "purchase@northbridge.edu"
+    },
+    {
+      "persona_id": "student.demo",
+      "display_name": "Demo Requesting User",
+      "role_code": "REQUESTER",
+      "address": "class.representatives@northbridge.edu"
+    },
+    {
+      "persona_id": "sysadmin",
+      "display_name": "Demo System Administrator",
+      "role_code": "SYSTEM_ADMIN",
+      "address": null
+    },
+    {
+      "persona_id": "compliance",
+      "display_name": "Demo Compliance Administrator",
+      "role_code": "COMPLIANCE_ADMIN",
+      "address": null
+    }
+  ],
+  "directory": [
+    {
+      "address": "accounts@northbridge.edu",
+      "role": "Accounts Section",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "admin.officer@northbridge.edu",
+      "role": "Administrative Officer",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "class.representatives@northbridge.edu",
+      "role": "Class Representatives",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "dean.admin@northbridge.edu",
+      "role": "Dean (Administration)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "dean.research@northbridge.edu",
+      "role": "Dean (Research)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "dean.student@northbridge.edu",
+      "role": "Dean (Student Affairs)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "department.office@northbridge.edu",
+      "role": "Department Office",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "exam.cell@northbridge.edu",
+      "role": "Examination Cell",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "facilities@northbridge.edu",
+      "role": "Facilities",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "faculty.coordinators@northbridge.edu",
+      "role": "Faculty Coordinators",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "faculty.member@northbridge.edu",
+      "role": "Faculty Member",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "fest.secretary@northbridge.edu",
+      "role": "Fest Secretary",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "it.helpdesk@northbridge.edu",
+      "role": "IT Helpdesk",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "it.network@northbridge.edu",
+      "role": "IT Network Team",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "it.support@northbridge.edu",
+      "role": "IT Support",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "lab.coordinator@northbridge.edu",
+      "role": "Lab Coordinator",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "lab.engineer@northbridge.edu",
+      "role": "Lab Engineer (Materials Testing Lab)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "maintenance@northbridge.edu",
+      "role": "Maintenance Section",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "mech.exam.coordinator@northbridge.edu",
+      "role": "Mechanical Exam Coordinator",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "mech.faculty@northbridge.edu",
+      "role": "Mechanical Faculty",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "mech.hod@northbridge.edu",
+      "role": "Head of Department (Mechanical)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "office.superintendent@northbridge.edu",
+      "role": "Office Superintendent",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "pi.lab@northbridge.edu",
+      "role": "Principal Investigator (Lab)",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "purchase@northbridge.edu",
+      "role": "Purchase Section",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "registrar@northbridge.edu",
+      "role": "Registrar",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "research.office@northbridge.edu",
+      "role": "Research Office",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "security@northbridge.edu",
+      "role": "Security Office",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "seminar.coordinator@northbridge.edu",
+      "role": "Seminar Coordinator",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": false
+    },
+    {
+      "address": "seminar.support@northbridge.edu",
+      "role": "Seminar Support",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    },
+    {
+      "address": "student.affairs@northbridge.edu",
+      "role": "Student Affairs",
+      "role_source": "INFERRED_FROM_ADDRESS",
+      "is_shared_mailbox": true
+    }
+  ],
+  "emails": [
+    {
+      "email_id": "E001",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-02T09:15:00Z",
+      "timestamp_local": "2026-09-02T14:45:00+05:30",
+      "sender": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.faculty@northbridge.edu",
+          "role": "Mechanical Faculty",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "We need one CNC turning centre for the Manufacturing Lab. Please collect three technical and commercial quotations. The requirement note is attached.",
+      "body_preview": "We need one CNC turning centre for the Manufacturing Lab. Please collect three technical and commercial quotations. The requirement note is …",
+      "in_reply_to": null,
+      "attachments": [
+        {
+          "attachment_id": "att-cnc-requirement-note",
+          "filename": "cnc_requirement_note.txt",
+          "status": "READY",
+          "size_bytes": 255,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E002",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-04T11:20:00Z",
+      "timestamp_local": "2026-09-04T16:50:00+05:30",
+      "sender": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.faculty@northbridge.edu",
+          "role": "Mechanical Faculty",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Quotations received: Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh, Vendor C INR 19.1 lakh. Vendor B is lowest, subject to technical compliance.",
+      "body_preview": "Quotations received: Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh, Vendor C INR 19.1 lakh. Vendor B is lowest, subject to technical compli…",
+      "in_reply_to": "E001",
+      "attachments": [
+        {
+          "attachment_id": "att-cnc-vendor-comparison",
+          "filename": "cnc_vendor_comparison.csv",
+          "status": "READY",
+          "size_bytes": 193,
+          "detected_mime": "text/csv",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 18.4 lakh",
+          "normalized_value": 1840000,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 17.9 lakh",
+          "normalized_value": 1790000,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 19.1 lakh",
+          "normalized_value": 1910000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E003",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-05T08:40:00Z",
+      "timestamp_local": "2026-09-05T14:10:00+05:30",
+      "sender": {
+        "address": "lab.coordinator@northbridge.edu",
+        "role": "Lab Coordinator",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Technical committee found Vendor A does not meet the spindle speed range. Vendor B meets all mandatory specifications and offers delivery within eight weeks. Vendor C is compliant but has a longer delivery period.",
+      "body_preview": "Technical committee found Vendor A does not meet the spindle speed range. Vendor B meets all mandatory specifications and offers delivery wi…",
+      "in_reply_to": "E002",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E004",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-07T10:05:00Z",
+      "timestamp_local": "2026-09-07T15:35:00+05:30",
+      "sender": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "dean.admin@northbridge.edu",
+          "role": "Dean (Administration)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "The department recommends Vendor B at INR 17.9 lakh based on technical compliance and commercial comparison. Please approve procurement.",
+      "body_preview": "The department recommends Vendor B at INR 17.9 lakh based on technical compliance and commercial comparison. Please approve procurement.",
+      "in_reply_to": "E003",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 17.9 lakh",
+          "normalized_value": 1790000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E005",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-08T12:30:00Z",
+      "timestamp_local": "2026-09-08T18:00:00+05:30",
+      "sender": {
+        "address": "dean.admin@northbridge.edu",
+        "role": "Dean (Administration)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Approved. Proceed with Vendor B for INR 17.9 lakh, subject to standard purchase terms and budget confirmation. Purchase section may initiate the purchase order.",
+      "body_preview": "Approved. Proceed with Vendor B for INR 17.9 lakh, subject to standard purchase terms and budget confirmation. Purchase section may initiate…",
+      "in_reply_to": "E004",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 17.9 lakh",
+          "normalized_value": 1790000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E006",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-09T09:00:00Z",
+      "timestamp_local": "2026-09-09T14:30:00+05:30",
+      "sender": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Accounts confirmed budget availability. Purchase order is being prepared. Please issue it to the vendor by 11 September 2026.",
+      "body_preview": "Accounts confirmed budget availability. Purchase order is being prepared. Please issue it to the vendor by 11 September 2026.",
+      "in_reply_to": "E005",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E007",
+      "thread_key": "THR-001",
+      "subject": "CNC machine procurement",
+      "timestamp": "2026-09-11T15:10:00Z",
+      "timestamp_local": "2026-09-11T20:40:00+05:30",
+      "sender": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.admin@northbridge.edu",
+          "role": "Dean (Administration)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Purchase order has been sent to Vendor B. Vendor acknowledged receipt and confirmed the eight-week delivery schedule. Delivery and installation remain pending.",
+      "body_preview": "Purchase order has been sent to Vendor B. Vendor acknowledged receipt and confirmed the eight-week delivery schedule. Delivery and installat…",
+      "in_reply_to": "E006",
+      "attachments": [
+        {
+          "attachment_id": "att-cnc-purchase-order",
+          "filename": "cnc_purchase_order.txt",
+          "status": "READY",
+          "size_bytes": 238,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E008",
+      "thread_key": "THR-002",
+      "subject": "Bonafide certificate requests",
+      "timestamp": "2026-09-10T06:30:00Z",
+      "timestamp_local": "2026-09-10T12:00:00+05:30",
+      "sender": {
+        "address": "student.affairs@northbridge.edu",
+        "role": "Student Affairs",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "registrar@northbridge.edu",
+          "role": "Registrar",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Final-year students need bonafide certificates for scholarship renewal. Please confirm required documents and processing timeline.",
+      "body_preview": "Final-year students need bonafide certificates for scholarship renewal. Please confirm required documents and processing timeline.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E009",
+      "thread_key": "THR-002",
+      "subject": "Bonafide certificate requests",
+      "timestamp": "2026-09-10T09:10:00Z",
+      "timestamp_local": "2026-09-10T14:40:00+05:30",
+      "sender": {
+        "address": "registrar@northbridge.edu",
+        "role": "Registrar",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "student.affairs@northbridge.edu",
+          "role": "Student Affairs",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Students must submit institute ID copy and current semester fee receipt. Applications received by 16 September will be processed by 20 September.",
+      "body_preview": "Students must submit institute ID copy and current semester fee receipt. Applications received by 16 September will be processed by 20 Septe…",
+      "in_reply_to": "E008",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E010",
+      "thread_key": "THR-002",
+      "subject": "Bonafide certificate requests",
+      "timestamp": "2026-09-11T07:45:00Z",
+      "timestamp_local": "2026-09-11T13:15:00+05:30",
+      "sender": {
+        "address": "department.office@northbridge.edu",
+        "role": "Department Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "student.affairs@northbridge.edu",
+          "role": "Student Affairs",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "class.representatives@northbridge.edu",
+          "role": "Class Representatives",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Please circulate the requirements. The department office will verify enrollment before forwarding complete applications to the Registrar.",
+      "body_preview": "Please circulate the requirements. The department office will verify enrollment before forwarding complete applications to the Registrar.",
+      "in_reply_to": "E009",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E011",
+      "thread_key": "THR-002",
+      "subject": "Bonafide certificate requests",
+      "timestamp": "2026-09-17T10:00:00Z",
+      "timestamp_local": "2026-09-17T15:30:00+05:30",
+      "sender": {
+        "address": "student.affairs@northbridge.edu",
+        "role": "Student Affairs",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "registrar@northbridge.edu",
+          "role": "Registrar",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "42 applications were received before the deadline. Four are incomplete because fee receipts are missing. The remaining 38 verified applications have been forwarded to the Registrar.",
+      "body_preview": "42 applications were received before the deadline. Four are incomplete because fee receipts are missing. The remaining 38 verified applicati…",
+      "in_reply_to": "E010",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E012",
+      "thread_key": "THR-002",
+      "subject": "Bonafide certificate requests",
+      "timestamp": "2026-09-19T13:25:00Z",
+      "timestamp_local": "2026-09-19T18:55:00+05:30",
+      "sender": {
+        "address": "registrar@northbridge.edu",
+        "role": "Registrar",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "student.affairs@northbridge.edu",
+          "role": "Student Affairs",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "38 bonafide certificates are ready for collection. Four incomplete applications remain on hold pending fee receipts.",
+      "body_preview": "38 bonafide certificates are ready for collection. Four incomplete applications remain on hold pending fee receipts.",
+      "in_reply_to": "E011",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E013",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-08-18T08:00:00Z",
+      "timestamp_local": "2026-08-18T13:30:00+05:30",
+      "sender": {
+        "address": "fest.secretary@northbridge.edu",
+        "role": "Fest Secretary",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "dean.student@northbridge.edu",
+          "role": "Dean (Student Affairs)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Annual technical fest is proposed for 14-16 November 2026. We request Main Auditorium and Central Lawn. Please confirm availability.",
+      "body_preview": "Annual technical fest is proposed for 14-16 November 2026. We request Main Auditorium and Central Lawn. Please confirm availability.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E014",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-08-19T10:30:00Z",
+      "timestamp_local": "2026-08-19T16:00:00+05:30",
+      "sender": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "fest.secretary@northbridge.edu",
+          "role": "Fest Secretary",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.student@northbridge.edu",
+          "role": "Dean (Student Affairs)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Main Auditorium is available on all three dates. Central Lawn is available on 14 and 15 November only due to maintenance on 16 November.",
+      "body_preview": "Main Auditorium is available on all three dates. Central Lawn is available on 14 and 15 November only due to maintenance on 16 November.",
+      "in_reply_to": "E013",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E015",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-08-20T09:00:00Z",
+      "timestamp_local": "2026-08-20T14:30:00+05:30",
+      "sender": {
+        "address": "fest.secretary@northbridge.edu",
+        "role": "Fest Secretary",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.student@northbridge.edu",
+          "role": "Dean (Student Affairs)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Outdoor activities can move to East Sports Ground on 16 November. Please place a provisional hold on the other venues.",
+      "body_preview": "Outdoor activities can move to East Sports Ground on 16 November. Please place a provisional hold on the other venues.",
+      "in_reply_to": "E014",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E016",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-08-21T12:15:00Z",
+      "timestamp_local": "2026-08-21T17:45:00+05:30",
+      "sender": {
+        "address": "dean.student@northbridge.edu",
+        "role": "Dean (Student Affairs)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "fest.secretary@northbridge.edu",
+          "role": "Fest Secretary",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Approved: Main Auditorium for 14-16 November, Central Lawn for 14-15 November, and East Sports Ground for outdoor activities on 16 November. Facilities should confirm power and security by 30 October.",
+      "body_preview": "Approved: Main Auditorium for 14-16 November, Central Lawn for 14-15 November, and East Sports Ground for outdoor activities on 16 November.…",
+      "in_reply_to": "E015",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E017",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-10-28T07:40:00Z",
+      "timestamp_local": "2026-10-28T13:10:00+05:30",
+      "sender": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "fest.secretary@northbridge.edu",
+          "role": "Fest Secretary",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "security@northbridge.edu",
+          "role": "Security Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Power distribution plan is attached. Security Office, please provide staffing plan by 2 November.",
+      "body_preview": "Power distribution plan is attached. Security Office, please provide staffing plan by 2 November.",
+      "in_reply_to": "E016",
+      "attachments": [
+        {
+          "attachment_id": "att-fest-power-plan",
+          "filename": "fest_power_plan.txt",
+          "status": "READY",
+          "size_bytes": 228,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E018",
+      "thread_key": "THR-003",
+      "subject": "Annual technical fest venues",
+      "timestamp": "2026-10-30T11:00:00Z",
+      "timestamp_local": "2026-10-30T16:30:00+05:30",
+      "sender": {
+        "address": "security@northbridge.edu",
+        "role": "Security Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "fest.secretary@northbridge.edu",
+          "role": "Fest Secretary",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Security staffing confirmed: six guards per shift at Main Auditorium and four at East Sports Ground. One supervisor will coordinate across venues.",
+      "body_preview": "Security staffing confirmed: six guards per shift at Main Auditorium and four at East Sports Ground. One supervisor will coordinate across v…",
+      "in_reply_to": "E017",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E019",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-21T05:50:00Z",
+      "timestamp_local": "2026-09-21T11:20:00+05:30",
+      "sender": {
+        "address": "lab.engineer@northbridge.edu",
+        "role": "Lab Engineer (Materials Testing Lab)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "maintenance@northbridge.edu",
+          "role": "Maintenance Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "UTM in Materials Testing Lab has unstable load readings and is out of service. Please arrange inspection.",
+      "body_preview": "UTM in Materials Testing Lab has unstable load readings and is out of service. Please arrange inspection.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E020",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-21T09:35:00Z",
+      "timestamp_local": "2026-09-21T15:05:00+05:30",
+      "sender": {
+        "address": "maintenance@northbridge.edu",
+        "role": "Maintenance Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "lab.engineer@northbridge.edu",
+          "role": "Lab Engineer (Materials Testing Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Technician can visit on 23 September. Inspection and calibration estimate is INR 28,000, excluding parts.",
+      "body_preview": "Technician can visit on 23 September. Inspection and calibration estimate is INR 28,000, excluding parts.",
+      "in_reply_to": "E019",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 28,000,",
+          "normalized_value": 28000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E021",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-22T08:15:00Z",
+      "timestamp_local": "2026-09-22T13:45:00+05:30",
+      "sender": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "maintenance@northbridge.edu",
+          "role": "Maintenance Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Approved inspection and calibration up to INR 28,000. Any replacement parts require a separate quote and approval.",
+      "body_preview": "Approved inspection and calibration up to INR 28,000. Any replacement parts require a separate quote and approval.",
+      "in_reply_to": "E020",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 28,000",
+          "normalized_value": 28000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E022",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-24T10:20:00Z",
+      "timestamp_local": "2026-09-24T15:50:00+05:30",
+      "sender": {
+        "address": "maintenance@northbridge.edu",
+        "role": "Maintenance Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "lab.engineer@northbridge.edu",
+          "role": "Lab Engineer (Materials Testing Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Technician found a damaged load-cell connector. Replacement quote is INR 6,500; separate approval is requested.",
+      "body_preview": "Technician found a damaged load-cell connector. Replacement quote is INR 6,500; separate approval is requested.",
+      "in_reply_to": "E021",
+      "attachments": [
+        {
+          "attachment_id": "att-utm-repair-quote",
+          "filename": "utm_repair_quote.txt",
+          "status": "READY",
+          "size_bytes": 204,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 6,500",
+          "normalized_value": 6500,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E023",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-25T07:55:00Z",
+      "timestamp_local": "2026-09-25T13:25:00+05:30",
+      "sender": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "maintenance@northbridge.edu",
+          "role": "Maintenance Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Additional INR 6,500 replacement is approved. Complete repair and calibration certificate by 29 September.",
+      "body_preview": "Additional INR 6,500 replacement is approved. Complete repair and calibration certificate by 29 September.",
+      "in_reply_to": "E022",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 6,500",
+          "normalized_value": 6500,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E024",
+      "thread_key": "THR-004",
+      "subject": "UTM maintenance",
+      "timestamp": "2026-09-28T14:00:00Z",
+      "timestamp_local": "2026-09-28T19:30:00+05:30",
+      "sender": {
+        "address": "maintenance@northbridge.edu",
+        "role": "Maintenance Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "lab.engineer@northbridge.edu",
+          "role": "Lab Engineer (Materials Testing Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Connector replaced and calibration completed. UTM passed verification and can be returned to service. Certificate attached.",
+      "body_preview": "Connector replaced and calibration completed. UTM passed verification and can be returned to service. Certificate attached.",
+      "in_reply_to": "E023",
+      "attachments": [
+        {
+          "attachment_id": "att-utm-calibration-certificate",
+          "filename": "utm_calibration_certificate.txt",
+          "status": "READY",
+          "size_bytes": 258,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E025",
+      "thread_key": "THR-005",
+      "subject": "AI in Manufacturing seminar",
+      "timestamp": "2026-10-01T06:00:00Z",
+      "timestamp_local": "2026-10-01T11:30:00+05:30",
+      "sender": {
+        "address": "seminar.coordinator@northbridge.edu",
+        "role": "Seminar Coordinator",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Seminar planned for 12 November 2026, 10:00-13:00. Please reserve Seminar Hall 2 and arrange projector.",
+      "body_preview": "Seminar planned for 12 November 2026, 10:00-13:00. Please reserve Seminar Hall 2 and arrange projector.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E026",
+      "thread_key": "THR-005",
+      "subject": "AI in Manufacturing seminar",
+      "timestamp": "2026-10-01T08:30:00Z",
+      "timestamp_local": "2026-10-01T14:00:00+05:30",
+      "sender": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "seminar.coordinator@northbridge.edu",
+          "role": "Seminar Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Seminar Hall 2 is available 09:00-14:00. A ceiling projector is installed. Please confirm attendance and seating layout.",
+      "body_preview": "Seminar Hall 2 is available 09:00-14:00. A ceiling projector is installed. Please confirm attendance and seating layout.",
+      "in_reply_to": "E025",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E027",
+      "thread_key": "THR-005",
+      "subject": "AI in Manufacturing seminar",
+      "timestamp": "2026-10-02T07:15:00Z",
+      "timestamp_local": "2026-10-02T12:45:00+05:30",
+      "sender": {
+        "address": "seminar.coordinator@northbridge.edu",
+        "role": "Seminar Coordinator",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "seminar.support@northbridge.edu",
+          "role": "Seminar Support",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Expected attendance is 85. Classroom seating is preferred. Please arrange two wireless microphones and a laptop adapter.",
+      "body_preview": "Expected attendance is 85. Classroom seating is preferred. Please arrange two wireless microphones and a laptop adapter.",
+      "in_reply_to": "E026",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E028",
+      "thread_key": "THR-005",
+      "subject": "AI in Manufacturing seminar",
+      "timestamp": "2026-10-03T09:45:00Z",
+      "timestamp_local": "2026-10-03T15:15:00+05:30",
+      "sender": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "seminar.coordinator@northbridge.edu",
+          "role": "Seminar Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Hall reserved for 12 November, 09:00-14:00. Projector and classroom seating confirmed. Seminar Support will arrange microphones and adapter.",
+      "body_preview": "Hall reserved for 12 November, 09:00-14:00. Projector and classroom seating confirmed. Seminar Support will arrange microphones and adapter.",
+      "in_reply_to": "E027",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E029",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-08-25T07:20:00Z",
+      "timestamp_local": "2026-08-25T12:50:00+05:30",
+      "sender": {
+        "address": "faculty.member@northbridge.edu",
+        "role": "Faculty Member",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "I attended National Materials Conference in Pune from 18-20 August. Travel tickets and hotel invoice are attached for reimbursement.",
+      "body_preview": "I attended National Materials Conference in Pune from 18-20 August. Travel tickets and hotel invoice are attached for reimbursement.",
+      "in_reply_to": null,
+      "attachments": [
+        {
+          "attachment_id": "att-conference-travel-claim",
+          "filename": "conference_travel_claim.txt",
+          "status": "READY",
+          "size_bytes": 166,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E030",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-08-27T10:10:00Z",
+      "timestamp_local": "2026-08-27T15:40:00+05:30",
+      "sender": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "faculty.member@northbridge.edu",
+          "role": "Faculty Member",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Claim is missing return boarding pass and conference attendance certificate. Please submit both.",
+      "body_preview": "Claim is missing return boarding pass and conference attendance certificate. Please submit both.",
+      "in_reply_to": "E029",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E031",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-08-29T08:05:00Z",
+      "timestamp_local": "2026-08-29T13:35:00+05:30",
+      "sender": {
+        "address": "faculty.member@northbridge.edu",
+        "role": "Faculty Member",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Return boarding pass and attendance certificate are attached. Please confirm completeness.",
+      "body_preview": "Return boarding pass and attendance certificate are attached. Please confirm completeness.",
+      "in_reply_to": "E030",
+      "attachments": [
+        {
+          "attachment_id": "att-return-boarding-pass",
+          "filename": "return_boarding_pass.txt",
+          "status": "READY",
+          "size_bytes": 84,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        },
+        {
+          "attachment_id": "att-conference-attendance-certificate",
+          "filename": "conference_attendance_certificate.txt",
+          "status": "READY",
+          "size_bytes": 129,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E032",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-09-01T12:00:00Z",
+      "timestamp_local": "2026-09-01T17:30:00+05:30",
+      "sender": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "faculty.member@northbridge.edu",
+          "role": "Faculty Member",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Documents are complete. Eligible reimbursement is INR 24,650 and has been forwarded for approval.",
+      "body_preview": "Documents are complete. Eligible reimbursement is INR 24,650 and has been forwarded for approval.",
+      "in_reply_to": "E031",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 24,650",
+          "normalized_value": 24650,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E033",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-09-02T09:30:00Z",
+      "timestamp_local": "2026-09-02T15:00:00+05:30",
+      "sender": {
+        "address": "dean.research@northbridge.edu",
+        "role": "Dean (Research)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "faculty.member@northbridge.edu",
+          "role": "Faculty Member",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Approved reimbursement of INR 24,650 as per institute travel policy. Accounts may process payment.",
+      "body_preview": "Approved reimbursement of INR 24,650 as per institute travel policy. Accounts may process payment.",
+      "in_reply_to": "E032",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 24,650",
+          "normalized_value": 24650,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E034",
+      "thread_key": "THR-006",
+      "subject": "Faculty conference reimbursement",
+      "timestamp": "2026-09-05T06:45:00Z",
+      "timestamp_local": "2026-09-05T12:15:00+05:30",
+      "sender": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "faculty.member@northbridge.edu",
+          "role": "Faculty Member",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "INR 24,650 was transferred on 4 September 2026. Claim is closed.",
+      "body_preview": "INR 24,650 was transferred on 4 September 2026. Claim is closed.",
+      "in_reply_to": "E033",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 24,650",
+          "normalized_value": 24650,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E035",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-05T05:30:00Z",
+      "timestamp_local": "2026-10-05T11:00:00+05:30",
+      "sender": {
+        "address": "office.superintendent@northbridge.edu",
+        "role": "Office Superintendent",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "admin.officer@northbridge.edu",
+          "role": "Administrative Officer",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Department office requires two network laser printers. Minimum specifications are attached.",
+      "body_preview": "Department office requires two network laser printers. Minimum specifications are attached.",
+      "in_reply_to": null,
+      "attachments": [
+        {
+          "attachment_id": "att-printer-specifications",
+          "filename": "printer_specifications.txt",
+          "status": "READY",
+          "size_bytes": 164,
+          "detected_mime": "text/plain",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E036",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-07T08:10:00Z",
+      "timestamp_local": "2026-10-07T13:40:00+05:30",
+      "sender": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "office.superintendent@northbridge.edu",
+          "role": "Office Superintendent",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "admin.officer@northbridge.edu",
+          "role": "Administrative Officer",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Quotes: Printwell INR 32,000 each, OfficeTech INR 29,500 each, PaperPro INR 34,000 each. OfficeTech is lowest; technical review is underway.",
+      "body_preview": "Quotes: Printwell INR 32,000 each, OfficeTech INR 29,500 each, PaperPro INR 34,000 each. OfficeTech is lowest; technical review is underway.",
+      "in_reply_to": "E035",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 32,000",
+          "normalized_value": 32000,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 29,500",
+          "normalized_value": 29500,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 34,000",
+          "normalized_value": 34000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E037",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-08T09:00:00Z",
+      "timestamp_local": "2026-10-08T14:30:00+05:30",
+      "sender": {
+        "address": "it.support@northbridge.edu",
+        "role": "IT Support",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "office.superintendent@northbridge.edu",
+          "role": "Office Superintendent",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "OfficeTech model supports network printing and duplex features with one-year onsite warranty. All three models meet minimum specifications.",
+      "body_preview": "OfficeTech model supports network printing and duplex features with one-year onsite warranty. All three models meet minimum specifications.",
+      "in_reply_to": "E036",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E038",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-09T10:40:00Z",
+      "timestamp_local": "2026-10-09T16:10:00+05:30",
+      "sender": {
+        "address": "admin.officer@northbridge.edu",
+        "role": "Administrative Officer",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "office.superintendent@northbridge.edu",
+          "role": "Office Superintendent",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Approved two OfficeTech printers at INR 29,500 each, total INR 59,000, from office equipment budget. Issue order by 14 October.",
+      "body_preview": "Approved two OfficeTech printers at INR 29,500 each, total INR 59,000, from office equipment budget. Issue order by 14 October.",
+      "in_reply_to": "E037",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 29,500",
+          "normalized_value": 29500,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 59,000,",
+          "normalized_value": 59000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E039",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-13T13:20:00Z",
+      "timestamp_local": "2026-10-13T18:50:00+05:30",
+      "sender": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "admin.officer@northbridge.edu",
+          "role": "Administrative Officer",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "office.superintendent@northbridge.edu",
+          "role": "Office Superintendent",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Purchase order issued to OfficeTech. Delivery expected by 20 October.",
+      "body_preview": "Purchase order issued to OfficeTech. Delivery expected by 20 October.",
+      "in_reply_to": "E038",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E040",
+      "thread_key": "THR-007",
+      "subject": "Department office printers",
+      "timestamp": "2026-10-21T08:50:00Z",
+      "timestamp_local": "2026-10-21T14:20:00+05:30",
+      "sender": {
+        "address": "office.superintendent@northbridge.edu",
+        "role": "Office Superintendent",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "it.support@northbridge.edu",
+          "role": "IT Support",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Both printers delivered and installed. IT Support verified network printing and duplex operation. Request complete.",
+      "body_preview": "Both printers delivered and installed. IT Support verified network printing and duplex operation. Request complete.",
+      "in_reply_to": "E039",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E041",
+      "thread_key": "THR-008",
+      "subject": "Mid-semester examination timetable",
+      "timestamp": "2026-10-12T06:00:00Z",
+      "timestamp_local": "2026-10-12T11:30:00+05:30",
+      "sender": {
+        "address": "exam.cell@northbridge.edu",
+        "role": "Examination Cell",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "faculty.coordinators@northbridge.edu",
+          "role": "Faculty Coordinators",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Mid-semester timetable is being finalized for 2-10 November 2026. Report room or faculty conflicts by 15 October.",
+      "body_preview": "Mid-semester timetable is being finalized for 2-10 November 2026. Report room or faculty conflicts by 15 October.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E042",
+      "thread_key": "THR-008",
+      "subject": "Mid-semester examination timetable",
+      "timestamp": "2026-10-14T10:20:00Z",
+      "timestamp_local": "2026-10-14T15:50:00+05:30",
+      "sender": {
+        "address": "mech.exam.coordinator@northbridge.edu",
+        "role": "Mechanical Exam Coordinator",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "exam.cell@northbridge.edu",
+          "role": "Examination Cell",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Manufacturing Processes exam on 5 November at 14:00 has a room conflict because Lab 1 is booked for accreditation. Request Lecture Hall 4.",
+      "body_preview": "Manufacturing Processes exam on 5 November at 14:00 has a room conflict because Lab 1 is booked for accreditation. Request Lecture Hall 4.",
+      "in_reply_to": "E041",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E043",
+      "thread_key": "THR-008",
+      "subject": "Mid-semester examination timetable",
+      "timestamp": "2026-10-15T07:30:00Z",
+      "timestamp_local": "2026-10-15T13:00:00+05:30",
+      "sender": {
+        "address": "exam.cell@northbridge.edu",
+        "role": "Examination Cell",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.exam.coordinator@northbridge.edu",
+          "role": "Mechanical Exam Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Lecture Hall 4 is available. Exam remains 5 November at 14:00; venue changes from Lab 1 to Lecture Hall 4. Inform students and invigilators.",
+      "body_preview": "Lecture Hall 4 is available. Exam remains 5 November at 14:00; venue changes from Lab 1 to Lecture Hall 4. Inform students and invigilators.",
+      "in_reply_to": "E042",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E044",
+      "thread_key": "THR-008",
+      "subject": "Mid-semester examination timetable",
+      "timestamp": "2026-10-16T08:00:00Z",
+      "timestamp_local": "2026-10-16T13:30:00+05:30",
+      "sender": {
+        "address": "department.office@northbridge.edu",
+        "role": "Department Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "mech.exam.coordinator@northbridge.edu",
+          "role": "Mechanical Exam Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "exam.cell@northbridge.edu",
+          "role": "Examination Cell",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Revised venue circulated to enrolled students and invigilators. Date and time are unchanged.",
+      "body_preview": "Revised venue circulated to enrolled students and invigilators. Date and time are unchanged.",
+      "in_reply_to": "E043",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E045",
+      "thread_key": "THR-009",
+      "subject": "Research grant consumables budget",
+      "timestamp": "2026-09-12T09:10:00Z",
+      "timestamp_local": "2026-09-12T14:40:00+05:30",
+      "sender": {
+        "address": "research.office@northbridge.edu",
+        "role": "Research Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "pi.lab@northbridge.edu",
+          "role": "Principal Investigator (Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Sanctioned grant allows INR 3.5 lakh for consumables this financial year. Submit revised itemized plan before placing orders.",
+      "body_preview": "Sanctioned grant allows INR 3.5 lakh for consumables this financial year. Submit revised itemized plan before placing orders.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 3.5 lakh",
+          "normalized_value": 350000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E046",
+      "thread_key": "THR-009",
+      "subject": "Research grant consumables budget",
+      "timestamp": "2026-09-15T06:55:00Z",
+      "timestamp_local": "2026-09-15T12:25:00+05:30",
+      "sender": {
+        "address": "pi.lab@northbridge.edu",
+        "role": "Principal Investigator (Lab)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "research.office@northbridge.edu",
+          "role": "Research Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Revised consumables plan totals INR 3.42 lakh for sensors, test coupons, and calibration materials. Please confirm eligibility.",
+      "body_preview": "Revised consumables plan totals INR 3.42 lakh for sensors, test coupons, and calibration materials. Please confirm eligibility.",
+      "in_reply_to": "E045",
+      "attachments": [
+        {
+          "attachment_id": "att-grant-consumables-plan",
+          "filename": "grant_consumables_plan.csv",
+          "status": "READY",
+          "size_bytes": 209,
+          "detected_mime": "text/csv",
+          "status_detail": null
+        }
+      ],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 3.42 lakh",
+          "normalized_value": 342000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E047",
+      "thread_key": "THR-009",
+      "subject": "Research grant consumables budget",
+      "timestamp": "2026-09-17T11:45:00Z",
+      "timestamp_local": "2026-09-17T17:15:00+05:30",
+      "sender": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "pi.lab@northbridge.edu",
+          "role": "Principal Investigator (Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "research.office@northbridge.edu",
+          "role": "Research Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Items are eligible under consumables head. INR 3.42 lakh is within INR 3.5 lakh cap. Individual purchase approvals still follow procurement rules.",
+      "body_preview": "Items are eligible under consumables head. INR 3.42 lakh is within INR 3.5 lakh cap. Individual purchase approvals still follow procurement …",
+      "in_reply_to": "E046",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 3.42 lakh",
+          "normalized_value": 342000,
+          "unit": "INR",
+          "timezone_label": null
+        },
+        {
+          "kind": "AMOUNT",
+          "original_text": "INR 3.5 lakh",
+          "normalized_value": 350000,
+          "unit": "INR",
+          "timezone_label": null
+        }
+      ]
+    },
+    {
+      "email_id": "E048",
+      "thread_key": "THR-009",
+      "subject": "Research grant consumables budget",
+      "timestamp": "2026-09-18T08:25:00Z",
+      "timestamp_local": "2026-09-18T13:55:00+05:30",
+      "sender": {
+        "address": "research.office@northbridge.edu",
+        "role": "Research Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "pi.lab@northbridge.edu",
+          "role": "Principal Investigator (Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Revised plan accepted for budget planning only. This is not purchase authorization; submit individual requisitions for approval before ordering.",
+      "body_preview": "Revised plan accepted for budget planning only. This is not purchase authorization; submit individual requisitions for approval before order…",
+      "in_reply_to": "E047",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E049",
+      "thread_key": "THR-010",
+      "subject": "Engineering Block network outage",
+      "timestamp": "2026-10-26T03:20:00Z",
+      "timestamp_local": "2026-10-26T08:50:00+05:30",
+      "sender": {
+        "address": "it.helpdesk@northbridge.edu",
+        "role": "IT Helpdesk",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "it.network@northbridge.edu",
+          "role": "IT Network Team",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Users report intermittent connectivity in Engineering Block since 08:30 IST. Please investigate and provide restoration estimate.",
+      "body_preview": "Users report intermittent connectivity in Engineering Block since 08:30 IST. Please investigate and provide restoration estimate.",
+      "in_reply_to": null,
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "TIME",
+          "original_text": "08:30 IST",
+          "normalized_value": "08:30",
+          "unit": null,
+          "timezone_label": "IST"
+        }
+      ]
+    },
+    {
+      "email_id": "E050",
+      "thread_key": "THR-010",
+      "subject": "Engineering Block network outage",
+      "timestamp": "2026-10-26T04:10:00Z",
+      "timestamp_local": "2026-10-26T09:40:00+05:30",
+      "sender": {
+        "address": "it.network@northbridge.edu",
+        "role": "IT Network Team",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "it.helpdesk@northbridge.edu",
+          "role": "IT Helpdesk",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Initial checks indicate failed distribution switch on second floor. Replacement unit is available in IT inventory.",
+      "body_preview": "Initial checks indicate failed distribution switch on second floor. Replacement unit is available in IT inventory.",
+      "in_reply_to": "E049",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E051",
+      "thread_key": "THR-010",
+      "subject": "Engineering Block network outage",
+      "timestamp": "2026-10-26T05:00:00Z",
+      "timestamp_local": "2026-10-26T10:30:00+05:30",
+      "sender": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "it.network@northbridge.edu",
+          "role": "IT Network Team",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "it.helpdesk@northbridge.edu",
+          "role": "IT Helpdesk",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Access to second-floor network cabinet is approved. Coordinate power isolation with Facilities before replacement.",
+      "body_preview": "Access to second-floor network cabinet is approved. Coordinate power isolation with Facilities before replacement.",
+      "in_reply_to": "E050",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": []
+    },
+    {
+      "email_id": "E052",
+      "thread_key": "THR-010",
+      "subject": "Engineering Block network outage",
+      "timestamp": "2026-10-26T07:15:00Z",
+      "timestamp_local": "2026-10-26T12:45:00+05:30",
+      "sender": {
+        "address": "it.network@northbridge.edu",
+        "role": "IT Network Team",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recipients": [
+        {
+          "address": "it.helpdesk@northbridge.edu",
+          "role": "IT Helpdesk",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "body_raw": "Distribution switch replaced and connectivity tests passed at 12:30 IST. Monitoring continues for 24 hours. Helpdesk may close tickets if no further drops occur.",
+      "body_preview": "Distribution switch replaced and connectivity tests passed at 12:30 IST. Monitoring continues for 24 hours. Helpdesk may close tickets if no…",
+      "in_reply_to": "E051",
+      "attachments": [],
+      "quality_flags": [],
+      "mentions": [
+        {
+          "kind": "TIME",
+          "original_text": "12:30 IST",
+          "normalized_value": "12:30",
+          "unit": null,
+          "timezone_label": "IST"
+        }
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "attachment_id": "att-cnc-purchase-order",
+      "filename": "cnc_purchase_order.txt",
+      "status": "READY",
+      "size_bytes": 238,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E007",
+      "thread_key": "THR-001",
+      "text_content": "SYNTHETIC PURCHASE ORDER\nVendor: Vendor B\nItem: One CNC turning centre\nOrder value: INR 1,790,000\nApproved by: Dean (Administration), 8 September 2026\nIssued: 11 September 2026\nExpected delivery: Within eight weeks of order confirmation.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-cnc-requirement-note",
+      "filename": "cnc_requirement_note.txt",
+      "status": "READY",
+      "size_bytes": 255,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E001",
+      "thread_key": "THR-001",
+      "text_content": "CNC TURNING CENTRE REQUIREMENT\nPurpose: Manufacturing Lab teaching and project use.\nMandatory: approved spindle speed range, enclosed work area, safety interlocks, and local service support.\nTechnical compliance is evaluated before commercial comparison.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-cnc-vendor-comparison",
+      "filename": "cnc_vendor_comparison.csv",
+      "status": "READY",
+      "size_bytes": 193,
+      "detected_mime": "text/csv",
+      "status_detail": null,
+      "email_id": "E002",
+      "thread_key": "THR-001",
+      "text_content": "vendor,quoted_price_inr,technical_status,delivery_weeks\nVendor A,1840000,Does not meet spindle speed range,6\nVendor B,1790000,Meets all mandatory specifications,8\nVendor C,1910000,Compliant,12\n",
+      "table": {
+        "columns": [
+          "vendor",
+          "quoted_price_inr",
+          "technical_status",
+          "delivery_weeks"
+        ],
+        "rows": [
+          [
+            "Vendor A",
+            "1840000",
+            "Does not meet spindle speed range",
+            "6"
+          ],
+          [
+            "Vendor B",
+            "1790000",
+            "Meets all mandatory specifications",
+            "8"
+          ],
+          [
+            "Vendor C",
+            "1910000",
+            "Compliant",
+            "12"
+          ]
+        ]
+      }
+    },
+    {
+      "attachment_id": "att-conference-attendance-certificate",
+      "filename": "conference_attendance_certificate.txt",
+      "status": "READY",
+      "size_bytes": 129,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E031",
+      "thread_key": "THR-006",
+      "text_content": "SYNTHETIC ATTENDANCE CERTIFICATE\nfaculty.member@northbridge.edu attended National Materials Conference, Pune, 18-20 August 2026.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-conference-travel-claim",
+      "filename": "conference_travel_claim.txt",
+      "status": "READY",
+      "size_bytes": 166,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E029",
+      "thread_key": "THR-006",
+      "text_content": "SYNTHETIC TRAVEL CLAIM\nConference: National Materials Conference, Pune\nTravel dates: 18-20 August 2026\nInitial supporting documents: onward ticket and hotel invoice.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-fest-power-plan",
+      "filename": "fest_power_plan.txt",
+      "status": "READY",
+      "size_bytes": 228,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E017",
+      "thread_key": "THR-003",
+      "text_content": "SYNTHETIC FEST POWER PLAN\nMain Auditorium: Existing three-phase supply.\nCentral Lawn (14-15 November): Temporary weather-protected distribution.\nEast Sports Ground (16 November): Temporary supply to be inspected before opening.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-grant-consumables-plan",
+      "filename": "grant_consumables_plan.csv",
+      "status": "READY",
+      "size_bytes": 209,
+      "detected_mime": "text/csv",
+      "status_detail": null,
+      "email_id": "E046",
+      "thread_key": "THR-009",
+      "text_content": "item,estimated_cost_inr,purpose\nSensors,145000,Experimental measurements\nTest coupons,98000,Material testing\nCalibration materials,99000,Equipment calibration\nTOTAL,342000,Within sanctioned consumables budget\n",
+      "table": {
+        "columns": [
+          "item",
+          "estimated_cost_inr",
+          "purpose"
+        ],
+        "rows": [
+          [
+            "Sensors",
+            "145000",
+            "Experimental measurements"
+          ],
+          [
+            "Test coupons",
+            "98000",
+            "Material testing"
+          ],
+          [
+            "Calibration materials",
+            "99000",
+            "Equipment calibration"
+          ],
+          [
+            "TOTAL",
+            "342000",
+            "Within sanctioned consumables budget"
+          ]
+        ]
+      }
+    },
+    {
+      "attachment_id": "att-printer-specifications",
+      "filename": "printer_specifications.txt",
+      "status": "READY",
+      "size_bytes": 164,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E035",
+      "thread_key": "THR-007",
+      "text_content": "DEPARTMENT PRINTER REQUIREMENTS\nQuantity: 2 network laser printers\nMandatory: Ethernet networking, automatic duplex printing, and minimum one-year onsite warranty.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-return-boarding-pass",
+      "filename": "return_boarding_pass.txt",
+      "status": "READY",
+      "size_bytes": 84,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E031",
+      "thread_key": "THR-006",
+      "text_content": "SYNTHETIC BOARDING PASS RECORD\nRoute: Pune to home city\nTravel date: 20 August 2026\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-utm-calibration-certificate",
+      "filename": "utm_calibration_certificate.txt",
+      "status": "READY",
+      "size_bytes": 258,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E024",
+      "thread_key": "THR-004",
+      "text_content": "SYNTHETIC CALIBRATION CERTIFICATE\nEquipment: Universal Testing Machine, Materials Testing Lab\nWork: Load-cell connector replaced; calibration and verification completed.\nResult: Passed verification test.\nDate: 28 September 2026. Status: Returned to service.\n",
+      "table": null
+    },
+    {
+      "attachment_id": "att-utm-repair-quote",
+      "filename": "utm_repair_quote.txt",
+      "status": "READY",
+      "size_bytes": 204,
+      "detected_mime": "text/plain",
+      "status_detail": null,
+      "email_id": "E022",
+      "thread_key": "THR-004",
+      "text_content": "SYNTHETIC REPAIR QUOTATION\nEquipment: Universal Testing Machine\nReplacement part: Load-cell connector\nQuoted amount: INR 6,500\nInitial inspection and calibration estimate separately approved: INR 28,000.\n",
+      "table": null
+    }
+  ],
+  "threads": [
+    {
+      "thread_key": "THR-001",
+      "title": "CNC machine procurement",
+      "category": "PROCUREMENT",
+      "status_class": "AWAITING_ACTION",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-09-02T09:15:00Z",
+      "last_message_at": "2026-09-11T15:10:00Z",
+      "message_count": 7,
+      "participants": [
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.faculty@northbridge.edu",
+          "role": "Mechanical Faculty",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "lab.coordinator@northbridge.edu",
+          "role": "Lab Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.admin@northbridge.edu",
+          "role": "Dean (Administration)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E001",
+        "E002",
+        "E003",
+        "E004",
+        "E005",
+        "E006",
+        "E007"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E001",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E002",
+          "parent_email_id": "E001",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E003",
+          "parent_email_id": "E002",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E004",
+          "parent_email_id": "E003",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E005",
+          "parent_email_id": "E004",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E006",
+          "parent_email_id": "E005",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E007",
+          "parent_email_id": "E006",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 3
+    },
+    {
+      "thread_key": "THR-002",
+      "title": "Bonafide certificate requests",
+      "category": "STUDENT_SERVICES",
+      "status_class": "PARTIALLY_COMPLETE",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-09-10T06:30:00Z",
+      "last_message_at": "2026-09-19T13:25:00Z",
+      "message_count": 5,
+      "participants": [
+        {
+          "address": "student.affairs@northbridge.edu",
+          "role": "Student Affairs",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "registrar@northbridge.edu",
+          "role": "Registrar",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "class.representatives@northbridge.edu",
+          "role": "Class Representatives",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E008",
+        "E009",
+        "E010",
+        "E011",
+        "E012"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E008",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E009",
+          "parent_email_id": "E008",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E010",
+          "parent_email_id": "E009",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E011",
+          "parent_email_id": "E010",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E012",
+          "parent_email_id": "E011",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 0
+    },
+    {
+      "thread_key": "THR-003",
+      "title": "Annual technical fest venues",
+      "category": "EVENTS_VENUES",
+      "status_class": "OPEN",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-08-18T08:00:00Z",
+      "last_message_at": "2026-10-30T11:00:00Z",
+      "message_count": 6,
+      "participants": [
+        {
+          "address": "fest.secretary@northbridge.edu",
+          "role": "Fest Secretary",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.student@northbridge.edu",
+          "role": "Dean (Student Affairs)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "security@northbridge.edu",
+          "role": "Security Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E013",
+        "E014",
+        "E015",
+        "E016",
+        "E017",
+        "E018"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E013",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E014",
+          "parent_email_id": "E013",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E015",
+          "parent_email_id": "E014",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E016",
+          "parent_email_id": "E015",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E017",
+          "parent_email_id": "E016",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E018",
+          "parent_email_id": "E017",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 1
+    },
+    {
+      "thread_key": "THR-004",
+      "title": "UTM maintenance",
+      "category": "MAINTENANCE_REPAIRS",
+      "status_class": "COMPLETED",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-09-21T05:50:00Z",
+      "last_message_at": "2026-09-28T14:00:00Z",
+      "message_count": 6,
+      "participants": [
+        {
+          "address": "lab.engineer@northbridge.edu",
+          "role": "Lab Engineer (Materials Testing Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "maintenance@northbridge.edu",
+          "role": "Maintenance Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E019",
+        "E020",
+        "E021",
+        "E022",
+        "E023",
+        "E024"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E019",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E020",
+          "parent_email_id": "E019",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E021",
+          "parent_email_id": "E020",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E022",
+          "parent_email_id": "E021",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E023",
+          "parent_email_id": "E022",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E024",
+          "parent_email_id": "E023",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 2
+    },
+    {
+      "thread_key": "THR-005",
+      "title": "AI in Manufacturing seminar",
+      "category": "EVENTS_VENUES",
+      "status_class": "AWAITING_ACTION",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-10-01T06:00:00Z",
+      "last_message_at": "2026-10-03T09:45:00Z",
+      "message_count": 4,
+      "participants": [
+        {
+          "address": "seminar.coordinator@northbridge.edu",
+          "role": "Seminar Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.hod@northbridge.edu",
+          "role": "Head of Department (Mechanical)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "seminar.support@northbridge.edu",
+          "role": "Seminar Support",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E025",
+        "E026",
+        "E027",
+        "E028"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E025",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E026",
+          "parent_email_id": "E025",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E027",
+          "parent_email_id": "E026",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E028",
+          "parent_email_id": "E027",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 0
+    },
+    {
+      "thread_key": "THR-006",
+      "title": "Faculty conference reimbursement",
+      "category": "FINANCE_REIMBURSEMENT",
+      "status_class": "COMPLETED",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-08-25T07:20:00Z",
+      "last_message_at": "2026-09-05T06:45:00Z",
+      "message_count": 6,
+      "participants": [
+        {
+          "address": "faculty.member@northbridge.edu",
+          "role": "Faculty Member",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "dean.research@northbridge.edu",
+          "role": "Dean (Research)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E029",
+        "E030",
+        "E031",
+        "E032",
+        "E033",
+        "E034"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E029",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E030",
+          "parent_email_id": "E029",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E031",
+          "parent_email_id": "E030",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E032",
+          "parent_email_id": "E031",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E033",
+          "parent_email_id": "E032",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E034",
+          "parent_email_id": "E033",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 3
+    },
+    {
+      "thread_key": "THR-007",
+      "title": "Department office printers",
+      "category": "PROCUREMENT",
+      "status_class": "COMPLETED",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-10-05T05:30:00Z",
+      "last_message_at": "2026-10-21T08:50:00Z",
+      "message_count": 6,
+      "participants": [
+        {
+          "address": "office.superintendent@northbridge.edu",
+          "role": "Office Superintendent",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "purchase@northbridge.edu",
+          "role": "Purchase Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "admin.officer@northbridge.edu",
+          "role": "Administrative Officer",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "it.support@northbridge.edu",
+          "role": "IT Support",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E035",
+        "E036",
+        "E037",
+        "E038",
+        "E039",
+        "E040"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E035",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E036",
+          "parent_email_id": "E035",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E037",
+          "parent_email_id": "E036",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E038",
+          "parent_email_id": "E037",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E039",
+          "parent_email_id": "E038",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E040",
+          "parent_email_id": "E039",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 1
+    },
+    {
+      "thread_key": "THR-008",
+      "title": "Mid-semester examination timetable",
+      "category": "EXAMINATIONS_ACADEMICS",
+      "status_class": "COMPLETED",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-10-12T06:00:00Z",
+      "last_message_at": "2026-10-16T08:00:00Z",
+      "message_count": 4,
+      "participants": [
+        {
+          "address": "exam.cell@northbridge.edu",
+          "role": "Examination Cell",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "department.office@northbridge.edu",
+          "role": "Department Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "faculty.coordinators@northbridge.edu",
+          "role": "Faculty Coordinators",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "mech.exam.coordinator@northbridge.edu",
+          "role": "Mechanical Exam Coordinator",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E041",
+        "E042",
+        "E043",
+        "E044"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E041",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E042",
+          "parent_email_id": "E041",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E043",
+          "parent_email_id": "E042",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E044",
+          "parent_email_id": "E043",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 0
+    },
+    {
+      "thread_key": "THR-009",
+      "title": "Research grant consumables budget",
+      "category": "RESEARCH_GRANTS_BUDGETS",
+      "status_class": "OPEN",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-09-12T09:10:00Z",
+      "last_message_at": "2026-09-18T08:25:00Z",
+      "message_count": 4,
+      "participants": [
+        {
+          "address": "research.office@northbridge.edu",
+          "role": "Research Office",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "pi.lab@northbridge.edu",
+          "role": "Principal Investigator (Lab)",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "accounts@northbridge.edu",
+          "role": "Accounts Section",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E045",
+        "E046",
+        "E047",
+        "E048"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E045",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E046",
+          "parent_email_id": "E045",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E047",
+          "parent_email_id": "E046",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E048",
+          "parent_email_id": "E047",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 1
+    },
+    {
+      "thread_key": "THR-010",
+      "title": "Engineering Block network outage",
+      "category": "IT_FACILITIES_INCIDENTS",
+      "status_class": "MONITORING",
+      "integrity": "COMPLETE",
+      "first_message_at": "2026-10-26T03:20:00Z",
+      "last_message_at": "2026-10-26T07:15:00Z",
+      "message_count": 4,
+      "participants": [
+        {
+          "address": "it.helpdesk@northbridge.edu",
+          "role": "IT Helpdesk",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "it.network@northbridge.edu",
+          "role": "IT Network Team",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        },
+        {
+          "address": "facilities@northbridge.edu",
+          "role": "Facilities",
+          "role_source": "INFERRED_FROM_ADDRESS"
+        }
+      ],
+      "message_ids": [
+        "E049",
+        "E050",
+        "E051",
+        "E052"
+      ],
+      "edges": [
+        {
+          "child_email_id": "E049",
+          "parent_email_id": null,
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E050",
+          "parent_email_id": "E049",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E051",
+          "parent_email_id": "E050",
+          "edge_type": "REPLY_TO"
+        },
+        {
+          "child_email_id": "E052",
+          "parent_email_id": "E051",
+          "edge_type": "REPLY_TO"
+        }
+      ],
+      "reconstruction": {
+        "method": "PROVIDED_AND_GRAPH",
+        "confidence": 1,
+        "review_state": "NONE"
+      },
+      "attachment_count": 0
+    }
+  ],
+  "summaries": [
+    {
+      "thread_key": "THR-001",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Procure one CNC turning centre for the Manufacturing Lab.",
+        "initial_context": "The Head of Department asked Purchase to collect three quotations (requirement note attached).",
+        "discussion_points": [
+          {
+            "text": "Three quotations were compared: Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh, Vendor C INR 19.1 lakh.",
+            "email_ids": [
+              "E002"
+            ]
+          },
+          {
+            "text": "The technical committee found Vendor A did not meet the spindle speed range; Vendor B met all mandatory specifications with delivery within eight weeks; Vendor C was compliant with a longer delivery period.",
+            "email_ids": [
+              "E003"
+            ]
+          },
+          {
+            "text": "The department recommended Vendor B; the Dean (Administration) approved subject to standard purchase terms and budget confirmation.",
+            "email_ids": [
+              "E004",
+              "E005"
+            ]
+          },
+          {
+            "text": "Purchase reported that Accounts confirmed budget availability, then sent the purchase order to Vendor B.",
+            "email_ids": [
+              "E006",
+              "E007"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-09-02T09:15:00Z",
+            "event": "Requirement and quotation request",
+            "email_ids": [
+              "E001"
+            ]
+          },
+          {
+            "date": "2026-09-04T11:20:00Z",
+            "event": "Quotations received",
+            "email_ids": [
+              "E002"
+            ]
+          },
+          {
+            "date": "2026-09-05T08:40:00Z",
+            "event": "Technical evaluation",
+            "email_ids": [
+              "E003"
+            ]
+          },
+          {
+            "date": "2026-09-07T10:05:00Z",
+            "event": "Department recommendation",
+            "email_ids": [
+              "E004"
+            ]
+          },
+          {
+            "date": "2026-09-08T12:30:00Z",
+            "event": "Conditional approval",
+            "email_ids": [
+              "E005"
+            ]
+          },
+          {
+            "date": "2026-09-09T09:00:00Z",
+            "event": "Budget confirmation relayed",
+            "email_ids": [
+              "E006"
+            ]
+          },
+          {
+            "date": "2026-09-11T15:10:00Z",
+            "event": "Purchase order sent; delivery pending",
+            "email_ids": [
+              "E007"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "AWAITING_ACTION",
+          "text": "Purchase order sent to Vendor B on 11 September 2026; delivery and installation remain pending.",
+          "as_of_email_id": "E007",
+          "as_of_time": "2026-09-11T15:10:00Z"
+        },
+        "pending_action_ids": [
+          "act-001"
+        ],
+        "pending_note": null,
+        "deadlines": [
+          {
+            "text": "Issue purchase order by 11 September 2026 — met (11 Sep 2026)",
+            "email_ids": [
+              "E006",
+              "E007"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-002",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Confirm the documents and timeline for bonafide certificates needed for scholarship renewal.",
+        "initial_context": "Student Affairs asked the Registrar for requirements and processing time for final-year students.",
+        "discussion_points": [
+          {
+            "text": "Required: institute ID copy and current semester fee receipt; applications received by 16 September are processed by 20 September.",
+            "email_ids": [
+              "E009"
+            ]
+          },
+          {
+            "text": "42 applications were received; 4 were incomplete (fee receipts missing); 38 verified applications were forwarded to the Registrar.",
+            "email_ids": [
+              "E011"
+            ]
+          },
+          {
+            "text": "The Registrar reported 38 certificates ready for collection; the 4 incomplete applications remain on hold.",
+            "email_ids": [
+              "E012"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-09-10T09:10:00Z",
+            "event": "Requirements and timeline stated",
+            "email_ids": [
+              "E009"
+            ]
+          },
+          {
+            "date": "2026-09-11T07:45:00Z",
+            "event": "Department office to verify before forwarding",
+            "email_ids": [
+              "E010"
+            ]
+          },
+          {
+            "date": "2026-09-17T10:00:00Z",
+            "event": "42 received; 38 forwarded; 4 incomplete",
+            "email_ids": [
+              "E011"
+            ]
+          },
+          {
+            "date": "2026-09-19T13:25:00Z",
+            "event": "38 certificates ready; 4 on hold",
+            "email_ids": [
+              "E012"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "PARTIALLY_COMPLETE",
+          "text": "38 certificates are ready for collection; four applications remain on hold pending fee receipts.",
+          "as_of_email_id": "E012",
+          "as_of_time": "2026-09-19T13:25:00Z"
+        },
+        "pending_action_ids": [
+          "act-002",
+          "act-003"
+        ],
+        "pending_note": null,
+        "deadlines": [
+          {
+            "text": "Process by 20 September 2026 — met (19 Sep 2026)",
+            "email_ids": [
+              "E009",
+              "E012"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-003",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Secure venues for the annual technical fest (14–16 November 2026).",
+        "initial_context": "The Fest Secretary requested Main Auditorium and Central Lawn.",
+        "discussion_points": [
+          {
+            "text": "Main Auditorium is available on all three dates; Central Lawn only on 14 and 15 November (maintenance on 16 November).",
+            "email_ids": [
+              "E014"
+            ]
+          },
+          {
+            "text": "Outdoor activities on 16 November were proposed for East Sports Ground.",
+            "email_ids": [
+              "E015"
+            ]
+          },
+          {
+            "text": "The Dean (Student Affairs) approved the venues on 21 August 2026 and asked Facilities to confirm power and security by 30 October.",
+            "email_ids": [
+              "E016"
+            ]
+          },
+          {
+            "text": "On 28 October Facilities sent the power plan; on 30 October the Security Office confirmed staffing.",
+            "email_ids": [
+              "E017",
+              "E018"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-08-18T08:00:00Z",
+            "event": "Venue request",
+            "email_ids": [
+              "E013"
+            ]
+          },
+          {
+            "date": "2026-08-19T10:30:00Z",
+            "event": "Availability reported",
+            "email_ids": [
+              "E014"
+            ]
+          },
+          {
+            "date": "2026-08-20T09:00:00Z",
+            "event": "East Sports Ground proposed",
+            "email_ids": [
+              "E015"
+            ]
+          },
+          {
+            "date": "2026-08-21T12:15:00Z",
+            "event": "Venues approved",
+            "email_ids": [
+              "E016"
+            ]
+          },
+          {
+            "date": "2026-10-28T07:40:00Z",
+            "event": "Power plan sent; staffing plan requested",
+            "email_ids": [
+              "E017"
+            ]
+          },
+          {
+            "date": "2026-10-30T11:00:00Z",
+            "event": "Security staffing confirmed",
+            "email_ids": [
+              "E018"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "OPEN",
+          "text": "Security staffing is confirmed (six guards per shift at Main Auditorium, four at East Sports Ground, one coordinating supervisor). The power plan says the East Sports Ground temporary supply is to be inspected before opening.",
+          "as_of_email_id": "E018",
+          "as_of_time": "2026-10-30T11:00:00Z"
+        },
+        "pending_action_ids": [
+          "act-004"
+        ],
+        "pending_note": null,
+        "deadlines": [
+          {
+            "text": "Power and security confirmation by 30 October — met",
+            "email_ids": [
+              "E016",
+              "E017",
+              "E018"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-004",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Restore the Universal Testing Machine (UTM) in the Materials Testing Lab.",
+        "initial_context": "The lab reported unstable load readings and asked for inspection.",
+        "discussion_points": [
+          {
+            "text": "Inspection and calibration was estimated at INR 28,000 excluding parts and approved up to that amount.",
+            "email_ids": [
+              "E020",
+              "E021"
+            ]
+          },
+          {
+            "text": "A damaged load-cell connector needed a INR 6,500 replacement, approved separately.",
+            "email_ids": [
+              "E022",
+              "E023"
+            ]
+          },
+          {
+            "text": "Approved spend totals INR 34,500 (28,000 + 6,500); no email states a final invoice amount.",
+            "email_ids": [
+              "E021",
+              "E023"
+            ]
+          },
+          {
+            "text": "The UTM passed verification and was returned to service on 28 September 2026.",
+            "email_ids": [
+              "E024"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-09-21T05:50:00Z",
+            "event": "Fault reported",
+            "email_ids": [
+              "E019"
+            ]
+          },
+          {
+            "date": "2026-09-21T09:35:00Z",
+            "event": "Estimate and technician visit",
+            "email_ids": [
+              "E020"
+            ]
+          },
+          {
+            "date": "2026-09-22T08:15:00Z",
+            "event": "Inspection approved up to INR 28,000",
+            "email_ids": [
+              "E021"
+            ]
+          },
+          {
+            "date": "2026-09-24T10:20:00Z",
+            "event": "Connector replacement quoted",
+            "email_ids": [
+              "E022"
+            ]
+          },
+          {
+            "date": "2026-09-25T07:55:00Z",
+            "event": "Replacement approved",
+            "email_ids": [
+              "E023"
+            ]
+          },
+          {
+            "date": "2026-09-28T14:00:00Z",
+            "event": "Repair complete; returned to service",
+            "email_ids": [
+              "E024"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "COMPLETED",
+          "text": "Repaired, verified and returned to service on 28 September 2026.",
+          "as_of_email_id": "E024",
+          "as_of_time": "2026-09-28T14:00:00Z"
+        },
+        "pending_action_ids": [],
+        "pending_note": "No pending action is stated in the emails.",
+        "deadlines": [
+          {
+            "text": "Repair and calibration certificate by 29 September — met (28 Sep 2026)",
+            "email_ids": [
+              "E023",
+              "E024"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-005",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Reserve a hall and equipment for the AI in Manufacturing seminar.",
+        "initial_context": "The Seminar Coordinator planned a seminar on 12 November 2026, 10:00–13:00.",
+        "discussion_points": [
+          {
+            "text": "Seminar Hall 2 is available 09:00–14:00 with a ceiling projector.",
+            "email_ids": [
+              "E026"
+            ]
+          },
+          {
+            "text": "Expected attendance is 85; classroom seating; two wireless microphones and a laptop adapter requested.",
+            "email_ids": [
+              "E027"
+            ]
+          },
+          {
+            "text": "Facilities reserved the hall 09:00–14:00 and confirmed projector and seating; Seminar Support will arrange microphones and adapter.",
+            "email_ids": [
+              "E028"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-10-01T06:00:00Z",
+            "event": "Seminar planned; hall requested",
+            "email_ids": [
+              "E025"
+            ]
+          },
+          {
+            "date": "2026-10-01T08:30:00Z",
+            "event": "Availability reported",
+            "email_ids": [
+              "E026"
+            ]
+          },
+          {
+            "date": "2026-10-02T07:15:00Z",
+            "event": "Attendance and equipment requested",
+            "email_ids": [
+              "E027"
+            ]
+          },
+          {
+            "date": "2026-10-03T09:45:00Z",
+            "event": "Hall reserved",
+            "email_ids": [
+              "E028"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "AWAITING_ACTION",
+          "text": "Hall reserved for 12 November (09:00–14:00); microphones and adapter to be arranged by Seminar Support. No completion is recorded.",
+          "as_of_email_id": "E028",
+          "as_of_time": "2026-10-03T09:45:00Z"
+        },
+        "pending_action_ids": [
+          "act-005"
+        ],
+        "pending_note": null,
+        "deadlines": [],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-006",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Reimburse a faculty member for conference travel (National Materials Conference, Pune, 18–20 August 2026).",
+        "initial_context": "The faculty member submitted tickets and a hotel invoice.",
+        "discussion_points": [
+          {
+            "text": "Accounts asked for the return boarding pass and attendance certificate, which were then supplied.",
+            "email_ids": [
+              "E030",
+              "E031"
+            ]
+          },
+          {
+            "text": "Accounts confirmed completeness and eligible reimbursement of INR 24,650.",
+            "email_ids": [
+              "E032"
+            ]
+          },
+          {
+            "text": "The Dean (Research) approved INR 24,650 as per institute travel policy.",
+            "email_ids": [
+              "E033"
+            ]
+          },
+          {
+            "text": "The amount was transferred on 4 September 2026 (reported 5 September) and the claim closed.",
+            "email_ids": [
+              "E034"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-08-25T07:20:00Z",
+            "event": "Claim submitted",
+            "email_ids": [
+              "E029"
+            ]
+          },
+          {
+            "date": "2026-08-27T10:10:00Z",
+            "event": "Missing documents requested",
+            "email_ids": [
+              "E030"
+            ]
+          },
+          {
+            "date": "2026-08-29T08:05:00Z",
+            "event": "Documents supplied",
+            "email_ids": [
+              "E031"
+            ]
+          },
+          {
+            "date": "2026-09-01T12:00:00Z",
+            "event": "Eligibility confirmed; forwarded",
+            "email_ids": [
+              "E032"
+            ]
+          },
+          {
+            "date": "2026-09-02T09:30:00Z",
+            "event": "Approved",
+            "email_ids": [
+              "E033"
+            ]
+          },
+          {
+            "date": "2026-09-05T06:45:00Z",
+            "event": "Payment reported; claim closed",
+            "email_ids": [
+              "E034"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "COMPLETED",
+          "text": "INR 24,650 was transferred on 4 September 2026 and the claim is closed.",
+          "as_of_email_id": "E034",
+          "as_of_time": "2026-09-05T06:45:00Z"
+        },
+        "pending_action_ids": [],
+        "pending_note": "No pending action is stated in the emails.",
+        "deadlines": [],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-007",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Buy two network laser printers for the department office.",
+        "initial_context": "The Office Superintendent attached minimum specifications.",
+        "discussion_points": [
+          {
+            "text": "Quotes per unit: Printwell INR 32,000, OfficeTech INR 29,500, PaperPro INR 34,000; all three models meet specifications.",
+            "email_ids": [
+              "E036",
+              "E037"
+            ]
+          },
+          {
+            "text": "The Administrative Officer approved two OfficeTech printers at INR 29,500 each, total INR 59,000.",
+            "email_ids": [
+              "E038"
+            ]
+          },
+          {
+            "text": "The order was issued on 13 October 2026; both printers were delivered, installed and verified (reported 21 October).",
+            "email_ids": [
+              "E039",
+              "E040"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-10-05T05:30:00Z",
+            "event": "Requirement",
+            "email_ids": [
+              "E035"
+            ]
+          },
+          {
+            "date": "2026-10-07T08:10:00Z",
+            "event": "Quotes received",
+            "email_ids": [
+              "E036"
+            ]
+          },
+          {
+            "date": "2026-10-08T09:00:00Z",
+            "event": "Specification review",
+            "email_ids": [
+              "E037"
+            ]
+          },
+          {
+            "date": "2026-10-09T10:40:00Z",
+            "event": "Purchase approved",
+            "email_ids": [
+              "E038"
+            ]
+          },
+          {
+            "date": "2026-10-13T13:20:00Z",
+            "event": "Order issued",
+            "email_ids": [
+              "E039"
+            ]
+          },
+          {
+            "date": "2026-10-21T08:50:00Z",
+            "event": "Delivered and installed; request complete",
+            "email_ids": [
+              "E040"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "COMPLETED",
+          "text": "Both printers delivered, installed and verified; the request is marked complete (21 October 2026).",
+          "as_of_email_id": "E040",
+          "as_of_time": "2026-10-21T08:50:00Z"
+        },
+        "pending_action_ids": [],
+        "pending_note": "No pending action is stated in the emails.",
+        "deadlines": [
+          {
+            "text": "Issue order by 14 October — met (13 Oct 2026)",
+            "email_ids": [
+              "E038",
+              "E039"
+            ]
+          },
+          {
+            "text": "Delivery by 20 October — undetermined (delivery date not stated; reported 21 Oct 2026)",
+            "email_ids": [
+              "E039",
+              "E040"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-008",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Resolve a room conflict for the Manufacturing Processes mid-semester examination.",
+        "initial_context": "The Exam Cell was finalising the 2–10 November 2026 timetable.",
+        "discussion_points": [
+          {
+            "text": "The 5 November 14:00 exam conflicted with an accreditation booking of Lab 1; Lecture Hall 4 was requested.",
+            "email_ids": [
+              "E042"
+            ]
+          },
+          {
+            "text": "The Exam Cell moved the venue to Lecture Hall 4; date and time are unchanged.",
+            "email_ids": [
+              "E043"
+            ]
+          },
+          {
+            "text": "The revised venue was circulated to students and invigilators.",
+            "email_ids": [
+              "E044"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-10-12T06:00:00Z",
+            "event": "Timetable draft",
+            "email_ids": [
+              "E041"
+            ]
+          },
+          {
+            "date": "2026-10-14T10:20:00Z",
+            "event": "Room conflict reported",
+            "email_ids": [
+              "E042"
+            ]
+          },
+          {
+            "date": "2026-10-15T07:30:00Z",
+            "event": "Venue changed",
+            "email_ids": [
+              "E043"
+            ]
+          },
+          {
+            "date": "2026-10-16T08:00:00Z",
+            "event": "Revised venue circulated",
+            "email_ids": [
+              "E044"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "COMPLETED",
+          "text": "Exam remains 5 November 2026 at 14:00; venue changed from Lab 1 to Lecture Hall 4; circulated 16 October 2026.",
+          "as_of_email_id": "E044",
+          "as_of_time": "2026-10-16T08:00:00Z"
+        },
+        "pending_action_ids": [],
+        "pending_note": "No pending action is stated in the emails.",
+        "deadlines": [
+          {
+            "text": "Report conflicts by 15 October — met (14 Oct 2026)",
+            "email_ids": [
+              "E041",
+              "E042"
+            ]
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-009",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Confirm the eligibility and status of a revised consumables plan under a research grant.",
+        "initial_context": "The Research Office noted a sanctioned INR 3.5 lakh consumables allowance.",
+        "discussion_points": [
+          {
+            "text": "The PI lab submitted a plan totalling INR 3.42 lakh (sensors, test coupons, calibration materials).",
+            "email_ids": [
+              "E046"
+            ]
+          },
+          {
+            "text": "Accounts confirmed eligibility and that INR 3.42 lakh is within the INR 3.5 lakh cap; individual purchase approvals still follow procurement rules.",
+            "email_ids": [
+              "E047"
+            ]
+          },
+          {
+            "text": "The Research Office accepted the plan for budget planning only. It is not purchase authorization; individual requisitions must be approved before ordering.",
+            "email_ids": [
+              "E048"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-09-12T09:10:00Z",
+            "event": "Allowance and plan requirement",
+            "email_ids": [
+              "E045"
+            ]
+          },
+          {
+            "date": "2026-09-15T06:55:00Z",
+            "event": "Revised plan submitted",
+            "email_ids": [
+              "E046"
+            ]
+          },
+          {
+            "date": "2026-09-17T11:45:00Z",
+            "event": "Eligibility confirmed",
+            "email_ids": [
+              "E047"
+            ]
+          },
+          {
+            "date": "2026-09-18T08:25:00Z",
+            "event": "Accepted for budget planning only",
+            "email_ids": [
+              "E048"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "OPEN",
+          "text": "The plan is accepted for budget planning only. No purchase is authorized; individual requisitions must be submitted for approval.",
+          "as_of_email_id": "E048",
+          "as_of_time": "2026-09-18T08:25:00Z"
+        },
+        "pending_action_ids": [
+          "act-006"
+        ],
+        "pending_note": null,
+        "deadlines": [],
+        "unresolved": []
+      }
+    },
+    {
+      "thread_key": "THR-010",
+      "summary_version": 1,
+      "verification_status": "VERIFIED",
+      "stale": false,
+      "generated_by": "demo-annotation",
+      "content": {
+        "purpose": "Restore connectivity in the Engineering Block.",
+        "initial_context": "The IT Helpdesk reported intermittent connectivity since 08:30 IST on 26 October 2026.",
+        "discussion_points": [
+          {
+            "text": "The IT Network Team found a failed second-floor distribution switch; a replacement was available.",
+            "email_ids": [
+              "E050"
+            ]
+          },
+          {
+            "text": "Facilities approved access to the network cabinet and asked for power-isolation coordination.",
+            "email_ids": [
+              "E051"
+            ]
+          },
+          {
+            "text": "The switch was replaced and tests passed at 12:30 IST; monitoring continues for 24 hours.",
+            "email_ids": [
+              "E052"
+            ]
+          }
+        ],
+        "timeline": [
+          {
+            "date": "2026-10-26T03:20:00Z",
+            "event": "Outage reported (08:50 IST)",
+            "email_ids": [
+              "E049"
+            ]
+          },
+          {
+            "date": "2026-10-26T04:10:00Z",
+            "event": "Failed switch identified",
+            "email_ids": [
+              "E050"
+            ]
+          },
+          {
+            "date": "2026-10-26T05:00:00Z",
+            "event": "Cabinet access approved",
+            "email_ids": [
+              "E051"
+            ]
+          },
+          {
+            "date": "2026-10-26T07:15:00Z",
+            "event": "Switch replaced; monitoring (12:45 IST)",
+            "email_ids": [
+              "E052"
+            ]
+          }
+        ],
+        "latest_status": {
+          "class": "MONITORING",
+          "text": "Switch replaced and tests passed (12:30 IST); 24-hour monitoring continues. No closure email exists in the available records.",
+          "as_of_email_id": "E052",
+          "as_of_time": "2026-10-26T07:15:00Z"
+        },
+        "pending_action_ids": [
+          "act-007"
+        ],
+        "pending_note": null,
+        "deadlines": [],
+        "unresolved": []
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "dec-001",
+      "thread_key": "THR-001",
+      "type": "RECOMMENDATION",
+      "subject": "Vendor B for the CNC turning centre",
+      "outcome": "The department recommends Vendor B at INR 17.9 lakh and asks for procurement approval. A recommendation is not an approval.",
+      "approver": null,
+      "recommended_by": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-07T10:05:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "QUOTED",
+          "value_inr": 1790000,
+          "original_text": "INR 17.9 lakh",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E004",
+          "quote": "The department recommends Vendor B at INR 17.9 lakh",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-002",
+      "thread_key": "THR-001",
+      "type": "CONDITIONAL_APPROVAL",
+      "subject": "Procurement of one CNC turning centre from Vendor B",
+      "outcome": "Approved on 8 September 2026 for INR 17.9 lakh, subject to standard purchase terms and budget confirmation. The Purchase section may initiate the purchase order.",
+      "approver": {
+        "address": "dean.admin@northbridge.edu",
+        "role": "Dean (Administration)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-08T12:30:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "APPROVED",
+          "value_inr": 1790000,
+          "original_text": "INR 17.9 lakh",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [
+          "Proceed with Vendor B",
+          "Purchase section may initiate the purchase order"
+        ],
+        "excludes": [],
+        "conditions": [
+          {
+            "text": "Budget confirmation",
+            "state": "FULFILLED",
+            "evidence_email_ids": [
+              "E006"
+            ]
+          },
+          {
+            "text": "Standard purchase terms",
+            "state": "NOT_EVIDENCED",
+            "evidence_email_ids": []
+          }
+        ]
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E005",
+          "quote": "Approved. Proceed with Vendor B for INR 17.9 lakh, subject to standard purchase terms and budget confirmation.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E005",
+          "quote": "Purchase section may initiate the purchase order.",
+          "role": "CONTEXT",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-003",
+      "thread_key": "THR-001",
+      "type": "CONFIRMATION",
+      "subject": "Budget availability for the Vendor B purchase",
+      "outcome": "Purchase section reports that Accounts confirmed budget availability.",
+      "approver": null,
+      "recommended_by": null,
+      "confirmed_by": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "attribution_note": "Relayed statement: sent by the Purchase Section; the confirmation is attributed to Accounts.",
+      "authority_basis": null,
+      "decided_at": "2026-09-09T09:00:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E006",
+          "quote": "Accounts confirmed budget availability.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-004",
+      "thread_key": "THR-003",
+      "type": "APPROVAL",
+      "subject": "Venues for the annual technical fest (14–16 November 2026)",
+      "outcome": "Approved: Main Auditorium 14–16 Nov; Central Lawn 14–15 Nov; East Sports Ground for outdoor activities on 16 Nov. Facilities to confirm power and security by 30 October.",
+      "approver": {
+        "address": "dean.student@northbridge.edu",
+        "role": "Dean (Student Affairs)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-08-21T12:15:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [
+          "Main Auditorium: 14–16 November 2026",
+          "Central Lawn: 14–15 November 2026",
+          "East Sports Ground (outdoor activities): 16 November 2026"
+        ],
+        "excludes": [],
+        "conditions": [
+          {
+            "text": "Facilities confirm power and security by 30 October",
+            "state": "FULFILLED",
+            "evidence_email_ids": [
+              "E017",
+              "E018"
+            ]
+          }
+        ]
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E016",
+          "quote": "Approved: Main Auditorium for 14-16 November, Central Lawn for 14-15 November, and East Sports Ground for outdoor activities on 16 November.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E016",
+          "quote": "Facilities should confirm power and security by 30 October.",
+          "role": "CONTEXT",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-005",
+      "thread_key": "THR-004",
+      "type": "APPROVAL",
+      "subject": "UTM inspection and calibration",
+      "outcome": "Approved up to INR 28,000. Replacement parts need a separate quote and approval.",
+      "approver": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-22T08:15:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "CEILING",
+          "value_inr": 28000,
+          "original_text": "INR 28,000",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [
+          "Inspection and calibration"
+        ],
+        "excludes": [
+          "Replacement parts (separate quote and approval required)"
+        ],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E021",
+          "quote": "Approved inspection and calibration up to INR 28,000. Any replacement parts require a separate quote and approval.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-006",
+      "thread_key": "THR-004",
+      "type": "APPROVAL",
+      "subject": "UTM load-cell connector replacement",
+      "outcome": "Additional INR 6,500 replacement approved.",
+      "approver": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-25T07:55:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "APPROVED",
+          "value_inr": 6500,
+          "original_text": "INR 6,500",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [
+          "Replacement of the damaged load-cell connector"
+        ],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E023",
+          "quote": "Additional INR 6,500 replacement is approved.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-007",
+      "thread_key": "THR-005",
+      "type": "CONFIRMATION",
+      "subject": "Seminar Hall 2 reservation",
+      "outcome": "Hall reserved for 12 November, 09:00–14:00 (the seminar itself runs 10:00–13:00). Projector and classroom seating confirmed.",
+      "approver": null,
+      "recommended_by": null,
+      "confirmed_by": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-10-03T09:45:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [
+          "Seminar Hall 2 reservation, 12 November 2026, 09:00–14:00"
+        ],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E028",
+          "quote": "Hall reserved for 12 November, 09:00-14:00. Projector and classroom seating confirmed.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-008",
+      "thread_key": "THR-006",
+      "type": "CONFIRMATION",
+      "subject": "Completeness and eligibility of the conference claim",
+      "outcome": "Documents complete; eligible reimbursement INR 24,650; forwarded for approval.",
+      "approver": null,
+      "recommended_by": null,
+      "confirmed_by": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-01T12:00:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "ELIGIBLE",
+          "value_inr": 24650,
+          "original_text": "INR 24,650",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E032",
+          "quote": "Documents are complete. Eligible reimbursement is INR 24,650 and has been forwarded for approval.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-009",
+      "thread_key": "THR-006",
+      "type": "APPROVAL",
+      "subject": "Faculty conference travel reimbursement",
+      "outcome": "Approved INR 24,650 as per institute travel policy; Accounts may process payment.",
+      "approver": {
+        "address": "dean.research@northbridge.edu",
+        "role": "Dean (Research)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": "Institute travel policy",
+      "decided_at": "2026-09-02T09:30:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "APPROVED",
+          "value_inr": 24650,
+          "original_text": "INR 24,650",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [
+          "Reimbursement of INR 24,650",
+          "Accounts may process payment"
+        ],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E033",
+          "quote": "Approved reimbursement of INR 24,650 as per institute travel policy.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-010",
+      "thread_key": "THR-007",
+      "type": "APPROVAL",
+      "subject": "Purchase of two OfficeTech network laser printers",
+      "outcome": "Approved two printers at INR 29,500 each, total INR 59,000, from the office equipment budget; order to be issued by 14 October.",
+      "approver": {
+        "address": "admin.officer@northbridge.edu",
+        "role": "Administrative Officer",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-10-09T10:40:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "APPROVED",
+          "value_inr": 29500,
+          "original_text": "INR 29,500",
+          "basis": "PER_UNIT",
+          "derived": false
+        },
+        {
+          "role": "APPROVED",
+          "value_inr": 59000,
+          "original_text": "INR 59,000",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [
+          "Two OfficeTech printers",
+          "Funding from the office equipment budget"
+        ],
+        "excludes": [],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E038",
+          "quote": "Approved two OfficeTech printers at INR 29,500 each, total INR 59,000, from office equipment budget.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-011",
+      "thread_key": "THR-008",
+      "type": "APPROVAL",
+      "subject": "Venue change for the Manufacturing Processes examination",
+      "outcome": "Venue changes from Lab 1 to Lecture Hall 4. Date (5 November) and time (14:00) are unchanged.",
+      "approver": {
+        "address": "exam.cell@northbridge.edu",
+        "role": "Examination Cell",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-10-15T07:30:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [
+          "Venue: Lecture Hall 4"
+        ],
+        "excludes": [
+          "Change of date",
+          "Change of time"
+        ],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E043",
+          "quote": "Exam remains 5 November at 14:00; venue changes from Lab 1 to Lecture Hall 4.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-012",
+      "thread_key": "THR-009",
+      "type": "CONFIRMATION",
+      "subject": "Eligibility of the revised consumables plan",
+      "outcome": "Items are eligible under the consumables head; INR 3.42 lakh is within the INR 3.5 lakh cap. Individual purchase approvals still follow procurement rules.",
+      "approver": null,
+      "recommended_by": null,
+      "confirmed_by": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-17T11:45:00Z",
+      "event_date": null,
+      "amounts": [
+        {
+          "role": "PLANNED",
+          "value_inr": 342000,
+          "original_text": "INR 3.42 lakh",
+          "basis": "TOTAL",
+          "derived": false
+        },
+        {
+          "role": "CAP",
+          "value_inr": 350000,
+          "original_text": "INR 3.5 lakh",
+          "basis": "TOTAL",
+          "derived": false
+        }
+      ],
+      "scope": {
+        "authorizes": [],
+        "excludes": [
+          "Individual purchase approvals (still follow procurement rules)"
+        ],
+        "conditions": []
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E047",
+          "quote": "Items are eligible under consumables head. INR 3.42 lakh is within INR 3.5 lakh cap.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E047",
+          "quote": "Individual purchase approvals still follow procurement rules.",
+          "role": "CONTEXT",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-013",
+      "thread_key": "THR-009",
+      "type": "LIMITED_SCOPE_ACCEPTANCE",
+      "subject": "Revised consumables plan accepted for budget planning only",
+      "outcome": "Accepted for budget planning only. This is NOT purchase authorization; individual requisitions must be submitted for approval before ordering.",
+      "approver": {
+        "address": "research.office@northbridge.edu",
+        "role": "Research Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-09-18T08:25:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [
+          "Budget planning"
+        ],
+        "excludes": [
+          "Purchase authorization"
+        ],
+        "conditions": [
+          {
+            "text": "Individual requisitions submitted and approved before ordering",
+            "state": "PENDING",
+            "evidence_email_ids": []
+          }
+        ]
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E048",
+          "quote": "Revised plan accepted for budget planning only. This is not purchase authorization; submit individual requisitions for approval before ordering.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "decision_id": "dec-014",
+      "thread_key": "THR-010",
+      "type": "APPROVAL",
+      "subject": "Access to the second-floor network cabinet",
+      "outcome": "Access approved; power isolation to be coordinated with Facilities before replacement.",
+      "approver": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "recommended_by": null,
+      "confirmed_by": null,
+      "attribution_note": null,
+      "authority_basis": null,
+      "decided_at": "2026-10-26T05:00:00Z",
+      "event_date": null,
+      "amounts": [],
+      "scope": {
+        "authorizes": [
+          "Access to the second-floor network cabinet"
+        ],
+        "excludes": [],
+        "conditions": [
+          {
+            "text": "Coordinate power isolation with Facilities before replacement",
+            "state": "NOT_EVIDENCED",
+            "evidence_email_ids": []
+          }
+        ]
+      },
+      "status": "ACTIVE",
+      "supersedes_id": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "evidence": [
+        {
+          "email_id": "E051",
+          "quote": "Access to second-floor network cabinet is approved.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "act-001",
+      "thread_key": "THR-001",
+      "action_kind": "COMMITMENT",
+      "task": "Deliver and install the CNC turning centre (vendor confirmed an eight-week delivery schedule)",
+      "owner": null,
+      "owner_basis": null,
+      "requested_by": null,
+      "deadline": {
+        "date": null,
+        "text": "Eight weeks from order confirmation (order confirmation date not stated)",
+        "precision": "RELATIVE"
+      },
+      "status": "OPEN",
+      "deadline_state": "UNDETERMINED",
+      "completed_at": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E007 states delivery and installation remain pending; no later email reports completion.",
+      "evidence": [
+        {
+          "email_id": "E007",
+          "quote": "Delivery and installation remain pending.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E007",
+          "quote": "Expected delivery: Within eight weeks of order confirmation.",
+          "role": "CONTEXT",
+          "attachment_id": "att-cnc-purchase-order",
+          "attachment_filename": "cnc_purchase_order.txt"
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-002",
+      "thread_key": "THR-002",
+      "action_kind": "REQUEST",
+      "task": "Obtain missing fee receipts for four incomplete bonafide applications",
+      "owner": null,
+      "owner_basis": null,
+      "requested_by": null,
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "OPEN",
+      "deadline_state": "NONE",
+      "completed_at": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E012 (19 Sep 2026) reports the four applications are still on hold. The four applicants are not named.",
+      "evidence": [
+        {
+          "email_id": "E012",
+          "quote": "Four incomplete applications remain on hold pending fee receipts.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E011",
+          "quote": "Four are incomplete because fee receipts are missing.",
+          "role": "CONTEXT",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-003",
+      "thread_key": "THR-002",
+      "action_kind": "REQUEST",
+      "task": "Collect the 38 prepared bonafide certificates",
+      "owner": null,
+      "owner_basis": null,
+      "requested_by": null,
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "OPEN",
+      "deadline_state": "NONE",
+      "completed_at": null,
+      "provenance": "INFERRED",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Implied by \"ready for collection\"; no email says who collects them or that they were collected.",
+      "evidence": [
+        {
+          "email_id": "E012",
+          "quote": "38 bonafide certificates are ready for collection.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-004",
+      "thread_key": "THR-003",
+      "action_kind": "REQUEST",
+      "task": "Inspect the East Sports Ground temporary power supply before opening (16 November)",
+      "owner": null,
+      "owner_basis": null,
+      "requested_by": null,
+      "deadline": {
+        "date": null,
+        "text": "Before opening on 16 November 2026",
+        "precision": "RELATIVE"
+      },
+      "status": "OPEN",
+      "deadline_state": "UPCOMING",
+      "completed_at": null,
+      "provenance": "INFERRED",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Found only in the power-plan attachment of E017; no email confirms the inspection.",
+      "evidence": [
+        {
+          "email_id": "E017",
+          "quote": "Temporary supply to be inspected before opening.",
+          "role": "PRIMARY",
+          "attachment_id": "att-fest-power-plan",
+          "attachment_filename": "fest_power_plan.txt"
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-005",
+      "thread_key": "THR-005",
+      "action_kind": "COMMITMENT",
+      "task": "Arrange two wireless microphones and a laptop adapter for the seminar",
+      "owner": {
+        "address": "seminar.support@northbridge.edu",
+        "role": "Seminar Support",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "EXPLICIT",
+      "requested_by": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "OPEN",
+      "deadline_state": "NONE",
+      "completed_at": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "No completion evidence in the available emails.",
+      "evidence": [
+        {
+          "email_id": "E028",
+          "quote": "Seminar Support will arrange microphones and adapter.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-006",
+      "thread_key": "THR-009",
+      "action_kind": "INSTRUCTION",
+      "task": "Submit individual requisitions for approval before ordering any consumables",
+      "owner": {
+        "address": "pi.lab@northbridge.edu",
+        "role": "Principal Investigator (Lab)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "research.office@northbridge.edu",
+        "role": "Research Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "CONDITIONAL",
+      "deadline_state": "NONE",
+      "completed_at": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Applies only if orders are placed; owner inferred from the email being addressed to the PI lab.",
+      "evidence": [
+        {
+          "email_id": "E048",
+          "quote": "submit individual requisitions for approval before ordering.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-007",
+      "thread_key": "THR-010",
+      "action_kind": "CONDITIONAL_NEXT_STEP",
+      "task": "Helpdesk may close tickets if no further connectivity drops occur during 24-hour monitoring",
+      "owner": {
+        "address": "it.helpdesk@northbridge.edu",
+        "role": "IT Helpdesk",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "EXPLICIT",
+      "requested_by": {
+        "address": "it.network@northbridge.edu",
+        "role": "IT Network Team",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": "24 hours of monitoring after connectivity tests passed at 12:30 IST on 26 October 2026",
+        "precision": "RELATIVE"
+      },
+      "status": "CONDITIONAL",
+      "deadline_state": "UNDETERMINED",
+      "completed_at": null,
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "No closure email exists in the available records.",
+      "evidence": [
+        {
+          "email_id": "E052",
+          "quote": "Monitoring continues for 24 hours. Helpdesk may close tickets if no further drops occur.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": []
+    },
+    {
+      "action_id": "act-008",
+      "thread_key": "THR-001",
+      "action_kind": "REQUEST",
+      "task": "Collect three technical and commercial quotations",
+      "owner": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "DONE",
+      "deadline_state": "NONE",
+      "completed_at": "2026-09-04T11:20:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E002 reports the quotations received.",
+      "evidence": [
+        {
+          "email_id": "E001",
+          "quote": "Please collect three technical and commercial quotations.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E002",
+          "quote": "Quotations received: Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh, Vendor C INR 19.1 lakh.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-009",
+      "thread_key": "THR-001",
+      "action_kind": "INSTRUCTION",
+      "task": "Issue the purchase order to the vendor by 11 September 2026",
+      "owner": null,
+      "owner_basis": null,
+      "requested_by": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-09-11T23:59:59+05:30",
+        "text": "11 September 2026",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-09-11T15:10:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E007 (11 Sep 2026, 20:40 IST) reports the order sent. The email is addressed to the HoD and Accounts, so the intended owner is not stated.",
+      "evidence": [
+        {
+          "email_id": "E006",
+          "quote": "Please issue it to the vendor by 11 September 2026.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E007",
+          "quote": "Purchase order has been sent to Vendor B.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-010",
+      "thread_key": "THR-002",
+      "action_kind": "COMMITMENT",
+      "task": "Process applications received by 16 September by 20 September",
+      "owner": {
+        "address": "registrar@northbridge.edu",
+        "role": "Registrar",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "registrar@northbridge.edu",
+        "role": "Registrar",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-09-20T23:59:59+05:30",
+        "text": "20 September 2026",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-09-19T13:25:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E012 (19 Sep 2026) reports certificates ready.",
+      "evidence": [
+        {
+          "email_id": "E009",
+          "quote": "Applications received by 16 September will be processed by 20 September.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E012",
+          "quote": "38 bonafide certificates are ready for collection.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-011",
+      "thread_key": "THR-003",
+      "action_kind": "INSTRUCTION",
+      "task": "Confirm power and security arrangements by 30 October",
+      "owner": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "EXPLICIT",
+      "requested_by": {
+        "address": "dean.student@northbridge.edu",
+        "role": "Dean (Student Affairs)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-10-30T23:59:59+05:30",
+        "text": "30 October",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-10-30T11:00:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Power plan sent 28 Oct; security staffing confirmed 30 Oct 2026.",
+      "evidence": [
+        {
+          "email_id": "E016",
+          "quote": "Facilities should confirm power and security by 30 October.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E017",
+          "quote": "Power distribution plan is attached.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        },
+        {
+          "email_id": "E018",
+          "quote": "Security staffing confirmed: six guards per shift at Main Auditorium and four at East Sports Ground.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-012",
+      "thread_key": "THR-003",
+      "action_kind": "REQUEST",
+      "task": "Provide the security staffing plan by 2 November",
+      "owner": {
+        "address": "security@northbridge.edu",
+        "role": "Security Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "EXPLICIT",
+      "requested_by": {
+        "address": "facilities@northbridge.edu",
+        "role": "Facilities",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-11-02T23:59:59+05:30",
+        "text": "2 November",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-10-30T11:00:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Confirmed 30 Oct 2026, before the deadline.",
+      "evidence": [
+        {
+          "email_id": "E017",
+          "quote": "Security Office, please provide staffing plan by 2 November.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E018",
+          "quote": "Security staffing confirmed: six guards per shift at Main Auditorium and four at East Sports Ground.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-013",
+      "thread_key": "THR-004",
+      "action_kind": "INSTRUCTION",
+      "task": "Complete repair and calibration certificate by 29 September",
+      "owner": {
+        "address": "maintenance@northbridge.edu",
+        "role": "Maintenance Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "mech.hod@northbridge.edu",
+        "role": "Head of Department (Mechanical)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-09-29T23:59:59+05:30",
+        "text": "29 September",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-09-28T14:00:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E024 (28 Sep 2026) reports completion; certificate attached.",
+      "evidence": [
+        {
+          "email_id": "E023",
+          "quote": "Complete repair and calibration certificate by 29 September.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E024",
+          "quote": "Connector replaced and calibration completed.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-014",
+      "thread_key": "THR-006",
+      "action_kind": "REQUEST",
+      "task": "Submit the missing return boarding pass and attendance certificate",
+      "owner": {
+        "address": "faculty.member@northbridge.edu",
+        "role": "Faculty Member",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "accounts@northbridge.edu",
+        "role": "Accounts Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "DONE",
+      "deadline_state": "NONE",
+      "completed_at": "2026-08-29T08:05:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Submitted in E031 (29 Aug 2026).",
+      "evidence": [
+        {
+          "email_id": "E030",
+          "quote": "Please submit both.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E031",
+          "quote": "Return boarding pass and attendance certificate are attached.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-015",
+      "thread_key": "THR-007",
+      "action_kind": "INSTRUCTION",
+      "task": "Issue the printer order by 14 October",
+      "owner": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "admin.officer@northbridge.edu",
+        "role": "Administrative Officer",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-10-14T23:59:59+05:30",
+        "text": "14 October",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "MET",
+      "completed_at": "2026-10-13T13:20:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Order issued 13 Oct 2026.",
+      "evidence": [
+        {
+          "email_id": "E038",
+          "quote": "Issue order by 14 October.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E039",
+          "quote": "Purchase order issued to OfficeTech.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-016",
+      "thread_key": "THR-007",
+      "action_kind": "COMMITMENT",
+      "task": "Deliver the printers by 20 October",
+      "owner": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "purchase@northbridge.edu",
+        "role": "Purchase Section",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": "2026-10-20T23:59:59+05:30",
+        "text": "20 October",
+        "precision": "DATE"
+      },
+      "status": "DONE",
+      "deadline_state": "UNDETERMINED",
+      "completed_at": "2026-10-21T08:50:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "E040 (21 Oct 2026) reports delivery but gives no delivery date, so on-time delivery cannot be determined.",
+      "evidence": [
+        {
+          "email_id": "E039",
+          "quote": "Delivery expected by 20 October.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E040",
+          "quote": "Both printers delivered and installed.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-017",
+      "thread_key": "THR-008",
+      "action_kind": "INSTRUCTION",
+      "task": "Inform students and invigilators of the venue change",
+      "owner": {
+        "address": "department.office@northbridge.edu",
+        "role": "Department Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "exam.cell@northbridge.edu",
+        "role": "Examination Cell",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "DONE",
+      "deadline_state": "NONE",
+      "completed_at": "2026-10-16T08:00:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Circulated 16 Oct 2026.",
+      "evidence": [
+        {
+          "email_id": "E043",
+          "quote": "Inform students and invigilators.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E044",
+          "quote": "Revised venue circulated to enrolled students and invigilators.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    },
+    {
+      "action_id": "act-018",
+      "thread_key": "THR-009",
+      "action_kind": "REQUEST",
+      "task": "Submit a revised itemized consumables plan before placing orders",
+      "owner": {
+        "address": "pi.lab@northbridge.edu",
+        "role": "Principal Investigator (Lab)",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "owner_basis": "INFERRED",
+      "requested_by": {
+        "address": "research.office@northbridge.edu",
+        "role": "Research Office",
+        "role_source": "INFERRED_FROM_ADDRESS"
+      },
+      "deadline": {
+        "date": null,
+        "text": null,
+        "precision": null
+      },
+      "status": "DONE",
+      "deadline_state": "NONE",
+      "completed_at": "2026-09-15T06:55:00Z",
+      "provenance": "EXPLICIT",
+      "confidence": null,
+      "review_state": "NONE",
+      "status_basis": "Submitted 15 Sep 2026.",
+      "evidence": [
+        {
+          "email_id": "E045",
+          "quote": "Submit revised itemized plan before placing orders.",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ],
+      "completion_evidence": [
+        {
+          "email_id": "E046",
+          "quote": "Revised consumables plan totals INR 3.42 lakh",
+          "role": "PRIMARY",
+          "attachment_id": null,
+          "attachment_filename": null
+        }
+      ]
+    }
+  ],
+  "answers": [
+    {
+      "demo_key": "cnc-summary",
+      "matches": [
+        {
+          "question": "What happened with the CNC machine procurement?",
+          "scope": null
+        },
+        {
+          "question": "What was the final decision on the CNC machine procurement?",
+          "scope": null
+        },
+        {
+          "question": "Summarise the complete conversation.",
+          "scope": "THR-001"
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-cnc-summary",
+        "status": "ANSWERED",
+        "question": "What happened with the CNC machine procurement?",
+        "intents": [
+          "THREAD_SUMMARY"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "The Head of Department asked Purchase to collect three technical and commercial quotations for one CNC turning centre for the Manufacturing Lab.",
+            "citation_ids": [
+              "cit_cnc-summary_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "Quotations were Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh and Vendor C INR 19.1 lakh; Vendor B was lowest, subject to technical compliance.",
+            "citation_ids": [
+              "cit_cnc-summary_2"
+            ]
+          },
+          {
+            "claim_id": "c3",
+            "claim_type": "EXPLICIT",
+            "text": "The technical committee found Vendor A did not meet the spindle speed range and Vendor B met all mandatory specifications with delivery within eight weeks.",
+            "citation_ids": [
+              "cit_cnc-summary_3"
+            ]
+          },
+          {
+            "claim_id": "c4",
+            "claim_type": "EXPLICIT",
+            "text": "The department recommended Vendor B at INR 17.9 lakh. A recommendation is not an approval.",
+            "citation_ids": [
+              "cit_cnc-summary_4"
+            ]
+          },
+          {
+            "claim_id": "c5",
+            "claim_type": "EXPLICIT",
+            "text": "The Dean (Administration) approved on 8 September 2026 for INR 17.9 lakh, subject to standard purchase terms and budget confirmation.",
+            "citation_ids": [
+              "cit_cnc-summary_5"
+            ]
+          },
+          {
+            "claim_id": "c6",
+            "claim_type": "EXPLICIT",
+            "text": "The Purchase section reported that Accounts confirmed budget availability.",
+            "citation_ids": [
+              "cit_cnc-summary_6"
+            ]
+          },
+          {
+            "claim_id": "c7",
+            "claim_type": "EXPLICIT",
+            "text": "The purchase order was sent to Vendor B on 11 September 2026.",
+            "citation_ids": [
+              "cit_cnc-summary_7"
+            ]
+          },
+          {
+            "claim_id": "c8",
+            "claim_type": "EXPLICIT",
+            "text": "Delivery and installation remain pending.",
+            "citation_ids": [
+              "cit_cnc-summary_8"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-001",
+            "dec-002",
+            "dec-003"
+          ],
+          "action_ids": [
+            "act-001"
+          ],
+          "latest_status": {
+            "class": "AWAITING_ACTION",
+            "text": "Purchase order sent; delivery and installation pending.",
+            "as_of_email_id": "E007"
+          }
+        },
+        "caveats": [
+          "No email states a delivery or installation date; the purchase order attachment says delivery is within eight weeks of order confirmation, and the confirmation date is not stated."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_cnc-summary_1",
+            "email_id": "E001",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-02T09:15:00Z",
+            "sender": {
+              "address": "mech.hod@northbridge.edu",
+              "role": "Head of Department (Mechanical)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Please collect three technical and commercial quotations.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_2",
+            "email_id": "E002",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-04T11:20:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Quotations received: Vendor A INR 18.4 lakh, Vendor B INR 17.9 lakh, Vendor C INR 19.1 lakh. Vendor B is lowest, subject to technical compliance.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_3",
+            "email_id": "E003",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-05T08:40:00Z",
+            "sender": {
+              "address": "lab.coordinator@northbridge.edu",
+              "role": "Lab Coordinator",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Vendor A does not meet the spindle speed range. Vendor B meets all mandatory specifications and offers delivery within eight weeks.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_4",
+            "email_id": "E004",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-07T10:05:00Z",
+            "sender": {
+              "address": "mech.hod@northbridge.edu",
+              "role": "Head of Department (Mechanical)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "The department recommends Vendor B at INR 17.9 lakh",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_5",
+            "email_id": "E005",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-08T12:30:00Z",
+            "sender": {
+              "address": "dean.admin@northbridge.edu",
+              "role": "Dean (Administration)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Approved. Proceed with Vendor B for INR 17.9 lakh, subject to standard purchase terms and budget confirmation.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_6",
+            "email_id": "E006",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-09T09:00:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Accounts confirmed budget availability.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_7",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Purchase order has been sent to Vendor B.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-summary_8",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Delivery and installation remain pending.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": "THR-001",
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "cnc-approver",
+      "matches": [
+        {
+          "question": "Who approved the procurement and for what amount?",
+          "scope": null
+        },
+        {
+          "question": "Who approved the procurement and for what amount?",
+          "scope": "THR-001"
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-cnc-approver",
+        "status": "ANSWERED",
+        "question": "Who approved the procurement and for what amount?",
+        "intents": [
+          "DECISION_STATUS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "The Dean (Administration) approved the purchase of Vendor B on 8 September 2026 for INR 17.9 lakh (INR 1,790,000), subject to standard purchase terms and budget confirmation.",
+            "citation_ids": [
+              "cit_cnc-approver_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "The Head of Department recommended Vendor B and asked for approval; this was a recommendation, not the approval.",
+            "citation_ids": [
+              "cit_cnc-approver_2"
+            ]
+          },
+          {
+            "claim_id": "c3",
+            "claim_type": "EXPLICIT",
+            "text": "The purchase order attachment records the order value as INR 1,790,000.",
+            "citation_ids": [
+              "cit_cnc-approver_3"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-001",
+            "dec-002"
+          ]
+        },
+        "caveats": [
+          "Role labels such as \"Dean (Administration)\" are derived from the sender address (dean.admin@…); they are not stated in the email text."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_cnc-approver_1",
+            "email_id": "E005",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-08T12:30:00Z",
+            "sender": {
+              "address": "dean.admin@northbridge.edu",
+              "role": "Dean (Administration)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Approved. Proceed with Vendor B for INR 17.9 lakh, subject to standard purchase terms and budget confirmation.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-approver_2",
+            "email_id": "E004",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-07T10:05:00Z",
+            "sender": {
+              "address": "mech.hod@northbridge.edu",
+              "role": "Head of Department (Mechanical)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "The department recommends Vendor B at INR 17.9 lakh based on technical compliance and commercial comparison. Please approve procurement.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_cnc-approver_3",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Order value: INR 1,790,000",
+            "attachment_id": "att-cnc-purchase-order",
+            "attachment_filename": "cnc_purchase_order.txt",
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": "THR-001",
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "pending-clarify",
+      "matches": [
+        {
+          "question": "What is still pending?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-pending-clarify",
+        "status": "CLARIFICATION_NEEDED",
+        "question": "What is still pending?",
+        "intents": [
+          "PENDING_ACTIONS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "I could not tell which conversation you mean. Pending work exists in several conversations. Choose a scope.",
+            "citation_ids": []
+          }
+        ],
+        "structured": {},
+        "caveats": [],
+        "citations": [],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [
+          {
+            "label": "CNC machine procurement (THR-001)",
+            "question": "What is still pending?",
+            "thread_scope": "THR-001"
+          },
+          {
+            "label": "All conversations",
+            "question": "What is still pending?",
+            "thread_scope": "ALL"
+          }
+        ],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "pending-cnc",
+      "matches": [
+        {
+          "question": "What is still pending?",
+          "scope": "THR-001"
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-pending-cnc",
+        "status": "ANSWERED",
+        "question": "What is still pending?",
+        "intents": [
+          "PENDING_ACTIONS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "Delivery and installation of the CNC turning centre remain pending. The vendor confirmed an eight-week delivery schedule.",
+            "citation_ids": [
+              "cit_pending-cnc_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "The purchase order is already issued, so purchase order generation is no longer pending.",
+            "citation_ids": [
+              "cit_pending-cnc_2"
+            ]
+          }
+        ],
+        "structured": {
+          "action_ids": [
+            "act-001"
+          ]
+        },
+        "caveats": [
+          "No owner or calendar deadline is stated for delivery and installation."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_pending-cnc_1",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Vendor acknowledged receipt and confirmed the eight-week delivery schedule. Delivery and installation remain pending.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-cnc_2",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Purchase order has been sent to Vendor B.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": "THR-001",
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "pending-all",
+      "matches": [
+        {
+          "question": "What is still pending?",
+          "scope": "ALL"
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-pending-all",
+        "status": "ANSWERED",
+        "question": "What is still pending?",
+        "intents": [
+          "PENDING_ACTIONS",
+          "CROSS_THREAD"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "CNC turning centre: delivery and installation remain pending.",
+            "citation_ids": [
+              "cit_pending-all_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "Bonafide certificates: four applications are on hold pending fee receipts.",
+            "citation_ids": [
+              "cit_pending-all_2"
+            ]
+          },
+          {
+            "claim_id": "c3",
+            "claim_type": "INFERRED",
+            "text": "Bonafide certificates: collection of the 38 ready certificates is implied; no email says who collects them.",
+            "citation_ids": [
+              "cit_pending-all_3"
+            ]
+          },
+          {
+            "claim_id": "c4",
+            "claim_type": "INFERRED",
+            "text": "Technical fest: the East Sports Ground temporary supply is to be inspected before opening (found only in the power-plan attachment).",
+            "citation_ids": [
+              "cit_pending-all_4"
+            ]
+          },
+          {
+            "claim_id": "c5",
+            "claim_type": "EXPLICIT",
+            "text": "AI in Manufacturing seminar: Seminar Support will arrange microphones and a laptop adapter; no completion is recorded.",
+            "citation_ids": [
+              "cit_pending-all_5"
+            ]
+          },
+          {
+            "claim_id": "c6",
+            "claim_type": "EXPLICIT",
+            "text": "Research consumables plan: individual requisitions must be approved before any ordering (conditional).",
+            "citation_ids": [
+              "cit_pending-all_6"
+            ]
+          },
+          {
+            "claim_id": "c7",
+            "claim_type": "EXPLICIT",
+            "text": "Engineering Block outage: 24-hour monitoring continues; Helpdesk may close tickets if no further drops occur (conditional; no closure email).",
+            "citation_ids": [
+              "cit_pending-all_7"
+            ]
+          }
+        ],
+        "structured": {
+          "action_ids": [
+            "act-001",
+            "act-002",
+            "act-003",
+            "act-004",
+            "act-005",
+            "act-006",
+            "act-007"
+          ]
+        },
+        "caveats": [
+          "None of these items has an explicit calendar deadline in the emails.",
+          "Items marked as inferred are not stated as tasks in an email body."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_pending-all_1",
+            "email_id": "E007",
+            "thread_id": "THR-001",
+            "timestamp": "2026-09-11T15:10:00Z",
+            "sender": {
+              "address": "purchase@northbridge.edu",
+              "role": "Purchase Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "CNC machine procurement",
+            "quote": "Delivery and installation remain pending.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_2",
+            "email_id": "E012",
+            "thread_id": "THR-002",
+            "timestamp": "2026-09-19T13:25:00Z",
+            "sender": {
+              "address": "registrar@northbridge.edu",
+              "role": "Registrar",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Bonafide certificate requests",
+            "quote": "Four incomplete applications remain on hold pending fee receipts.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_3",
+            "email_id": "E012",
+            "thread_id": "THR-002",
+            "timestamp": "2026-09-19T13:25:00Z",
+            "sender": {
+              "address": "registrar@northbridge.edu",
+              "role": "Registrar",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Bonafide certificate requests",
+            "quote": "38 bonafide certificates are ready for collection.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_4",
+            "email_id": "E017",
+            "thread_id": "THR-003",
+            "timestamp": "2026-10-28T07:40:00Z",
+            "sender": {
+              "address": "facilities@northbridge.edu",
+              "role": "Facilities",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Annual technical fest venues",
+            "quote": "Temporary supply to be inspected before opening.",
+            "attachment_id": "att-fest-power-plan",
+            "attachment_filename": "fest_power_plan.txt",
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_5",
+            "email_id": "E028",
+            "thread_id": "THR-005",
+            "timestamp": "2026-10-03T09:45:00Z",
+            "sender": {
+              "address": "facilities@northbridge.edu",
+              "role": "Facilities",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "AI in Manufacturing seminar",
+            "quote": "Seminar Support will arrange microphones and adapter.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_6",
+            "email_id": "E048",
+            "thread_id": "THR-009",
+            "timestamp": "2026-09-18T08:25:00Z",
+            "sender": {
+              "address": "research.office@northbridge.edu",
+              "role": "Research Office",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Research grant consumables budget",
+            "quote": "submit individual requisitions for approval before ordering.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_pending-all_7",
+            "email_id": "E052",
+            "thread_id": "THR-010",
+            "timestamp": "2026-10-26T07:15:00Z",
+            "sender": {
+              "address": "it.network@northbridge.edu",
+              "role": "IT Network Team",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Engineering Block network outage",
+            "quote": "Monitoring continues for 24 hours. Helpdesk may close tickets if no further drops occur.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": "ALL",
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "on-hold",
+      "matches": [
+        {
+          "question": "Which applications are on hold and why?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-on-hold",
+        "status": "ANSWERED",
+        "question": "Which applications are on hold and why?",
+        "intents": [
+          "COUNT_STATUS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "Four bonafide certificate applications are on hold because their fee receipts are missing.",
+            "citation_ids": [
+              "cit_on-hold_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "Of 42 applications received before the deadline, 38 verified applications were forwarded to the Registrar and the Registrar reports those 38 certificates ready for collection.",
+            "citation_ids": [
+              "cit_on-hold_2",
+              "cit_on-hold_3"
+            ]
+          }
+        ],
+        "structured": {
+          "action_ids": [
+            "act-002"
+          ]
+        },
+        "caveats": [
+          "The emails do not name the four applicants, so individual applications cannot be listed."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_on-hold_1",
+            "email_id": "E012",
+            "thread_id": "THR-002",
+            "timestamp": "2026-09-19T13:25:00Z",
+            "sender": {
+              "address": "registrar@northbridge.edu",
+              "role": "Registrar",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Bonafide certificate requests",
+            "quote": "Four incomplete applications remain on hold pending fee receipts.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_on-hold_2",
+            "email_id": "E011",
+            "thread_id": "THR-002",
+            "timestamp": "2026-09-17T10:00:00Z",
+            "sender": {
+              "address": "student.affairs@northbridge.edu",
+              "role": "Student Affairs",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Bonafide certificate requests",
+            "quote": "42 applications were received before the deadline. Four are incomplete because fee receipts are missing. The remaining 38 verified applications have been forwarded to the Registrar.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_on-hold_3",
+            "email_id": "E012",
+            "thread_id": "THR-002",
+            "timestamp": "2026-09-19T13:25:00Z",
+            "sender": {
+              "address": "registrar@northbridge.edu",
+              "role": "Registrar",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Bonafide certificate requests",
+            "quote": "38 bonafide certificates are ready for collection.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "latest-decisions-clarify",
+      "matches": [
+        {
+          "question": "What decisions were made in the latest discussion?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-latest-decisions-clarify",
+        "status": "CLARIFICATION_NEEDED",
+        "question": "What decisions were made in the latest discussion?",
+        "intents": [
+          "DECISION_STATUS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "\"Latest discussion\" could mean several conversations. Choose one, ordered by most recent activity.",
+            "citation_ids": []
+          }
+        ],
+        "structured": {},
+        "caveats": [],
+        "citations": [],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [
+          {
+            "label": "Annual technical fest venues (last activity 30 Oct 2026)",
+            "question": "What decisions were made in the latest discussion?",
+            "thread_scope": "THR-003"
+          },
+          {
+            "label": "Engineering Block network outage (26 Oct 2026)",
+            "question": "What decisions were made in the latest discussion?",
+            "thread_scope": "THR-010"
+          },
+          {
+            "label": "Department office printers (21 Oct 2026)",
+            "question": "What decisions were made in the latest discussion?",
+            "thread_scope": "THR-007"
+          }
+        ],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "latest-decisions-thr003",
+      "matches": [
+        {
+          "question": "What decisions were made in the latest discussion?",
+          "scope": "THR-003"
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-latest-decisions-thr003",
+        "status": "ANSWERED",
+        "question": "What decisions were made in the latest discussion?",
+        "intents": [
+          "DECISION_STATUS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "The Dean (Student Affairs) approved the venues on 21 August 2026: Main Auditorium 14–16 November, Central Lawn 14–15 November, and East Sports Ground for outdoor activities on 16 November.",
+            "citation_ids": [
+              "cit_latest-decisions-thr003_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "Later messages supply the power plan and confirm security staffing; they do not contain a new approval.",
+            "citation_ids": [
+              "cit_latest-decisions-thr003_2",
+              "cit_latest-decisions-thr003_3"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-004"
+          ]
+        },
+        "caveats": [],
+        "citations": [
+          {
+            "citation_id": "cit_latest-decisions-thr003_1",
+            "email_id": "E016",
+            "thread_id": "THR-003",
+            "timestamp": "2026-08-21T12:15:00Z",
+            "sender": {
+              "address": "dean.student@northbridge.edu",
+              "role": "Dean (Student Affairs)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Annual technical fest venues",
+            "quote": "Approved: Main Auditorium for 14-16 November, Central Lawn for 14-15 November, and East Sports Ground for outdoor activities on 16 November.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_latest-decisions-thr003_2",
+            "email_id": "E017",
+            "thread_id": "THR-003",
+            "timestamp": "2026-10-28T07:40:00Z",
+            "sender": {
+              "address": "facilities@northbridge.edu",
+              "role": "Facilities",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Annual technical fest venues",
+            "quote": "Power distribution plan is attached.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_latest-decisions-thr003_3",
+            "email_id": "E018",
+            "thread_id": "THR-003",
+            "timestamp": "2026-10-30T11:00:00Z",
+            "sender": {
+              "address": "security@northbridge.edu",
+              "role": "Security Office",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Annual technical fest venues",
+            "quote": "Security staffing confirmed: six guards per shift at Main Auditorium and four at East Sports Ground.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": "THR-003",
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "utm-cost",
+      "matches": [
+        {
+          "question": "What was the final cost to repair the UTM and when was it returned to service?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-utm-cost",
+        "status": "ANSWERED",
+        "question": "What was the final cost to repair the UTM and when was it returned to service?",
+        "intents": [
+          "FINANCIAL_AGGREGATE",
+          "DATE"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "DERIVED_CALC",
+            "text": "Approved repair spend totals INR 34,500: INR 28,000 for inspection and calibration plus INR 6,500 for the load-cell connector replacement.",
+            "citation_ids": [
+              "cit_utm-cost_1",
+              "cit_utm-cost_2"
+            ],
+            "calculation": {
+              "operation": "SUM",
+              "operands": [
+                {
+                  "label": "Inspection and calibration (approved up to)",
+                  "value_inr": 28000,
+                  "citation_ids": [
+                    "cit_utm-cost_1"
+                  ]
+                },
+                {
+                  "label": "Connector replacement",
+                  "value_inr": 6500,
+                  "citation_ids": [
+                    "cit_utm-cost_2"
+                  ]
+                }
+              ],
+              "result_inr": 34500
+            }
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "The UTM passed verification and was cleared to return to service in the maintenance email of 28 September 2026.",
+            "citation_ids": [
+              "cit_utm-cost_3"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-005",
+            "dec-006"
+          ]
+        },
+        "caveats": [
+          "INR 28,000 was approved as an upper limit; no email states the final invoiced amount."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_utm-cost_1",
+            "email_id": "E021",
+            "thread_id": "THR-004",
+            "timestamp": "2026-09-22T08:15:00Z",
+            "sender": {
+              "address": "mech.hod@northbridge.edu",
+              "role": "Head of Department (Mechanical)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "UTM maintenance",
+            "quote": "Approved inspection and calibration up to INR 28,000.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_utm-cost_2",
+            "email_id": "E023",
+            "thread_id": "THR-004",
+            "timestamp": "2026-09-25T07:55:00Z",
+            "sender": {
+              "address": "mech.hod@northbridge.edu",
+              "role": "Head of Department (Mechanical)",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "UTM maintenance",
+            "quote": "Additional INR 6,500 replacement is approved.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_utm-cost_3",
+            "email_id": "E024",
+            "thread_id": "THR-004",
+            "timestamp": "2026-09-28T14:00:00Z",
+            "sender": {
+              "address": "maintenance@northbridge.edu",
+              "role": "Maintenance Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "UTM maintenance",
+            "quote": "UTM passed verification and can be returned to service.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": {
+          "level": "MEDIUM",
+          "reasons": [
+            "Derived calculation",
+            "Ceiling amount rather than invoiced amount"
+          ]
+        },
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "exam-date",
+      "matches": [
+        {
+          "question": "Did the Manufacturing Processes examination date change?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-exam-date",
+        "status": "ANSWERED",
+        "question": "Did the Manufacturing Processes examination date change?",
+        "intents": [
+          "CHANGE_DETECTION"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "No. The exam remains on 5 November at 14:00; only the venue changed, from Lab 1 to Lecture Hall 4.",
+            "citation_ids": [
+              "cit_exam-date_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "The Department Office confirmed the revised venue was circulated and that date and time are unchanged.",
+            "citation_ids": [
+              "cit_exam-date_2"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-011"
+          ]
+        },
+        "caveats": [],
+        "citations": [
+          {
+            "citation_id": "cit_exam-date_1",
+            "email_id": "E043",
+            "thread_id": "THR-008",
+            "timestamp": "2026-10-15T07:30:00Z",
+            "sender": {
+              "address": "exam.cell@northbridge.edu",
+              "role": "Examination Cell",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Mid-semester examination timetable",
+            "quote": "Exam remains 5 November at 14:00; venue changes from Lab 1 to Lecture Hall 4.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_exam-date_2",
+            "email_id": "E044",
+            "thread_id": "THR-008",
+            "timestamp": "2026-10-16T08:00:00Z",
+            "sender": {
+              "address": "department.office@northbridge.edu",
+              "role": "Department Office",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Mid-semester examination timetable",
+            "quote": "Date and time are unchanged.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "scope-authority",
+      "matches": [
+        {
+          "question": "Does acceptance of the revised consumables plan authorize purchases?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-scope-authority",
+        "status": "ANSWERED",
+        "question": "Does acceptance of the revised consumables plan authorize purchases?",
+        "intents": [
+          "SCOPE_OF_AUTHORITY"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "No. The revised plan was accepted for budget planning only and is not purchase authorization.",
+            "citation_ids": [
+              "cit_scope-authority_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "Individual requisitions must be submitted and approved before ordering, and Accounts noted that individual purchase approvals still follow procurement rules.",
+            "citation_ids": [
+              "cit_scope-authority_2",
+              "cit_scope-authority_3"
+            ]
+          }
+        ],
+        "structured": {
+          "decision_ids": [
+            "dec-012",
+            "dec-013"
+          ]
+        },
+        "caveats": [],
+        "citations": [
+          {
+            "citation_id": "cit_scope-authority_1",
+            "email_id": "E048",
+            "thread_id": "THR-009",
+            "timestamp": "2026-09-18T08:25:00Z",
+            "sender": {
+              "address": "research.office@northbridge.edu",
+              "role": "Research Office",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Research grant consumables budget",
+            "quote": "Revised plan accepted for budget planning only. This is not purchase authorization; submit individual requisitions for approval before ordering.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_scope-authority_2",
+            "email_id": "E048",
+            "thread_id": "THR-009",
+            "timestamp": "2026-09-18T08:25:00Z",
+            "sender": {
+              "address": "research.office@northbridge.edu",
+              "role": "Research Office",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Research grant consumables budget",
+            "quote": "submit individual requisitions for approval before ordering.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_scope-authority_3",
+            "email_id": "E047",
+            "thread_id": "THR-009",
+            "timestamp": "2026-09-17T11:45:00Z",
+            "sender": {
+              "address": "accounts@northbridge.edu",
+              "role": "Accounts Section",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Research grant consumables budget",
+            "quote": "Individual purchase approvals still follow procurement rules.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "outage",
+      "matches": [
+        {
+          "question": "What caused the Engineering Block network outage and what is its status?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-outage",
+        "status": "ANSWERED",
+        "question": "What caused the Engineering Block network outage and what is its status?",
+        "intents": [
+          "ROOT_CAUSE",
+          "LATEST_STATUS"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "Initial checks indicated a failed distribution switch on the second floor.",
+            "citation_ids": [
+              "cit_outage_1"
+            ]
+          },
+          {
+            "claim_id": "c2",
+            "claim_type": "EXPLICIT",
+            "text": "The switch was replaced and connectivity tests passed at 12:30 IST; monitoring continues for 24 hours.",
+            "citation_ids": [
+              "cit_outage_2"
+            ]
+          },
+          {
+            "claim_id": "c3",
+            "claim_type": "EXPLICIT",
+            "text": "Helpdesk may close tickets if no further drops occur; no closure email exists in the available records.",
+            "citation_ids": [
+              "cit_outage_3"
+            ]
+          }
+        ],
+        "structured": {
+          "action_ids": [
+            "act-007"
+          ]
+        },
+        "caveats": [
+          "Times in the email text are IST; message timestamps are stored in UTC (12:30 IST = 07:00 UTC)."
+        ],
+        "citations": [
+          {
+            "citation_id": "cit_outage_1",
+            "email_id": "E050",
+            "thread_id": "THR-010",
+            "timestamp": "2026-10-26T04:10:00Z",
+            "sender": {
+              "address": "it.network@northbridge.edu",
+              "role": "IT Network Team",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Engineering Block network outage",
+            "quote": "Initial checks indicate failed distribution switch on second floor.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_outage_2",
+            "email_id": "E052",
+            "thread_id": "THR-010",
+            "timestamp": "2026-10-26T07:15:00Z",
+            "sender": {
+              "address": "it.network@northbridge.edu",
+              "role": "IT Network Team",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Engineering Block network outage",
+            "quote": "Distribution switch replaced and connectivity tests passed at 12:30 IST. Monitoring continues for 24 hours.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          },
+          {
+            "citation_id": "cit_outage_3",
+            "email_id": "E052",
+            "thread_id": "THR-010",
+            "timestamp": "2026-10-26T07:15:00Z",
+            "sender": {
+              "address": "it.network@northbridge.edu",
+              "role": "IT Network Team",
+              "role_source": "INFERRED_FROM_ADDRESS"
+            },
+            "subject": "Engineering Block network outage",
+            "quote": "Helpdesk may close tickets if no further drops occur.",
+            "attachment_id": null,
+            "attachment_filename": null,
+            "evidence_role": "PRIMARY",
+            "verification": {
+              "email_exists": true,
+              "access_ok": true,
+              "quote_found": true,
+              "values_match": true
+            }
+          }
+        ],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": null,
+        "suggestions": [],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    },
+    {
+      "demo_key": "insufficient",
+      "matches": [
+        {
+          "question": "What did the Dean decide about the library renovation?",
+          "scope": null
+        }
+      ],
+      "answer": {
+        "answer_id": "ans-demo-insufficient",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "question": "What did the Dean decide about the library renovation?",
+        "intents": [
+          "FACT_LOOKUP"
+        ],
+        "as_of": "2026-10-30T11:00:00Z",
+        "answer_blocks": [
+          {
+            "claim_id": "c1",
+            "claim_type": "EXPLICIT",
+            "text": "I could not find sufficient supporting information in the available email records.",
+            "citation_ids": []
+          }
+        ],
+        "structured": {},
+        "caveats": [],
+        "citations": [],
+        "confidence": null,
+        "validation": {
+          "passed": true,
+          "repairs": 0,
+          "removed_claims": 0
+        },
+        "search_scope": {
+          "threads_searched": 10,
+          "date_range": [
+            "2026-08-18",
+            "2026-10-30"
+          ]
+        },
+        "suggestions": [
+          "Broaden the date range",
+          "Check whether the relevant conversation was imported"
+        ],
+        "options": [],
+        "thread_scope": null,
+        "provenance": "DEMO_PREAUTHORED"
+      }
+    }
+  ],
+  "ingestion_jobs": [
+    {
+      "job_id": "job-demo-benchmark",
+      "status": "COMPLETED",
+      "source_file_name": "emails.csv",
+      "created_at": null,
+      "finished_at": null,
+      "counts": {
+        "rows_total": 52,
+        "rows_ok": 52,
+        "rows_failed": 0,
+        "rows_duplicate": 0,
+        "attachments_linked": 11,
+        "threads": 10
+      },
+      "warnings": [],
+      "stages": [
+        {
+          "name": "file_received",
+          "status": "DONE"
+        },
+        {
+          "name": "schema_validation",
+          "status": "DONE"
+        },
+        {
+          "name": "records_parsed",
+          "status": "DONE"
+        },
+        {
+          "name": "threads_reconstructed",
+          "status": "DONE"
+        },
+        {
+          "name": "attachments_registered",
+          "status": "DONE"
+        },
+        {
+          "name": "index_prepared",
+          "status": "DONE"
+        },
+        {
+          "name": "workspace_ready",
+          "status": "DONE"
+        }
+      ]
+    }
+  ],
+  "suggested_questions": [
+    "What happened with the CNC machine procurement?",
+    "Who approved the procurement and for what amount?",
+    "What is still pending?",
+    "Which applications are on hold and why?",
+    "What decisions were made in the latest discussion?",
+    "Summarise the complete conversation.",
+    "What was the final cost to repair the UTM and when was it returned to service?",
+    "Does acceptance of the revised consumables plan authorize purchases?"
+  ]
+} as const;
