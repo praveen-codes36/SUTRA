@@ -78,3 +78,6 @@ chroma_db/
 .cache/
 models/
 huggingface/
+
+# Node.js dependencies
+node_modules/
