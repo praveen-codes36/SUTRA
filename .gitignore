@@ -76,5 +76,6 @@ $RECYCLE.BIN/
 qdrant_data/
 chroma_db/
 .cache/
-models/
+/models/
+!sutra/models/
 huggingface/

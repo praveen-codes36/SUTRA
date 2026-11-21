@@ -1,0 +1,397 @@
+{
+  "evaluation_timestamp": "2026-11-21T14:17:55.795191",
+  "dataset_size": 52,
+  "total_queries": 15,
+  "embedder_diagnostics": {
+    "model_type": "pretrained",
+    "dimension": 384,
+    "fallback_triggered": false,
+    "fallback_reason": null,
+    "pretrained_available": true,
+    "model_name": "all-MiniLM-L6-v2",
+    "device": "cpu",
+    "is_genuine_pretrained": true
+  },
+  "retrieval_configuration": {
+    "rrf_k": 60,
+    "dense_weight": 1.2,
+    "bm25_weight": 0.8,
+    "thread_coherence_boost": 0.008
+  },
+  "macro_averages": {
+    "recall@5": 1.0,
+    "precision@5": 0.4933,
+    "mrr@5": 0.8556,
+    "ndcg@5": 0.8701,
+    "thread_hit@1": 1.0
+  },
+  "per_query_results": [
+    {
+      "query_id": "Q001",
+      "query": "What was the final decision on the CNC machine procurement?",
+      "expected_thread_id": "THR-001",
+      "retrieved_top_thread": "THR-001",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E005",
+        "E007"
+      ],
+      "retrieved_email_ids": [
+        "E004",
+        "E005",
+        "E001",
+        "E006",
+        "E007"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6241
+      }
+    },
+    {
+      "query_id": "Q002",
+      "query": "Who approved the CNC machine purchase and what is still pending?",
+      "expected_thread_id": "THR-001",
+      "retrieved_top_thread": "THR-001",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E005",
+        "E006",
+        "E007"
+      ],
+      "retrieved_email_ids": [
+        "E007",
+        "E006",
+        "E005",
+        "E001",
+        "E004"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      }
+    },
+    {
+      "query_id": "Q003",
+      "query": "What documents are required for a bonafide certificate?",
+      "expected_thread_id": "THR-002",
+      "retrieved_top_thread": "THR-002",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E009",
+        "E010"
+      ],
+      "retrieved_email_ids": [
+        "E008",
+        "E012",
+        "E010",
+        "E011",
+        "E009"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 0.3333,
+        "ndcg@5": 0.5438
+      }
+    },
+    {
+      "query_id": "Q004",
+      "query": "How many bonafide applications were completed and how many are on hold?",
+      "expected_thread_id": "THR-002",
+      "retrieved_top_thread": "THR-002",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E011",
+        "E012"
+      ],
+      "retrieved_email_ids": [
+        "E012",
+        "E011",
+        "E009",
+        "E008",
+        "E010"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      }
+    },
+    {
+      "query_id": "Q005",
+      "query": "Which venues are approved for the annual technical fest on 16 November?",
+      "expected_thread_id": "THR-003",
+      "retrieved_top_thread": "THR-003",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E014",
+        "E016"
+      ],
+      "retrieved_email_ids": [
+        "E013",
+        "E016",
+        "E015",
+        "E014",
+        "E017"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6509
+      }
+    },
+    {
+      "query_id": "Q006",
+      "query": "What is the latest status of technical fest security arrangements?",
+      "expected_thread_id": "THR-003",
+      "retrieved_top_thread": "THR-003",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E017",
+        "E018"
+      ],
+      "retrieved_email_ids": [
+        "E018",
+        "E017",
+        "E013",
+        "E016",
+        "E015"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      }
+    },
+    {
+      "query_id": "Q007",
+      "query": "What was the final cost to repair the UTM and when was it returned to service?",
+      "expected_thread_id": "THR-004",
+      "retrieved_top_thread": "THR-004",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E021",
+        "E022",
+        "E023",
+        "E024"
+      ],
+      "retrieved_email_ids": [
+        "E023",
+        "E024",
+        "E021",
+        "E020",
+        "E022"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9829
+      }
+    },
+    {
+      "query_id": "Q008",
+      "query": "When and where is the AI in Manufacturing seminar?",
+      "expected_thread_id": "THR-005",
+      "retrieved_top_thread": "THR-005",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E025",
+        "E028"
+      ],
+      "retrieved_email_ids": [
+        "E025",
+        "E027",
+        "E028",
+        "E026",
+        "E042"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9197
+      }
+    },
+    {
+      "query_id": "Q009",
+      "query": "What was the approved faculty travel reimbursement and payment status?",
+      "expected_thread_id": "THR-006",
+      "retrieved_top_thread": "THR-006",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E032",
+        "E033",
+        "E034"
+      ],
+      "retrieved_email_ids": [
+        "E033",
+        "E031",
+        "E034",
+        "E032",
+        "E029"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.906
+      }
+    },
+    {
+      "query_id": "Q010",
+      "query": "Which printer vendor was selected and what was the total order value?",
+      "expected_thread_id": "THR-007",
+      "retrieved_top_thread": "THR-007",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E037",
+        "E038",
+        "E039",
+        "E040"
+      ],
+      "retrieved_email_ids": [
+        "E038",
+        "E035",
+        "E039",
+        "E040",
+        "E037"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.8,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9047
+      }
+    },
+    {
+      "query_id": "Q011",
+      "query": "Did the Manufacturing Processes examination date change?",
+      "expected_thread_id": "THR-008",
+      "retrieved_top_thread": "THR-008",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E042",
+        "E043",
+        "E044"
+      ],
+      "retrieved_email_ids": [
+        "E042",
+        "E041",
+        "E044",
+        "E043",
+        "E025"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.906
+      }
+    },
+    {
+      "query_id": "Q012",
+      "query": "Does acceptance of the revised consumables plan authorize purchases?",
+      "expected_thread_id": "THR-009",
+      "retrieved_top_thread": "THR-009",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E047",
+        "E048"
+      ],
+      "retrieved_email_ids": [
+        "E045",
+        "E048",
+        "E047",
+        "E046",
+        "E007"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6934
+      }
+    },
+    {
+      "query_id": "Q013",
+      "query": "What caused the Engineering Block network outage and what is its status?",
+      "expected_thread_id": "THR-010",
+      "retrieved_top_thread": "THR-010",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E049",
+        "E050",
+        "E052"
+      ],
+      "retrieved_email_ids": [
+        "E049",
+        "E052",
+        "E050",
+        "E051",
+        "E035"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.6,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      }
+    },
+    {
+      "query_id": "Q014",
+      "query": "Find messages related to Vendor B's technical compliance.",
+      "expected_thread_id": "THR-001",
+      "retrieved_top_thread": "THR-001",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E002",
+        "E003"
+      ],
+      "retrieved_email_ids": [
+        "E002",
+        "E004",
+        "E003",
+        "E005",
+        "E007"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.9197
+      }
+    },
+    {
+      "query_id": "Q015",
+      "query": "Which email confirms that the UTM can be used again?",
+      "expected_thread_id": "THR-004",
+      "retrieved_top_thread": "THR-004",
+      "thread_hit": true,
+      "gold_email_ids": [
+        "E024"
+      ],
+      "retrieved_email_ids": [
+        "E024",
+        "E020",
+        "E019",
+        "E023",
+        "E021"
+      ],
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0
+      }
+    }
+  ]
+}

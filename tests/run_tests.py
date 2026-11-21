@@ -12,6 +12,11 @@ from sutra.ingestion.normalizers import parse_indian_currency
 from sutra.processing.threading import ThreadManager
 from sutra.evaluation.harness import SutraEvaluator
 from tests.test_retrieval import TestEmbeddingAndVectorRetrieval
+from tests.test_intelligence import TestConversationIntelligence
+from tests.test_generalization import TestGeneralizationIntelligence
+from tests.test_deadline_compliance import TestDeadlineComplianceEngine
+from tests.test_generalized_intelligence import TestGeneralizedIntelligenceMetamorphic
+from tests.test_evaluation_metrics import TestEvaluationMetrics
 
 DATASET_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dataset"))
 

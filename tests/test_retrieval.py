@@ -21,7 +21,7 @@ from sutra.retrieval.embedder import (
 from sutra.retrieval.vector_index import VectorIndex
 from sutra.retrieval.fusion import reciprocal_rank_fusion
 from sutra.retrieval.hybrid import HybridRetriever
-from sutra.models.email import Email
+from sutra.models.email import Email, AttachmentMetadata
 from sutra.models.intelligence import ThreadIntelligence, LifecycleState
 
 
@@ -237,6 +237,74 @@ class TestEmbeddingAndVectorRetrieval(unittest.TestCase):
         m_e, m_s = retriever.retrieve("")
         self.assertEqual(m_e, [])
         self.assertEqual(m_s, [])
+
+    def test_pretrained_semantic_embedder_and_diagnostics(self):
+        from sutra.retrieval.embedder import get_embedder_diagnostics, is_pretrained_available
+
+        if not is_pretrained_available():
+            self.skipTest("sentence-transformers not available")
+
+        embedder = PretrainedSemanticEmbedder(model_name="all-MiniLM-L6-v2")
+        self.assertEqual(embedder.dimension, 384)
+        self.assertEqual(embedder.model_type, "pretrained")
+
+        # Test semantic similarity separation
+        v1 = embedder.embed_text("Purchase order for CNC milling machine")
+        v2 = embedder.embed_text("Procurement quotation for industrial CNC machinery")
+        v3 = embedder.embed_text("Student bonafide certificate fee receipt submission")
+
+        norm1 = np.linalg.norm(v1)
+        self.assertAlmostEqual(norm1, 1.0, places=4)
+
+        sim_related = np.dot(v1, v2)
+        sim_unrelated = np.dot(v1, v3)
+        self.assertGreater(sim_related, sim_unrelated)
+        self.assertGreater(sim_related, 0.40)
+
+        # Test diagnostics
+        diag = get_embedder_diagnostics(embedder)
+        self.assertEqual(diag["model_type"], "pretrained")
+        self.assertEqual(diag["model_name"], "all-MiniLM-L6-v2")
+        self.assertEqual(diag["dimension"], 384)
+        self.assertTrue(diag["is_genuine_pretrained"])
+        self.assertFalse(diag["fallback_triggered"])
+
+    def test_deduplication_by_source(self):
+        e1 = Email(
+            email_id="E046",
+            thread_id="THR-009",
+            sender="prof@inst.edu",
+            recipients=["reg@inst.edu"],
+            subject="Consumables budget breakdown",
+            timestamp=datetime(2025, 1, 10, 10, 0),
+            body="First email with table of consumables.",
+            attachment_data={
+                "items.csv": AttachmentMetadata(
+                    filename="items.csv",
+                    file_type="csv",
+                    content_text="Item,Cost,Qty\nSensor,5000,10\nWire,200,50\nResistor,10,1000",
+                )
+            },
+        )
+        e2 = Email(
+            email_id="E047",
+            thread_id="THR-009",
+            sender="reg@inst.edu",
+            recipients=["prof@inst.edu"],
+            subject="Re: Consumables budget breakdown",
+            timestamp=datetime(2025, 1, 11, 10, 0),
+            body="Approval for revised consumables plan.",
+        )
+        retriever = HybridRetriever(emails=[e1, e2], summaries={}, embedder=self.mock_embedder)
+
+        # Without deduplication, multiple chunks of E046 might occupy all slots
+        raw_results = retriever.retrieve_results("consumables sensor", top_k=5, dedup_by_source=False)
+        self.assertTrue(len(raw_results) > 0)
+
+        # With deduplication, each result must come from a distinct source
+        dedup_results = retriever.retrieve_results("consumables sensor", top_k=5, dedup_by_source=True)
+        sources = [r.metadata.get("email_id") or r.source_id for r in dedup_results]
+        self.assertEqual(len(sources), len(set(sources)))
 
 
 if __name__ == "__main__":

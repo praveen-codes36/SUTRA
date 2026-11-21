@@ -220,8 +220,9 @@ class PretrainedSemanticEmbedder(BaseEmbedder):
     _cached_instance = None
     _cached_model_name = None
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "all-MiniLM-L6-v2", device: Optional[str] = None):
         self.model_name = model_name
+        self.device = device or ("cuda" if self._has_cuda() else "cpu")
         try:
             from sentence_transformers import SentenceTransformer
             if (
@@ -230,11 +231,17 @@ class PretrainedSemanticEmbedder(BaseEmbedder):
             ):
                 self.model = PretrainedSemanticEmbedder._cached_instance
             else:
-                self.model = SentenceTransformer(model_name)
+                self.model = SentenceTransformer(model_name, device=self.device)
                 PretrainedSemanticEmbedder._cached_instance = self.model
                 PretrainedSemanticEmbedder._cached_model_name = model_name
 
-            self._dim = self.model.get_sentence_embedding_dimension()
+            # Compatibility across sentence-transformers versions
+            if hasattr(self.model, "get_embedding_dimension"):
+                self._dim = self.model.get_embedding_dimension()
+            elif hasattr(self.model, "get_sentence_embedding_dimension"):
+                self._dim = self.model.get_sentence_embedding_dimension()
+            else:
+                self._dim = 384
         except ImportError as e:
             raise ImportError(
                 "sentence-transformers is not installed in the environment. "
@@ -242,6 +249,14 @@ class PretrainedSemanticEmbedder(BaseEmbedder):
             ) from e
         except Exception as e:
             raise RuntimeError(f"Failed to load sentence-transformers model '{model_name}': {e}") from e
+
+    @staticmethod
+    def _has_cuda() -> bool:
+        try:
+            import torch
+            return torch.cuda.is_available()
+        except Exception:
+            return False
 
     @property
     def dimension(self) -> int:
@@ -255,7 +270,9 @@ class PretrainedSemanticEmbedder(BaseEmbedder):
         if not text or not text.strip():
             return [0.0] * self._dim
         vec = self.model.encode(text, normalize_embeddings=True)
-        return vec.tolist()
+        if hasattr(vec, "tolist"):
+            return vec.tolist()
+        return list(vec)
 
     def embed_batch(self, texts: List[str]) -> List[List[float]]:
         if not texts:
@@ -266,7 +283,57 @@ class PretrainedSemanticEmbedder(BaseEmbedder):
         for idx, t in enumerate(texts):
             if not t or not t.strip():
                 vecs[idx] = np.zeros(self._dim, dtype=np.float32)
-        return vecs.tolist()
+        if hasattr(vecs, "tolist"):
+            return vecs.tolist()
+        return [v.tolist() if hasattr(v, "tolist") else list(v) for v in vecs]
+
+
+# Module-level tracking for runtime diagnostics
+_ACTIVE_EMBEDDER: Optional[BaseEmbedder] = None
+_FALLBACK_TRIGGERED: bool = False
+_FALLBACK_REASON: Optional[str] = None
+
+
+def is_pretrained_available() -> bool:
+    """Check if sentence-transformers is installed and importable."""
+    try:
+        import sentence_transformers  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def get_embedder_diagnostics(embedder: Optional[BaseEmbedder] = None) -> Dict[str, Any]:
+    """
+    Return comprehensive runtime diagnostic metadata for the embedding subsystem.
+    """
+    target = embedder or _ACTIVE_EMBEDDER or get_embedder()
+    is_fallback = isinstance(target, DenseFeatureEmbedder) and _FALLBACK_TRIGGERED
+    fallback_reason = _FALLBACK_REASON if is_fallback else None
+    info: Dict[str, Any] = {
+        "model_type": target.model_type,
+        "dimension": target.dimension,
+        "fallback_triggered": is_fallback,
+        "fallback_reason": fallback_reason,
+        "pretrained_available": is_pretrained_available(),
+    }
+    if isinstance(target, PretrainedSemanticEmbedder):
+        info["model_name"] = target.model_name
+        info["device"] = getattr(target, "device", "unknown")
+        info["is_genuine_pretrained"] = True
+    elif isinstance(target, DenseFeatureEmbedder):
+        info["model_name"] = "DenseFeatureEmbedder (structural n-gram hashing)"
+        info["device"] = "cpu"
+        info["is_genuine_pretrained"] = False
+        info["warning"] = "Degraded mode active: using zero-dependency feature baseline, not a pretrained LM."
+    elif isinstance(target, OllamaEmbedder):
+        info["model_name"] = target.model_name
+        info["host"] = target.host
+        info["is_genuine_pretrained"] = True
+    elif isinstance(target, MockEmbedder):
+        info["model_name"] = "MockEmbedder"
+        info["is_genuine_pretrained"] = False
+    return info
 
 
 def get_embedder(
@@ -283,49 +350,92 @@ def get_embedder(
     3. Auto-detection:
        - Checks if `sentence-transformers` is installed -> PretrainedSemanticEmbedder.
        - Checks if Ollama is running on localhost:11434 -> OllamaEmbedder.
-       - Falls back to DenseFeatureEmbedder (offline structural baseline).
+       - Falls back to DenseFeatureEmbedder (offline structural baseline) with explicit degraded-mode warning.
     """
+    global _ACTIVE_EMBEDDER, _FALLBACK_TRIGGERED, _FALLBACK_REASON
+
     selected_backend = backend or os.environ.get("SUTRA_EMBEDDING_BACKEND", "").lower().strip()
     target_model = model_name or os.environ.get("SUTRA_EMBEDDING_MODEL")
 
     if selected_backend == "mock":
-        return MockEmbedder(dim=dimension)
+        _ACTIVE_EMBEDDER = MockEmbedder(dim=dimension)
+        _FALLBACK_TRIGGERED = False
+        _FALLBACK_REASON = None
+        return _ACTIVE_EMBEDDER
 
     if selected_backend == "ollama":
         m_name = target_model or "nomic-embed-text"
         embedder = OllamaEmbedder(model_name=m_name)
         if not embedder.check_health():
-            logger.warning("Ollama daemon requested but unreachable at localhost:11434. Falling back to feature baseline.")
-            return DenseFeatureEmbedder(dimension=dimension)
-        return embedder
+            _FALLBACK_TRIGGERED = True
+            _FALLBACK_REASON = f"Ollama daemon requested but unreachable at {embedder.host}"
+            logger.warning(
+                "DEGRADED MODE: %s. Falling back to DenseFeatureEmbedder. Semantic retrieval quality will be limited.",
+                _FALLBACK_REASON,
+            )
+            _ACTIVE_EMBEDDER = DenseFeatureEmbedder(dimension=dimension)
+            return _ACTIVE_EMBEDDER
+        _ACTIVE_EMBEDDER = embedder
+        _FALLBACK_TRIGGERED = False
+        _FALLBACK_REASON = None
+        return _ACTIVE_EMBEDDER
 
     if selected_backend == "pretrained":
         m_name = target_model or "all-MiniLM-L6-v2"
         try:
-            return PretrainedSemanticEmbedder(model_name=m_name)
+            _ACTIVE_EMBEDDER = PretrainedSemanticEmbedder(model_name=m_name)
+            _FALLBACK_TRIGGERED = False
+            _FALLBACK_REASON = None
+            return _ACTIVE_EMBEDDER
         except Exception as e:
-            logger.warning("Pretrained model '%s' unavailable (%s). Falling back to feature baseline.", m_name, e)
-            return DenseFeatureEmbedder(dimension=dimension)
+            _FALLBACK_TRIGGERED = True
+            _FALLBACK_REASON = f"Pretrained model '{m_name}' unavailable: {e}"
+            logger.warning(
+                "DEGRADED MODE: %s. Falling back to DenseFeatureEmbedder. Semantic retrieval quality will be limited.",
+                _FALLBACK_REASON,
+            )
+            _ACTIVE_EMBEDDER = DenseFeatureEmbedder(dimension=dimension)
+            return _ACTIVE_EMBEDDER
 
     if selected_backend == "feature":
-        return DenseFeatureEmbedder(dimension=dimension)
+        _ACTIVE_EMBEDDER = DenseFeatureEmbedder(dimension=dimension)
+        _FALLBACK_TRIGGERED = False
+        _FALLBACK_REASON = "Feature baseline explicitly requested by configuration."
+        return _ACTIVE_EMBEDDER
 
     # Auto-detection
     # 1. Try PretrainedSemanticEmbedder
-    try:
-        import sentence_transformers  # noqa: F401
+    if is_pretrained_available():
         m_name = target_model or "all-MiniLM-L6-v2"
-        return PretrainedSemanticEmbedder(model_name=m_name)
-    except Exception:
-        pass
+        try:
+            _ACTIVE_EMBEDDER = PretrainedSemanticEmbedder(model_name=m_name)
+            _FALLBACK_TRIGGERED = False
+            _FALLBACK_REASON = None
+            logger.info("Auto-detected sentence-transformers. Activated PretrainedSemanticEmbedder ('%s').", m_name)
+            return _ACTIVE_EMBEDDER
+        except Exception as e:
+            logger.warning("sentence-transformers installed but failed to load model '%s': %s", m_name, e)
 
     # 2. Try Ollama if running
     try:
         ollama_candidate = OllamaEmbedder()
         if ollama_candidate.check_health():
-            return ollama_candidate
+            _ACTIVE_EMBEDDER = ollama_candidate
+            _FALLBACK_TRIGGERED = False
+            _FALLBACK_REASON = None
+            logger.info("Auto-detected local Ollama daemon. Activated OllamaEmbedder.")
+            return _ACTIVE_EMBEDDER
     except Exception:
         pass
 
-    # 3. Default to zero-dependency feature baseline
-    return DenseFeatureEmbedder(dimension=dimension)
+    # 3. Default to zero-dependency feature baseline with explicit degraded-mode warning
+    _FALLBACK_TRIGGERED = True
+    _FALLBACK_REASON = "Neither sentence-transformers nor local Ollama is available."
+    logger.warning(
+        "DEGRADED MODE: %s Falling back to DenseFeatureEmbedder (structural n-gram hashing baseline). "
+        "Semantic retrieval quality will be limited. To activate genuine semantic embeddings, "
+        "install sentence-transformers: pip install sentence-transformers",
+        _FALLBACK_REASON,
+    )
+    _ACTIVE_EMBEDDER = DenseFeatureEmbedder(dimension=dimension)
+    return _ACTIVE_EMBEDDER
