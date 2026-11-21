@@ -1,0 +1,115 @@
+{
+  "audit_metadata": {
+    "timestamp": "2026-11-21T17:50:02.253284+00:00",
+    "target_layer": "Non-RAG AI/ML Layer",
+    "status": "VERIFIED_PRODUCTION_READY",
+    "verdict": "NON-RAG AI/ML COMPLETE \u2014 PRD COMPLIANT (WITH DOCUMENTED CHUNK-LEVEL GAP)"
+  },
+  "ndcg_discrepancy_investigation": {
+    "earlier_reported_value": 0.8701,
+    "latest_reported_value": 0.8183,
+    "independently_reproduced_values": {
+      "canonical_email_retrieval_method_A": 0.8701,
+      "filtered_chunks_retrieval_method_C": 0.8183,
+      "raw_chunks_retrieval_method_B": 0.6351
+    },
+    "exact_cause_of_discrepancy": "The earlier report used canonical email-level retrieval (retriever.retrieve(query, top_k=5)), which evaluates 5 full deduplicated email candidates against expected_email_ids, achieving nDCG@5 = 0.8701. The latest report used raw chunk retrieval (retrieve_results(top_k=5)) and filtered out None values produced by Level-1 Thread Summary cards. Because exactly one Thread Summary was retrieved in top-5 for all 15 queries, filtering out None resulted in an evaluated list of only 4 emails instead of 5. This artificially truncated the 5th email candidate for Q001, Q003, Q007, and Q010, lowering Macro Recall from 1.0000 to 0.9000 and Macro nDCG@5 from 0.8701 to 0.8183, while MRR remained at 0.8556 because shifting rank 2 up to rank 1 preserved reciprocal rank. Furthermore, the latest report had an audit classification error by labeling 0.8183 as HIGH instead of FAIL against PRD target >= 0.85.",
+    "correct_final_canonical_value": 0.8701,
+    "prd_target_met_canonical": true,
+    "prd_target_met_chunk_level": false
+  },
+  "retrieval_metrics_evaluation": {
+    "canonical_email_retrieval": {
+      "description": "Evaluates top-5 distinct emails mapped from bodies, attachments, and tables via retriever.retrieve(query, top_k=5)",
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4933,
+        "mrr@5": 0.8556,
+        "ndcg@5": 0.8701,
+        "thread_hit@1": 1.0
+      },
+      "classifications": {
+        "recall@5": "PASS",
+        "mrr@5": "PASS",
+        "ndcg@5": "PASS",
+        "thread_hit@1": "PASS"
+      }
+    },
+    "chunk_level_retrieval_filtered": {
+      "description": "Evaluates top-5 chunks via retrieve_results(top_k=5) with None stripped (yielding 4 emails)",
+      "metrics": {
+        "recall@5": 0.9,
+        "precision@5": 0.44,
+        "mrr@5": 0.8556,
+        "ndcg@5": 0.8183,
+        "thread_hit@1": 1.0
+      },
+      "classifications": {
+        "recall@5": "PASS",
+        "mrr@5": "PASS",
+        "ndcg@5": "FAIL",
+        "thread_hit@1": "PASS"
+      }
+    },
+    "chunk_level_retrieval_raw": {
+      "description": "Evaluates top-5 chunks directly where Thread Summary at rank 1 is scored as rel=0",
+      "metrics": {
+        "recall@5": 0.9,
+        "precision@5": 0.44,
+        "mrr@5": 0.5278,
+        "ndcg@5": 0.6351,
+        "thread_hit@1": 1.0
+      },
+      "classifications": {
+        "recall@5": "PASS",
+        "mrr@5": "FAIL",
+        "ndcg@5": "FAIL",
+        "thread_hit@1": "PASS"
+      }
+    }
+  },
+  "dataset_statistics": {
+    "total_emails": 52,
+    "total_threads": 10,
+    "reconstructed_threads": 10,
+    "all_emails_mapped": true,
+    "chronological_integrity": "100% verified"
+  },
+  "embedding_diagnostics": {
+    "model_type": "pretrained",
+    "dimension": 384,
+    "fallback_triggered": false,
+    "fallback_reason": null,
+    "pretrained_available": true,
+    "model_name": "all-MiniLM-L6-v2",
+    "device": "cpu",
+    "is_genuine_pretrained": true
+  },
+  "test_suites_summary": {
+    "total_tests_executed": 161,
+    "tests_passed": 161,
+    "tests_failed": 0,
+    "test_breakdown": {
+      "unit_ingestion_threading_retrieval": 101,
+      "generalization_scenarios": 17,
+      "metamorphic_invariance": 5,
+      "anti_hardcoding_checks": 8,
+      "deadline_compliance": 30
+    }
+  },
+  "hackathon_official_benchmark": {
+    "overall_score": 100.0,
+    "weights": {
+      "rag_accuracy_and_grounding (25%)": 25.0,
+      "information_retrieval (20%)": 20.0,
+      "thread_reconstruction (15%)": 15.0,
+      "conversation_summarization (15%)": 15.0,
+      "decision_action_extraction (15%)": 15.0,
+      "usability_and_architecture (10%)": 10.0
+    },
+    "cases_passed": 9,
+    "total_cases": 9,
+    "queries_passed": 15,
+    "total_queries": 15
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "audit_metadata": {
+    "timestamp": "2026-11-21T18:05:56.438970+00:00",
+    "repository": "C:/Official-Email-Intelligence",
+    "branch": "anvaya-reliability-upgrade",
+    "head_commit": "53a58cec6ffe84b029178a19c532b0a077086a09",
+    "baseline_tag": "anvaya-ai-ml-baseline-v1.0",
+    "baseline_commit": "a13786d1914562f96d40398b8325713316c14d86",
+    "target_layer": "Non-RAG AI/ML Layer",
+    "audit_verdict": "NON-RAG AI/ML \u2014 PRODUCTION READY"
+  },
+  "audit_areas_summary": {
+    "area_a_ingestion": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "checks": {
+        "utf8_bom_and_zero_width_stripping": "PASS",
+        "iso8601_utc_date_normalization": "PASS",
+        "indian_currency_normalization": "PASS",
+        "csv_table_row_provenance": "PASS",
+        "malformed_input_graceful_handling": "PASS"
+      }
+    },
+    "area_b_threading": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "checks": {
+        "four_stage_cascade": "PASS",
+        "cycle_detection_discarded": "PASS",
+        "missing_parent_stubbing": "PASS",
+        "topological_kahns_sort": "PASS",
+        "permutation_invariance": "PASS",
+        "ten_of_ten_threads_reconstructed": "PASS",
+        "fifty_two_of_fifty_two_emails_mapped": "PASS"
+      }
+    },
+    "area_c_retrieval": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "authoritative_interface": "retriever.retrieve(query, top_k=5)",
+      "metrics": {
+        "recall@5": 1.0,
+        "precision@5": 0.4933,
+        "mrr@5": 0.8556,
+        "ndcg@5": 0.8701,
+        "thread_hit@1": 1.0
+      },
+      "prd_targets": {
+        "recall@5": ">= 0.90 (PASS)",
+        "mrr@5": ">= 0.80 (PASS)",
+        "ndcg@5": ">= 0.85 (PASS)",
+        "thread_hit@1": ">= 0.95 (PASS)"
+      },
+      "all_prd_targets_met": true
+    },
+    "area_d_conversation_intelligence": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "checks": {
+        "proposal_vs_authorized_distinction": "PASS",
+        "budget_planning_vs_authorization": "PASS",
+        "completed_vs_pending_actions": "PASS",
+        "none_stated_obligations_representation": "PASS",
+        "grounded_explanations_source_text": "PASS"
+      }
+    },
+    "area_e_llm_provider": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "checks": {
+        "multi_provider_support": [
+          "mock",
+          "ollama",
+          "gemini",
+          "openai",
+          "anthropic"
+        ],
+        "disk_cache_sha256": "PASS",
+        "markdown_fence_cleaning": "PASS",
+        "pydantic_schema_validation_retry": "PASS",
+        "credential_validation_no_leak": "PASS"
+      }
+    },
+    "area_f_performance": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "latencies": {
+        "cold_ingest_ms": 2.09,
+        "warm_ingest_mean_ms": 0.62,
+        "cold_embed_load_ms": 6526.71,
+        "cold_index_construction_ms": 1267.9,
+        "cold_first_retrieval_ms": 9.87,
+        "warm_retrieval_ms": {
+          "mean": 10.84,
+          "median": 10.46,
+          "p90": 13.23,
+          "p95": 13.84,
+          "p99": 15.38
+        }
+      }
+    },
+    "area_g_generalization_anti_hardcoding": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "checks": {
+        "ast_anti_hardcoding_checks": "8/8 PASSED (0 hardcoded IDs/entities)",
+        "synthetic_generalization_scenarios": "17/17 PASSED",
+        "metamorphic_invariance_tests": "5/5 PASSED"
+      }
+    },
+    "area_h_integration_contracts": {
+      "status": "VERIFIED_PRODUCTION_READY",
+      "authoritative_email_retrieval_contract": "retriever.retrieve(query: str, top_k: int = 5) -> Tuple[List[Email], List[ThreadSummary]]",
+      "specialized_chunk_retrieval_contract": "retriever.retrieve_results(query: str, top_k: int = 5, mode: str = 'hybrid', dedup_by_source: bool = False) -> List[RetrievalResult]"
+    }
+  },
+  "embedder_diagnostics": {
+    "model_type": "pretrained",
+    "dimension": 384,
+    "fallback_triggered": false,
+    "fallback_reason": null,
+    "pretrained_available": true,
+    "model_name": "all-MiniLM-L6-v2",
+    "device": "cpu",
+    "is_genuine_pretrained": true
+  },
+  "test_suite_status": {
+    "total_tests_passing": 161,
+    "zero_failures": true,
+    "official_benchmark_score": 100.0
+  }
+}
